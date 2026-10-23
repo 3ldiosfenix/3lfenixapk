@@ -11,13 +11,16 @@
 </head>
 <body class="bg-slate-900 text-slate-800 min-h-screen flex flex-col justify-between font-sans">
 
+    <!-- Aquí enlazamos tu archivo MP3 subido al hosting -->
+    <audio id="intro-audio" src="intro.mp3" preload="auto"></audio>
+
     <!-- Container Principal de la App Mobile -->
     <div class="max-w-md w-full mx-auto bg-slate-100 min-h-screen flex flex-col shadow-2xl relative pb-24">
 
         <!-- Screen Autenticación -->
         <div id="auth-screen" class="flex-1 flex flex-col justify-center p-6 bg-slate-900 text-white">
             <div class="text-center mb-8">
-                <div class="bg-emerald-500 text-white w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/30">
+                <div onclick="playIntroMusic()" class="bg-emerald-500 text-white w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/30 cursor-pointer transition transform hover:scale-105 active:scale-95" title="¡Toca para reproducir intro!">
                     <i class="fa-solid fa-wallet text-3xl"></i>
                 </div>
                 <h1 id="auth-title" class="text-2xl font-bold">Iniciar Sesión</h1>
@@ -280,6 +283,18 @@
 
         document.getElementById('tx-date').valueAsDate = new Date();
 
+        // Función para reproducir tu MP3 al tocar el logo o iniciar
+        window.playIntroMusic = () => {
+            const audio = document.getElementById('intro-audio');
+            audio.currentTime = 0;
+            audio.play().catch(e => console.log("Reproducción automática bloqueada por políticas del navegador"));
+        };
+
+        // Intenta reproducir el MP3 al cargar la página
+        window.addEventListener('DOMContentLoaded', () => {
+            playIntroMusic();
+        });
+
         window.switchTab = (tab) => {
             document.getElementById('tab-dashboard').classList.add('hidden');
             document.getElementById('tab-add').classList.add('hidden');
@@ -469,3 +484,320 @@
 
         let isRegister = false;
         document.getElementById('auth-switch').addEventListener('click', () => {
+            isRegister = !isRegister;
+            document.getElementById('name-field').classList.toggle('hidden', !isRegister);
+            document.getElementById('auth-title').textContent = isRegister ? 'Crear Cuenta' : 'Iniciar Sesión';
+            document.getElementById('auth-btn').textContent = isRegister ? 'Registrarse' : 'Iniciar Sesión';
+            document.getElementById('auth-switch').textContent = isRegister ? '¿Ya tienes cuenta? Inicia Sesión' : '¿No tienes cuenta? Regístrate';
+        });
+
+        document.getElementById('auth-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value.trim();
+            const name = document.getElementById('auth-name').value.trim();
+            const errDiv = document.getElementById('auth-error');
+            const successDiv = document.getElementById('auth-success');
+            errDiv.classList.add('hidden');
+            successDiv.classList.add('hidden');
+
+            try {
+                if (isRegister) {
+                    const res = await createUserWithEmailAndPassword(auth, email, password);
+                    await updateProfile(res.user, { displayName: name });
+                } else {
+                    await signInWithEmailAndPassword(auth, email, password);
+                }
+            } catch (err) {
+                errDiv.textContent = "Correo o contraseña incorrectos.";
+                errDiv.classList.remove('hidden');
+            }
+        });
+
+        window.logout = () => signOut(auth);
+
+        async function loadUserData() {
+            const querySnapTx = await getDocs(collection(db, `users/${currentUser.uid}/transactions`));
+            transactions = [];
+            querySnapTx.forEach((doc) => {
+                transactions.push({ id: doc.id, ...doc.data() });
+            });
+
+            const catDoc = await getDoc(doc(db, `users_config/${currentUser.uid}`));
+            if (catDoc.exists()) {
+                const data = catDoc.data();
+                if (data.categories && data.categories.length > 0) categories = data.categories;
+                if (data.appName) {
+                    document.getElementById('app-brand-name').textContent = data.appName;
+                    document.getElementById('setting-app-name').value = data.appName;
+                }
+            }
+
+            renderCategories();
+            renderUI();
+        }
+
+        async function saveSettingsToCloud() {
+            const appName = document.getElementById('setting-app-name').value.trim() || "Mis Finanzas";
+            try {
+                await setDoc(doc(db, `users_config/${currentUser.uid}`), { appName, categories }, { merge: true });
+                document.getElementById('app-brand-name').textContent = appName;
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        window.saveSettings = async () => {
+            await saveSettingsToCloud();
+            toggleSettingsModal();
+            alert("¡Configuración guardada!");
+        };
+
+        function renderCategories() {
+            const select = document.getElementById('tx-category');
+            select.innerHTML = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+        }
+
+        function renderCategoriesManagement() {
+            const listEl = document.getElementById('categories-management-list');
+            listEl.innerHTML = categories.map((cat, index) => `
+                <div class="flex items-center justify-between gap-2 bg-white p-1.5 rounded-lg border text-xs">
+                    <input type="text" value="${cat}" id="cat-input-${index}" onchange="updateCategory(${index})" class="flex-1 px-2 py-1 bg-slate-50 border rounded-md outline-none focus:ring-1 focus:ring-emerald-500 font-medium">
+                    <button type="button" onclick="deleteCategory(${index})" class="text-red-500 hover:text-red-700 px-2 py-1"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+            `).join('');
+        }
+
+        window.updateCategory = (index) => {
+            const input = document.getElementById(`cat-input-${index}`);
+            const newName = input.value.trim();
+            if (!newName) return;
+            categories[index] = newName;
+            renderCategories();
+            saveSettingsToCloud();
+        };
+
+        window.addCategory = async () => {
+            const nameInput = document.getElementById('new-category-name');
+            const name = nameInput.value.trim();
+            if (!name || categories.includes(name)) return;
+            categories.push(name);
+            nameInput.value = '';
+            renderCategories();
+            renderCategoriesManagement();
+            await saveSettingsToCloud();
+            alert("¡Categoría creada!");
+        };
+
+        window.deleteCategory = async (index) => {
+            if (categories.length <= 1) {
+                alert("Debes tener al menos una categoría.");
+                return;
+            }
+            categories.splice(index, 1);
+            renderCategories();
+            renderCategoriesManagement();
+            await saveSettingsToCloud();
+        };
+
+        document.getElementById('transaction-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const editId = document.getElementById('tx-edit-id').value;
+            const description = document.getElementById('tx-description').value.trim() || "Sin descripción";
+            const amount = parseFloat(document.getElementById('tx-amount').value);
+            const category = document.getElementById('tx-category').value;
+            const dateVal = document.getElementById('tx-date').value;
+
+            const txData = {
+                description,
+                amount,
+                type: currentType,
+                category,
+                date: new Date(dateVal + 'T12:00:00').toISOString()
+            };
+
+            try {
+                if (editId) {
+                    await updateDoc(doc(db, `users/${currentUser.uid}/transactions/${editId}`), txData);
+                    const index = transactions.findIndex(t => t.id === editId);
+                    if (index !== -1) transactions[index] = { id: editId, ...txData };
+                    alert("¡Transacción modificada con éxito!");
+                    cancelEdit();
+                } else {
+                    const docRef = await addDoc(collection(db, `users/${currentUser.uid}/transactions`), txData);
+                    transactions.push({ id: docRef.id, ...txData });
+                    document.getElementById('transaction-form').reset();
+                    document.getElementById('tx-date').valueAsDate = new Date();
+                    setTxType('expense');
+                }
+                renderUI();
+                switchTab('dashboard');
+            } catch (err) {
+                alert("Error al guardar o modificar la transacción.");
+            }
+        });
+
+        window.editTx = (id) => {
+            const tx = transactions.find(t => t.id === id);
+            if (!tx) return;
+
+            document.getElementById('tx-edit-id').value = tx.id;
+            document.getElementById('tx-amount').value = tx.amount;
+            document.getElementById('tx-category').value = tx.category || categories[0];
+            document.getElementById('tx-date').value = tx.date ? tx.date.split('T')[0] : '';
+            document.getElementById('tx-description').value = tx.description;
+            setTxType(tx.type);
+
+            document.getElementById('form-title').textContent = "MODIFICAR REGISTRO";
+            document.getElementById('form-submit-btn').textContent = "Actualizar Transacción";
+            document.getElementById('form-cancel-btn').classList.remove('hidden');
+
+            switchTab('add');
+        };
+
+        window.cancelEdit = () => {
+            document.getElementById('transaction-form').reset();
+            document.getElementById('tx-edit-id').value = '';
+            document.getElementById('tx-date').valueAsDate = new Date();
+            setTxType('expense');
+
+            document.getElementById('form-title').textContent = "NUEVO REGISTRO";
+            document.getElementById('form-submit-btn').textContent = "Guardar Transacción";
+            document.getElementById('form-cancel-btn').classList.add('hidden');
+            switchTab('dashboard');
+        };
+
+        window.deleteTx = async (id) => {
+            if (!confirm("¿Deseas eliminar este movimiento?")) return;
+            try {
+                await deleteDoc(doc(db, `users/${currentUser.uid}/transactions/${id}`));
+                transactions = transactions.filter(t => t.id !== id);
+                renderUI();
+            } catch (err) {
+                alert("Error al eliminar");
+            }
+        };
+
+        function renderUI() {
+            let income = 0;
+            let expense = 0;
+            const recentEl = document.getElementById('dashboard-recent-list');
+            const fullHistoryEl = document.getElementById('full-history-list');
+            recentEl.innerHTML = '';
+            fullHistoryEl.innerHTML = '';
+
+            const categoryTotals = {};
+
+            transactions.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((tx, idx) => {
+                if (tx.type === 'income') income += tx.amount;
+                else {
+                    expense += tx.amount;
+                    categoryTotals[tx.category || 'Otros'] = (categoryTotals[tx.category || 'Otros'] || 0) + tx.amount;
+                }
+
+                const formattedDate = tx.date ? tx.date.split('T')[0] : '';
+                const itemHTML = `
+                    <div class="flex justify-between items-center p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-full ${tx.type === 'income' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-500'} flex items-center justify-center text-xs">
+                                <i class="fa-solid ${tx.type === 'income' ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-800 text-xs">${tx.description}</p>
+                                <p class="text-[10px] text-slate-400">${formattedDate} • <span class="bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-full">${tx.category || 'General'}</span></p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="font-extrabold text-xs ${tx.type === 'income' ? 'text-emerald-600' : 'text-slate-800'}">
+                                ${tx.type === 'income' ? '+' : '-'} S/ ${tx.amount.toFixed(2)}
+                            </span>
+                            <button onclick="editTx('${tx.id}')" title="Modificar" class="text-blue-400 hover:text-blue-600 text-xs pl-1"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteTx('${tx.id}')" title="Eliminar" class="text-slate-300 hover:text-red-500 text-xs pl-1"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>
+                `;
+
+                if (idx < 3) recentEl.innerHTML += itemHTML;
+                fullHistoryEl.innerHTML += itemHTML;
+            });
+
+            if (transactions.length === 0) {
+                recentEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">Sin movimientos recientes</p>`;
+                fullHistoryEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Sin movimientos</p>`;
+            }
+
+            const balance = income - expense;
+            document.getElementById('total-balance').textContent = `S/ ${balance.toFixed(2)}`;
+            document.getElementById('total-income').textContent = `S/ ${income.toFixed(2)}`;
+            document.getElementById('total-expense').textContent = `S/ ${expense.toFixed(2)}`;
+
+            renderChart(categoryTotals);
+        }
+
+        function renderChart(categoryTotals) {
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            const labels = Object.keys(categoryTotals);
+            const data = Object.values(categoryTotals);
+
+            if (chartInstance) chartInstance.destroy();
+
+            if (labels.length === 0) {
+                chartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Sin Gastos'],
+                        datasets: [{ data: [1], backgroundColor: ['#E2E8F0'] }]
+                    },
+                    options: { plugins: { legend: { display: false } }, cutout: '75%' }
+                });
+                return;
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#3B82F6', '#8B5CF6', '#EC4899']
+                    }]
+                },
+                options: {
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        window.exportJSON = () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ transactions, categories }));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", "misfinanzas_respaldo.json");
+            dlAnchorElem.click();
+        };
+
+        window.importJSON = async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.transactions) {
+                        for (let t of data.transactions) {
+                            delete t.id;
+                            await addDoc(collection(db, `users/${currentUser.uid}/transactions`), t);
+                        }
+                    }
+                    alert("¡Datos importados con éxito!");
+                    loadUserData();
+                } catch (err) {
+                    alert("Archivo no válido");
+                }
+            };
+            reader.readAsText(file);
+        };
+    </script>
+</body>
+</html>
