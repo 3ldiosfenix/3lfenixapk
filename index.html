@@ -119,7 +119,7 @@
                 <!-- Manual Desplegable -->
                 <div id="voice-manual" class="hidden bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-xs text-slate-700 space-y-1.5">
                     <p class="font-bold text-emerald-800"><i class="fa-solid fa-microphone text-emerald-600 mr-1"></i> Comandos de voz disponibles:</p>
-                    <p>• <b>Para crear categoría:</b> Di <i>"Crear categoría Mantenimiento"</i>.</p>
+                    <p>• <b>Para crear categoría:</b> Di <i>"Crear categoría Repuestos"</i>.</p>
                     <p>• <b>Para registrar gasto:</b> Di <i>"Gasto de 15 soles en gasolina"</i>.</p>
                     <p>• <b>Para registrar ingreso:</b> Di <i>"Ingreso de 50 soles por pedido"</i>.</p>
                 </div>
@@ -154,4 +154,173 @@
             <div id="voice-status" class="hidden bg-slate-900 text-white text-xs py-1.5 px-3 rounded-full shadow-lg font-medium animate-pulse">
                 Escuchando...
             </div>
-            <button type="button" onclick="startSmartVoice()" class="bg-emerald-600 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-xl hover:bg-emerald-700 transition transform hover:scale-105
+            <button type="button" onclick="startSmartVoice()" class="bg-emerald-600 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-xl hover:bg-emerald-700 transition transform hover:scale-105 active:scale-95" title="Dictado inteligente">
+                <i id="smart-mic-icon" class="fa-solid fa-microphone"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Scripts de Firebase y Lógica -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Tus credenciales correctas configuradas
+        const firebaseConfig = {
+            apiKey: "AIzaSyCuwUQojfewTYO-A2iaO75HHp234r-Z0Tg",
+            authDomain: "misfinanzasapp-dc2d1.firebaseapp.com",
+            projectId: "misfinanzasapp-dc2d1",
+            storageBucket: "misfinanzasapp-dc2d1.firebasestorage.app",
+            messagingSenderId: "735407911555",
+            appId: "1:735407911555:web:2333eeb95dd41548ce21b6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let currentType = 'expense';
+        let transactions = [];
+        let categories = ['General', 'Comida', 'Transporte', 'Servicios', 'Salario'];
+
+        window.setTxType = (type) => {
+            currentType = type;
+            const expBtn = document.getElementById('type-expense');
+            const incBtn = document.getElementById('type-income');
+            if(type === 'expense') {
+                expBtn.className = "py-2 rounded-lg text-sm font-semibold border border-red-500 text-red-500 bg-red-50 transition";
+                incBtn.className = "py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-500 transition";
+            } else {
+                incBtn.className = "py-2 rounded-lg text-sm font-semibold border border-emerald-500 text-emerald-500 bg-emerald-50 transition";
+                expBtn.className = "py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-500 transition";
+            }
+        };
+
+        window.toggleVoiceManual = () => {
+            const manual = document.getElementById('voice-manual');
+            manual.classList.toggle('hidden');
+        };
+
+        // Dictado Inteligente
+        window.startSmartVoice = () => {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("Tu navegador no soporta el reconocimiento de voz.");
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'es-PE';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            const micIcon = document.getElementById('smart-mic-icon');
+            const statusTag = document.getElementById('voice-status');
+
+            recognition.onstart = () => {
+                micIcon.className = "fa-solid fa-spinner fa-spin";
+                statusTag.classList.remove('hidden');
+            };
+
+            recognition.onresult = (event) => {
+                const text = event.results[0][0].transcript.toLowerCase();
+                processSmartVoiceText(text);
+            };
+
+            recognition.onerror = () => {
+                alert("No se pudo entender el audio. Por favor intenta hablar más claro.");
+            };
+
+            recognition.onend = () => {
+                micIcon.className = "fa-solid fa-microphone";
+                statusTag.classList.add('hidden');
+            };
+
+            recognition.start();
+        };
+
+        function processSmartVoiceText(text) {
+            // Crear categoría por voz
+            if (text.includes('crear categoría') || text.includes('agregar categoría') || text.includes('nueva categoría')) {
+                let catName = text
+                    .replace(/crear categoría|agregar categoría|nueva categoría|de|llamada|que se llame|por nombre/g, '')
+                    .trim();
+                if (catName.length > 0) {
+                    catName = catName.charAt(0).toUpperCase() + catName.slice(1);
+                    if (!categories.includes(catName)) {
+                        categories.push(catName);
+                        renderCategories();
+                        saveSettings();
+                        alert(`¡Categoría "${catName}" creada por voz con éxito!`);
+                    } else {
+                        alert(`La categoría "${catName}" ya existe.`);
+                    }
+                    return;
+                }
+            }
+
+            // Detectar tipo (Ingreso / Gasto)
+            if (text.includes('ingreso') || text.includes('ganancia') || text.includes('cobro')) {
+                setTxType('income');
+            } else {
+                setTxType('expense');
+            }
+
+            // Extraer Monto
+            const numbers = text.match(/\d+([.,]\d+)?/g);
+            if (numbers && numbers.length > 0) {
+                const amount = parseFloat(numbers[0].replace(',', '.'));
+                document.getElementById('tx-amount').value = amount;
+            }
+
+            // Extraer Descripción limpia
+            let cleanDescription = text
+                .replace(/gasto|ingreso|de|en|por|soles|sol|\d+([.,]\d+)?/g, '')
+                .trim();
+
+            if (cleanDescription.length > 0) {
+                cleanDescription = cleanDescription.charAt(0).toUpperCase() + cleanDescription.slice(1);
+                document.getElementById('tx-description').value = cleanDescription;
+            } else {
+                document.getElementById('tx-description').value = text;
+            }
+
+            const foundCategory = categories.find(cat => text.includes(cat.toLowerCase()));
+            if (foundCategory) {
+                document.getElementById('tx-category').value = foundCategory;
+            }
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('app-screen').classList.remove('hidden');
+                document.getElementById('user-display-name').textContent = user.displayName || user.email;
+                await loadUserData();
+            } else {
+                currentUser = null;
+                document.getElementById('app-screen').classList.add('hidden');
+                document.getElementById('auth-screen').classList.remove('hidden');
+            }
+        });
+
+        let isRegister = false;
+        const switchBtn = document.getElementById('auth-switch');
+        const nameField = document.getElementById('name-field');
+        const authTitle = document.getElementById('auth-title');
+        const authBtn = document.getElementById('auth-btn');
+
+        switchBtn.addEventListener('click', () => {
+            isRegister = !isRegister;
+            nameField.classList.toggle('hidden', !isRegister);
+            authTitle.textContent = isRegister ? 'Crear Cuenta' : 'Iniciar Sesión';
+            authBtn.textContent = isRegister ? 'Registrarse' : 'Entrar';
+            switchBtn.textContent = isRegister ? '¿Ya tienes cuenta? Inicia Sesión' : '¿No tienes cuenta? Regístrate';
+        });
+
+        document.getElementById('auth-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('auth
