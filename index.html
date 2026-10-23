@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="page-title">Mis Finanzas</title>
+    <title id="page-title">Mis Finanzas - 3ldiosfenix</title>
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3135/3135706.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -22,6 +22,9 @@
                 </div>
                 <h1 id="auth-title" class="text-2xl font-bold">Iniciar Sesión</h1>
                 <p class="text-xs text-slate-400 mt-1">Gestiona tus finanzas personales de forma fácil</p>
+                <div class="inline-block mt-3 px-3 py-1 bg-slate-800 border border-slate-700 rounded-full shadow-inner">
+                    <span class="text-[10px] text-emerald-400 font-bold tracking-wider"><i class="fa-solid fa-code mr-1"></i> Desarrollado por 3ldiosfenix</span>
+                </div>
             </div>
 
             <div id="auth-error" class="hidden bg-red-500/20 text-red-300 p-3 rounded-xl text-xs mb-4 text-center border border-red-500/30"></div>
@@ -60,9 +63,13 @@
                     <div class="bg-emerald-500 text-white w-8 h-8 rounded-xl flex items-center justify-center">
                         <i class="fa-solid fa-wallet text-sm"></i>
                     </div>
-                    <span id="app-brand-name" class="font-bold text-base">Mis Finanzas</span>
+                    <div>
+                        <span id="app-brand-name" class="font-bold text-base block leading-tight">Mis Finanzas</span>
+                        <span class="text-[9px] text-emerald-400 font-semibold tracking-wide">by 3ldiosfenix</span>
+                    </div>
                 </div>
                 <div class="flex items-center space-x-3 text-slate-300">
+                    <button onclick="toggleMusicWidget()" title="Reproductor de Música" class="hover:text-emerald-400 text-sm"><i class="fa-solid fa-music"></i></button>
                     <button onclick="toggleSettingsModal()" title="Configuración y Categorías" class="hover:text-emerald-400 text-sm"><i class="fa-solid fa-gear"></i></button>
                     <button onclick="exportJSON()" title="Exportar JSON" class="hover:text-emerald-400 text-sm"><i class="fa-solid fa-download"></i></button>
                     <label title="Importar JSON" class="hover:text-emerald-400 cursor-pointer text-sm">
@@ -72,6 +79,16 @@
                     <button onclick="logout()" title="Cerrar Sesión" class="text-red-400 hover:text-red-300 text-sm ml-1"><i class="fa-solid fa-right-from-bracket"></i></button>
                 </div>
             </header>
+
+            <!-- Widget de Música Desplegable -->
+            <div id="music-widget" class="hidden bg-slate-800 text-white p-3 border-b border-slate-700 flex flex-col items-center space-y-2">
+                <div class="flex justify-between items-center w-full px-2">
+                    <span class="text-xs font-bold text-emerald-400"><i class="fa-solid fa-headphones mr-1"></i> Música de Fondo</span>
+                    <button onclick="toggleMusicWidget()" class="text-slate-400 hover:text-white text-xs"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <!-- Embed de Spotify (Lista Lofi / Relax) -->
+                <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/37i9dQZF1DX8U239m92M3b?utm_source=generator&theme=0" width="100%" height="80" frameborder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+            </div>
 
             <!-- Vista 1: Resumen Dashboard -->
             <main id="tab-dashboard" class="p-4 space-y-4">
@@ -274,6 +291,10 @@
 
         document.getElementById('tx-date').valueAsDate = new Date();
 
+        window.toggleMusicWidget = () => {
+            document.getElementById('music-widget').classList.toggle('hidden');
+        };
+
         window.switchTab = (tab) => {
             document.getElementById('tab-dashboard').classList.add('hidden');
             document.getElementById('tab-add').classList.add('hidden');
@@ -383,7 +404,6 @@
                                      textNormalized.includes('agregar');
 
             if (isCategoryIntent) {
-                // Limpieza agresiva: remueve todas las palabras de comando y deja solo el nombre final
                 let cleanCatName = rawText
                     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
                     .replace(/crear|anadir|añadir|agregar|nueva|nuevo|categoria|categoría|de|llamada|que se llame|para|el|la|los|las/gi, '')
