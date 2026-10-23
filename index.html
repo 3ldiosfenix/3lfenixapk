@@ -120,9 +120,8 @@
                 <div id="voice-manual" class="hidden bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-xs text-slate-700 space-y-1.5">
                     <p class="font-bold text-emerald-800"><i class="fa-solid fa-microphone text-emerald-600 mr-1"></i> ¿Cómo usar el dictado por voz?</p>
                     <p>1. Toca el botón del micrófono <i class="fa-solid fa-microphone text-emerald-600"></i>.</p>
-                    <p>2. Habla claramente para dictar la descripción de tu gasto o ingreso (ej. <i>"Almuerzo"</i> o <i>"Gasolina moto"</i>).</p>
-                    <p>3. El texto aparecerá automáticamente en la casilla de descripción.</p>
-                    <p class="text-slate-500 italic">Nota: Requiere un navegador compatible (como Chrome en Android) y permisos de micrófono.</p>
+                    <p>2. Habla claro para dictar la descripción de tu gasto o ingreso.</p>
+                    <p class="text-slate-500 italic">Nota: Si tu navegador te pide permiso para usar el micrófono, asegúrate de aceptarlo.</p>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
@@ -191,31 +190,43 @@
             }
         };
 
-        // Mostrar / Ocultar Manual de Voz
         window.toggleVoiceManual = () => {
             const manual = document.getElementById('voice-manual');
             manual.classList.toggle('hidden');
         };
 
-        // Función de dictado por voz
+        // Dictado por voz restaurado y optimizado
         window.startSpeechRecognition = () => {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
-                alert("Tu navegador no soporta el dictado por voz.");
+                alert("Tu navegador no soporta el dictado por voz directo. Puedes usar el dictado integrado de tu teclado (el ícono de micrófono del teclado).");
                 return;
             }
+
             const recognition = new SpeechRecognition();
             recognition.lang = 'es-ES';
-            recognition.start();
-            
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.onstart = () => {
+                const descInput = document.getElementById('tx-description');
+                descInput.placeholder = "Escuchando...";
+            };
+
             recognition.onresult = (event) => {
-                const speechToText = event.results[0][0].transcript;
-                document.getElementById('tx-description').value = speechToText;
+                const speechResult = event.results[0][0].transcript;
+                document.getElementById('tx-description').value = speechResult;
             };
-            
-            recognition.onerror = () => {
-                alert("No se pudo reconocer la voz. Inténtalo de nuevo.");
+
+            recognition.onerror = (event) => {
+                alert("Error en el reconocimiento de voz. Inténtalo de nuevo.");
             };
+
+            recognition.onend = () => {
+                document.getElementById('tx-description').placeholder = "Descripción (Ej. Comida, Repuesto)";
+            };
+
+            recognition.start();
         };
 
         onAuthStateChanged(auth, async (user) => {
