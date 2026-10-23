@@ -323,4 +323,170 @@
 
         document.getElementById('auth-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('auth
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const name = document.getElementById('auth-name').value;
+            const errDiv = document.getElementById('auth-error');
+            errDiv.classList.add('hidden');
+
+            try {
+                if (isRegister) {
+                    const res = await createUserWithEmailAndPassword(auth, email, password);
+                    await updateProfile(res.user, { displayName: name });
+                } else {
+                    await signInWithEmailAndPassword(auth, email, password);
+                }
+            } catch (err) {
+                errDiv.textContent = "Ocurrió un error: " + err.message;
+                errDiv.classList.remove('hidden');
+            }
+        });
+
+        window.logout = () => signOut(auth);
+
+        async function loadUserData() {
+            const querySnapTx = await getDocs(collection(db, `users/${currentUser.uid}/transactions`));
+            transactions = [];
+            querySnapTx.forEach((doc) => {
+                transactions.push({ id: doc.id, ...doc.data() });
+            });
+
+            const catDoc = await getDoc(doc(db, `users_config/${currentUser.uid}`));
+            if (catDoc.exists()) {
+                const data = catDoc.data();
+                if (data.categories && data.categories.length > 0) {
+                    categories = data.categories;
+                }
+                if (data.appName) {
+                    document.getElementById('app-brand-name').textContent = data.appName;
+                    document.getElementById('page-title').textContent = data.appName;
+                    document.getElementById('setting-app-name').value = data.appName;
+                }
+            }
+
+            renderCategories();
+            renderUI();
+        }
+
+        window.saveSettings = async () => {
+            const appName = document.getElementById('setting-app-name').value.trim() || "Mis Finanzas";
+            try {
+                await setDoc(doc(db, `users_config/${currentUser.uid}`), {
+                    appName,
+                    categories
+                }, { merge: true });
+                document.getElementById('app-brand-name').textContent = appName;
+                document.getElementById('page-title').textContent = appName;
+            } catch (err) {
+                console.error("Error al guardar config", err);
+            }
+        };
+
+        function renderCategories() {
+            const select = document.getElementById('tx-category');
+            select.innerHTML = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+        }
+
+        window.addCategory = async () => {
+            const nameInput = document.getElementById('new-category-name');
+            const name = nameInput.value.trim();
+            if (!name) return;
+            if (categories.includes(name)) {
+                alert('La categoría ya existe');
+                return;
+            }
+
+            categories.push(name);
+            nameInput.value = '';
+            renderCategories();
+            await saveSettings();
+            alert("¡Categoría creada con éxito!");
+        };
+
+        document.getElementById('transaction-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const description = document.getElementById('tx-description').value;
+            const amount = parseFloat(document.getElementById('tx-amount').value);
+            const category = document.getElementById('tx-category').value;
+
+            const newTx = {
+                description,
+                amount,
+                type: currentType,
+                category,
+                date: new Date().toISOString()
+            };
+
+            try {
+                const docRef = await addDoc(collection(db, `users/${currentUser.uid}/transactions`), newTx);
+                transactions.push({ id: docRef.id, ...newTx });
+                document.getElementById('transaction-form').reset();
+                setTxType('expense');
+                renderUI();
+            } catch (err) {
+                alert("Error al registrar transacción");
+            }
+        });
+
+        function renderUI() {
+            let income = 0;
+            let expense = 0;
+            const listEl = document.getElementById('transactions-list');
+            listEl.innerHTML = '';
+
+            transactions.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(tx => {
+                if (tx.type === 'income') income += tx.amount;
+                else expense += tx.amount;
+
+                const item = document.createElement('div');
+                item.className = "flex justify-between items-center p-2.5 bg-slate-50 rounded-xl text-sm border border-slate-100";
+                item.innerHTML = `
+                    <div>
+                        <p class="font-semibold text-slate-700">${tx.description}</p>
+                        <span class="text-xs text-slate-400 bg-slate-200 px-2 py-0.5 rounded-full">${tx.category || 'General'}</span>
+                    </div>
+                    <span class="font-bold ${tx.type === 'income' ? 'text-emerald-600' : 'text-red-500'}">
+                        ${tx.type === 'income' ? '+' : '-'}S/${tx.amount.toFixed(2)}
+                    </span>
+                `;
+                listEl.appendChild(item);
+            });
+
+            const balance = income - expense;
+            document.getElementById('total-balance').textContent = `S/${balance.toFixed(2)}`;
+            document.getElementById('total-income').textContent = `S/${income.toFixed(2)}`;
+            document.getElementById('total-expense').textContent = `S/${expense.toFixed(2)}`;
+        }
+
+        window.exportJSON = () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ transactions, categories }));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", "misfinanzas_respaldo.json");
+            dlAnchorElem.click();
+        };
+
+        window.importJSON = async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.transactions) {
+                        for (let t of data.transactions) {
+                            delete t.id;
+                            await addDoc(collection(db, `users/${currentUser.uid}/transactions`), t);
+                        }
+                    }
+                    alert("¡Datos importados con éxito!");
+                    loadUserData();
+                } catch (err) {
+                    alert("El archivo no es válido");
+                }
+            };
+            reader.readAsText(file);
+        };
+    </script>
+</body>
+</html>
