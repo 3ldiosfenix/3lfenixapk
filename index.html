@@ -140,14 +140,19 @@
                     </div>
                 </div>
 
-                <!-- TARJETA DE AGENDA DE DEUDAS (AMISTADES) -->
+                <!-- TARJETA DE AGENDA DE DEUDAS CON BOTÓN DE REGISTRO RÁPIDO (+) -->
                 <div class="bg-slate-900 text-white p-4 rounded-3xl shadow-md border border-slate-800 space-y-2">
                     <div class="flex justify-between items-center px-1">
-                        <h3 class="text-xs font-bold text-amber-400 tracking-wider uppercase"><i class="fa-solid fa-address-book mr-1"></i> Agenda de Deudas (Amistades)</h3>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-xs font-bold text-amber-400 tracking-wider uppercase flex items-center"><i class="fa-solid fa-address-book mr-1.5"></i> AGENDA DE DEUDAS (AMISTADES)</h3>
+                            <button onclick="addQuickDebt()" title="Registrar nueva deuda" class="bg-amber-400 hover:bg-amber-500 text-slate-900 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black shadow transition transform active:scale-90">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
                         <span id="total-debt-amount" class="text-xs font-extrabold text-amber-400">S/ 0.00</span>
                     </div>
                     <p class="text-[10px] text-slate-400 px-1">Dinero pendiente por devolver a amistades.</p>
-                    <div id="debtors-list" class="space-y-1.5 pt-1 max-h-32 overflow-y-auto"></div>
+                    <div id="debtors-list" class="space-y-1.5 pt-1 max-h-36 overflow-y-auto"></div>
                 </div>
 
                 <!-- Asistente por Voz -->
@@ -397,6 +402,24 @@
         let barChartInstance = null;
 
         document.getElementById('tx-date').valueAsDate = new Date();
+
+        // REGISTRO RÁPIDO DE DEUDAS CON EL BOTÓN (+)
+        window.addQuickDebt = () => {
+            setTxType('expense');
+            renderCategories();
+            
+            // Buscar la categoría Deudas si existe
+            const debtCat = categories.find(c => c.name.toLowerCase().includes('deuda'));
+            if (debtCat) {
+                document.getElementById('tx-category').value = debtCat.name;
+            }
+            
+            document.getElementById('tx-description').value = '';
+            document.getElementById('tx-amount').value = '';
+            document.getElementById('tx-description').focus();
+            
+            switchTab('add');
+        };
 
         window.openImageModal = (photoUrl) => {
             document.getElementById('modal-image-view').src = photoUrl;
