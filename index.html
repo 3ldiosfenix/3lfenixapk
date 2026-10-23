@@ -39,7 +39,7 @@
             </form>
 
             <div class="text-center mt-4">
-                <button id="auth-switch" class="text-sm text-emerald-600 hover:underline">¿No tienes cuenta? Regístrate</button>
+                <button type="button" id="auth-switch" class="text-sm text-emerald-600 hover:underline">¿No tienes cuenta? Regístrate</button>
             </div>
         </div>
     </div>
@@ -102,10 +102,10 @@
                         <label class="block text-xs font-semibold text-slate-500 mb-1">Añadir Nueva Categoría</label>
                         <div class="flex gap-2">
                             <input type="text" id="new-category-name" placeholder="Ej. Combustible, Mascotas..." class="flex-1 px-3 py-1.5 border text-sm rounded-lg outline-none focus:ring-1 focus:ring-emerald-500">
-                            <button onclick="addCategory()" class="bg-slate-800 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-slate-700">Crear</button>
+                            <button type="button" onclick="addCategory()" class="bg-slate-800 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-slate-700">Crear</button>
                         </div>
                     </div>
-                    <button onclick="saveSettings()" class="w-full bg-slate-800 text-white py-2 rounded-lg text-sm font-semibold hover:bg-slate-700 transition">Guardar Configuración</button>
+                    <button type="button" onclick="saveSettings()" class="w-full bg-slate-800 text-white py-2 rounded-lg text-sm font-semibold hover:bg-slate-700 transition">Guardar Configuración</button>
                 </div>
             </div>
 
@@ -142,7 +142,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCx... [Tus credenciales]",
@@ -227,15 +227,13 @@
         window.logout = () => signOut(auth);
 
         async function loadUserData() {
-            // Cargar Transacciones
             const querySnapTx = await getDocs(collection(db, `users/${currentUser.uid}/transactions`));
             transactions = [];
             querySnapTx.forEach((doc) => {
                 transactions.push({ id: doc.id, ...doc.data() });
             });
 
-            // Cargar Categorías
-            const catDoc = await getDoc(doc(db, `users_config/${currentUser.uid}`)));
+            const catDoc = await getDoc(doc(db, `users_config/${currentUser.uid}`));
             if (catDoc.exists()) {
                 const data = catDoc.data();
                 if (data.categories && data.categories.length > 0) {
