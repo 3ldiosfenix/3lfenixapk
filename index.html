@@ -111,13 +111,29 @@
 
             <!-- Formulario de Transacción -->
             <form id="transaction-form" class="bg-white p-4 rounded-2xl shadow-sm space-y-3">
-                <h3 class="text-sm font-bold text-slate-700">Nueva Transacción</h3>
+                <div class="flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-slate-700">Nueva Transacción</h3>
+                    <button type="button" onclick="toggleVoiceManual()" class="text-xs text-emerald-600 hover:underline flex items-center"><i class="fa-solid fa-circle-question mr-1"></i> Manual de Voz</button>
+                </div>
+
+                <!-- Manual Desplegable de Dictado por Voz -->
+                <div id="voice-manual" class="hidden bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-xs text-slate-700 space-y-1.5">
+                    <p class="font-bold text-emerald-800"><i class="fa-solid fa-microphone text-emerald-600 mr-1"></i> ¿Cómo usar el dictado por voz?</p>
+                    <p>1. Toca el botón del micrófono <i class="fa-solid fa-microphone text-emerald-600"></i>.</p>
+                    <p>2. Habla claramente para dictar la descripción de tu gasto o ingreso (ej. <i>"Almuerzo"</i> o <i>"Gasolina moto"</i>).</p>
+                    <p>3. El texto aparecerá automáticamente en la casilla de descripción.</p>
+                    <p class="text-slate-500 italic">Nota: Requiere un navegador compatible (como Chrome en Android) y permisos de micrófono.</p>
+                </div>
+
                 <div class="grid grid-cols-2 gap-2">
                     <button type="button" id="type-expense" onclick="setTxType('expense')" class="py-2 rounded-lg text-sm font-semibold border border-red-500 text-red-500 bg-red-50 transition">Gasto</button>
                     <button type="button" id="type-income" onclick="setTxType('income')" class="py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-500 transition">Ingreso</button>
                 </div>
                 <div>
-                    <input type="text" id="tx-description" placeholder="Descripción (Ej. Comida, Repuesto)" required class="w-full px-3 py-2 border text-sm rounded-lg outline-none focus:ring-1 focus:ring-emerald-500">
+                    <div class="flex gap-2">
+                        <input type="text" id="tx-description" placeholder="Descripción (Ej. Comida, Repuesto)" required class="flex-1 px-3 py-2 border text-sm rounded-lg outline-none focus:ring-1 focus:ring-emerald-500">
+                        <button type="button" onclick="startSpeechRecognition()" title="Dictar por voz" class="bg-emerald-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-emerald-700 transition"><i class="fa-solid fa-microphone"></i></button>
+                    </div>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <input type="number" step="0.01" id="tx-amount" placeholder="Monto ($)" required class="w-full px-3 py-2 border text-sm rounded-lg outline-none focus:ring-1 focus:ring-emerald-500">
@@ -144,7 +160,6 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Tus credenciales reales de Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCuwUQojfewTYO-A2iaO75HHp234r-Z0Tg",
             authDomain: "misfinanzasapp-dc2d1.firebaseapp.com",
@@ -174,6 +189,33 @@
                 incBtn.className = "py-2 rounded-lg text-sm font-semibold border border-emerald-500 text-emerald-500 bg-emerald-50 transition";
                 expBtn.className = "py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-500 transition";
             }
+        };
+
+        // Mostrar / Ocultar Manual de Voz
+        window.toggleVoiceManual = () => {
+            const manual = document.getElementById('voice-manual');
+            manual.classList.toggle('hidden');
+        };
+
+        // Función de dictado por voz
+        window.startSpeechRecognition = () => {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("Tu navegador no soporta el dictado por voz.");
+                return;
+            }
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'es-ES';
+            recognition.start();
+            
+            recognition.onresult = (event) => {
+                const speechToText = event.results[0][0].transcript;
+                document.getElementById('tx-description').value = speechToText;
+            };
+            
+            recognition.onerror = () => {
+                alert("No se pudo reconocer la voz. Inténtalo de nuevo.");
+            };
         };
 
         onAuthStateChanged(auth, async (user) => {
