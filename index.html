@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mis Gastos e Ingresos</title>
+  <title>Mis Gastos e Ingresos - Cloud</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -30,7 +30,7 @@
           <i class="fa-solid fa-wallet"></i>
         </div>
         <h1 class="text-2xl font-bold text-slate-800" id="authTitle">Iniciar Sesión</h1>
-        <p class="text-xs text-slate-500 mt-1" id="authSubtitle">Gestiona tus finanzas personales de forma fácil</p>
+        <p class="text-xs text-slate-500 mt-1" id="authSubtitle">Gestiona tus finanzas en la nube</p>
       </div>
 
       <!-- Auth Form -->
@@ -77,40 +77,16 @@
           <i class="fa-solid fa-key"></i>
         </div>
         <h2 class="text-xl font-bold text-slate-800">Recuperar Contraseña</h2>
-        <p class="text-xs text-slate-500 mt-1">Ingresa tu correo registrado para restablecer tu contraseña</p>
+        <p class="text-xs text-slate-500 mt-1">Te enviaremos un correo para restablecer tu contraseña</p>
       </div>
 
-      <div id="recoveryStep1" class="space-y-4">
+      <div class="space-y-4">
         <div>
           <label class="block text-xs font-semibold text-slate-600 mb-1">Correo Electrónico</label>
           <input type="email" id="recoveryEmail" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
         </div>
-        <button onclick="verifyRecoveryEmail()" class="w-full bg-emerald-500 text-white font-semibold py-3.5 rounded-xl text-sm shadow-md active:scale-95 transition">
-          Verificar Correo
-        </button>
-      </div>
-
-      <div id="recoveryStep2" class="hidden space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Nueva Contraseña</label>
-          <div class="relative">
-            <input type="password" id="newPassword" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-            <button type="button" onclick="togglePasswordVisibility('newPassword', 'newPasswordIcon')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1">
-              <i class="fa-solid fa-eye" id="newPasswordIcon"></i>
-            </button>
-          </div>
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Confirmar Nueva Contraseña</label>
-          <div class="relative">
-            <input type="password" id="confirmNewPassword" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-            <button type="button" onclick="togglePasswordVisibility('confirmNewPassword', 'confirmNewPasswordIcon')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1">
-              <i class="fa-solid fa-eye" id="confirmNewPasswordIcon"></i>
-            </button>
-          </div>
-        </div>
-        <button onclick="resetPassword()" class="w-full bg-emerald-500 text-white font-semibold py-3.5 rounded-xl text-sm shadow-md active:scale-95 transition">
-          Guardar Nueva Contraseña
+        <button onclick="sendPasswordReset()" class="w-full bg-emerald-500 text-white font-semibold py-3.5 rounded-xl text-sm shadow-md active:scale-95 transition">
+          Enviar Correo de Recuperación
         </button>
       </div>
 
@@ -119,7 +95,7 @@
       </button>
     </div>
 
-    <!-- MAIN APP SECTION (Hidden until login) -->
+    <!-- MAIN APP SECTION -->
     <div id="appContainer" class="hidden flex-1 flex flex-col justify-between">
       
       <!-- Top Bar -->
@@ -146,7 +122,7 @@
 
         <!-- Total Balance Card -->
         <div class="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl p-4 shadow-md text-white">
-          <p class="text-xs opacity-80 uppercase tracking-wider font-semibold">Balance Total</p>
+          <p class="text-xs opacity-80 uppercase tracking-wider font-semibold">Balance Total (Nube)</p>
           <h1 class="text-3xl font-extrabold mt-1" id="totalBalance">S/ 0.00</h1>
           
           <div class="flex justify-between mt-4 pt-3 border-t border-emerald-500/40 text-xs">
@@ -206,22 +182,13 @@
               <ul class="list-disc list-inside text-slate-600 space-y-1">
                 <li class="cursor-pointer hover:text-emerald-600" onclick="demoVoiceText('Gasté 25 soles en almuerzo')">"Gasté 25 soles en almuerzo"</li>
                 <li class="cursor-pointer hover:text-emerald-600" onclick="demoVoiceText('Gasto de 15 en taxi')">"Gasto de 15 en taxi"</li>
-                <li class="cursor-pointer hover:text-emerald-600" onclick="demoVoiceText('Compré repuesto de moto por 80')">"Compré repuesto por 80"</li>
               </ul>
             </div>
-
             <div class="bg-white p-2.5 rounded-xl border border-amber-100 shadow-sm">
               <span class="font-bold text-emerald-600 block mb-0.5"> Registrar Ingresos:</span>
               <ul class="list-disc list-inside text-slate-600 space-y-1">
                 <li class="cursor-pointer hover:text-emerald-600" onclick="demoVoiceText('Cobré 150 soles de carrera')">"Cobré 150 soles de carrera"</li>
-                <li class="cursor-pointer hover:text-emerald-600" onclick="demoVoiceText('Ingreso de 50 soles por pedido')">"Ingreso de 50 soles por pedido"</li>
-                <li class="cursor-pointer hover:text-emerald-600" onclick="demoVoiceText('Gané 300 soles de sueldo')">"Gané 300 soles de sueldo"</li>
               </ul>
-            </div>
-
-            <div class="bg-white p-2.5 rounded-xl border border-amber-100 shadow-sm">
-              <span class="font-bold text-slate-700 block mb-0.5"> Navegación:</span>
-              <p class="text-slate-600">"Ir a historial", "Ir a resumen", "Ir a agregar", "Cerrar sesión".</p>
             </div>
           </div>
         </div>
@@ -235,14 +202,27 @@
             </div>
           </div>
 
+          <!-- BACKUP / UPLOADER PANEL -->
+          <div class="bg-slate-50 p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-cloud-arrow-up mr-1"></i> Respaldo y Actualización</h3>
+            <p class="text-[11px] text-slate-500">Exporta tus datos a un archivo o sube una copia para restaurar.</p>
+            <div class="flex gap-2">
+              <button onclick="exportJSONBackup()" class="flex-1 bg-slate-800 text-white py-2 rounded-xl text-xs font-semibold shadow hover:bg-slate-700">
+                <i class="fa-solid fa-download mr-1"></i> Descargar Copia
+              </button>
+              <label class="flex-1 bg-emerald-600 text-white py-2 rounded-xl text-xs font-semibold shadow hover:bg-emerald-500 text-center cursor-pointer">
+                <i class="fa-solid fa-upload mr-1"></i> Subir / Cargar
+                <input type="file" accept=".json" onchange="importJSONBackup(event)" class="hidden">
+              </label>
+            </div>
+          </div>
+
           <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
             <div class="flex justify-between items-center mb-3">
               <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Últimos Movimientos</h3>
               <button onclick="switchTab('history')" class="text-xs text-emerald-600 font-semibold">Ver todos</button>
             </div>
-            <div id="recentTransactionsList" class="space-y-2">
-              <!-- Dynamic List -->
-            </div>
+            <div id="recentTransactionsList" class="space-y-2"></div>
           </div>
         </div>
 
@@ -285,7 +265,7 @@
             </div>
 
             <button type="submit" class="w-full bg-emerald-500 text-white font-semibold py-3 rounded-xl text-xs shadow-md shadow-emerald-200 active:scale-95 transition mt-2">
-              Guardar Transacción
+              Guardar Transacción en la Nube
             </button>
           </form>
         </div>
@@ -305,9 +285,7 @@
             </select>
           </div>
 
-          <div id="fullHistoryList" class="space-y-2">
-            <!-- Full History List -->
-          </div>
+          <div id="fullHistoryList" class="space-y-2"></div>
         </div>
 
       </div>
@@ -334,8 +312,45 @@
 
   </div>
 
-  <script>
-    // App State
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { 
+      getAuth, 
+      createUserWithEmailAndPassword, 
+      signInWithEmailAndPassword, 
+      signOut, 
+      onAuthStateChanged,
+      sendPasswordResetEmail,
+      updateProfile
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { 
+      getFirestore, 
+      collection, 
+      addDoc, 
+      getDocs, 
+      deleteDoc, 
+      doc, 
+      query, 
+      orderBy,
+      setDoc
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCuwUQojfewTYO-A2iaO75HHp234r-Z0Tg",
+      authDomain: "misfinanzasapp-dc2d1.firebaseapp.com",
+      projectId: "misfinanzasapp-dc2d1",
+      storageBucket: "misfinanzasapp-dc2d1.firebasestorage.app",
+      messagingSenderId: "735407911555",
+      appId: "1:735407911555:web:2333eeb95dd41548ce21b6"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
     let currentUser = null;
     let transactions = [];
     let currentType = 'expense';
@@ -344,22 +359,25 @@
     let recognition = null;
     let isListening = false;
 
-    // Toggle Password Visibility Function
-    function togglePasswordVisibility(inputId, iconId) {
-      const input = document.getElementById(inputId);
-      const icon = document.getElementById(iconId);
-      if (input.type === 'password') {
-        input.type = 'text';
-        icon.classList.remove('fa-eye');
-        icon.classList.add('fa-eye-slash');
-      } else {
-        input.type = 'password';
-        icon.classList.remove('fa-eye-slash');
-        icon.classList.add('fa-eye');
-      }
-    }
+    // Make functions globally available
+    window.togglePasswordVisibility = togglePasswordVisibility;
+    window.toggleAuthMode = toggleAuthMode;
+    window.handleAuth = handleAuth;
+    window.logout = logout;
+    window.showForgotPassword = showForgotPassword;
+    window.hideForgotPassword = hideForgotPassword;
+    window.sendPasswordReset = sendPasswordReset;
+    window.toggleVoiceRecognition = toggleVoiceRecognition;
+    window.toggleVoiceManual = toggleVoiceManual;
+    window.demoVoiceText = demoVoiceText;
+    window.switchTab = switchTab;
+    window.setType = setType;
+    window.addTransaction = addTransaction;
+    window.deleteTransaction = deleteTransaction;
+    window.renderHistory = renderHistory;
+    window.exportJSONBackup = exportJSONBackup;
+    window.importJSONBackup = importJSONBackup;
 
-    // Toast Notification helper
     function showToast(msg) {
       const toast = document.createElement('div');
       toast.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs px-4 py-2 rounded-full shadow-xl z-50 transition opacity-0';
@@ -374,7 +392,177 @@
 
     function setDefaultDate() {
       const today = new Date().toISOString().split('T')[0];
-      document.getElementById('date').value = today;
+      const dateEl = document.getElementById('date');
+      if (dateEl) dateEl.value = today;
+    }
+
+    function togglePasswordVisibility(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    }
+
+    function toggleAuthMode() {
+      isRegisterMode = !isRegisterMode;
+      document.getElementById('nameFieldContainer').classList.toggle('hidden', !isRegisterMode);
+      document.getElementById('forgotPasswordBtn').classList.toggle('hidden', isRegisterMode);
+      document.getElementById('authTitle').innerText = isRegisterMode ? "Crear Cuenta" : "Iniciar Sesión";
+      document.getElementById('authSubtitle').innerText = isRegisterMode ? "Tus finanzas seguras en la nube" : "Gestiona tus finanzas en la nube";
+      document.getElementById('authSubmitBtn').innerText = isRegisterMode ? "Registrarse" : "Iniciar Sesión";
+      document.getElementById('toggleAuthBtn').innerHTML = isRegisterMode ? 
+        '¿Ya tienes cuenta? <span class="text-emerald-600 font-semibold">Inicia Sesión</span>' : 
+        '¿No tienes cuenta? <span class="text-emerald-600 font-semibold">Regístrate</span>';
+    }
+
+    async function handleAuth(e) {
+      e.preventDefault();
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value;
+
+      try {
+        if (isRegisterMode) {
+          const name = document.getElementById('authName').value.trim() || "Usuario";
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          await updateProfile(userCredential.user, { displayName: name });
+          showToast("¡Cuenta creada con éxito!");
+        } else {
+          await signInWithEmailAndPassword(auth, email, password);
+          showToast("¡Bienvenido de nuevo!");
+        }
+      } catch (error) {
+        let msg = "Ocurrió un error";
+        if (error.code === 'auth/invalid-credential') msg = "Correo o contraseña incorrectos";
+        if (error.code === 'auth/email-already-in-use') msg = "El correo ya está registrado";
+        if (error.code === 'auth/weak-password') msg = "La contraseña debe tener al menos 6 caracteres";
+        showToast(msg);
+      }
+    }
+
+    async function logout() {
+      await signOut(auth);
+      currentUser = null;
+      document.getElementById('appContainer').classList.add('hidden');
+      document.getElementById('authContainer').classList.remove('hidden');
+      showToast("Sesión cerrada");
+    }
+
+    function showForgotPassword() {
+      document.getElementById('authContainer').classList.add('hidden');
+      document.getElementById('forgotPasswordContainer').classList.remove('hidden');
+    }
+
+    function hideForgotPassword() {
+      document.getElementById('forgotPasswordContainer').classList.add('hidden');
+      document.getElementById('authContainer').classList.remove('hidden');
+    }
+
+    async function sendPasswordReset() {
+      const email = document.getElementById('recoveryEmail').value.trim();
+      if (!email) return showToast("Ingresa tu correo electrónico");
+      try {
+        await sendPasswordResetEmail(auth, email);
+        showToast("Correo de recuperación enviado");
+        hideForgotPassword();
+      } catch (error) {
+        showToast("No se pudo enviar el correo");
+      }
+    }
+
+    // Firestore Data Sync
+    async function loadTransactions() {
+      if (!currentUser) return;
+      try {
+        const q = query(collection(db, "users", currentUser.uid, "transactions"), orderBy("date", "desc"));
+        const querySnapshot = await getDocs(q);
+        transactions = [];
+        querySnapshot.forEach((docSnap) => {
+          transactions.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        renderApp();
+      } catch (error) {
+        console.error("Error cargando datos:", error);
+      }
+    }
+
+    async function addTransaction(e) {
+      e.preventDefault();
+      if (!currentUser) return;
+      const amount = parseFloat(document.getElementById('amount').value);
+      const category = document.getElementById('category').value;
+      const date = document.getElementById('date').value;
+      const note = document.getElementById('note').value;
+
+      const newTx = { type: currentType, amount, category, date, note, createdAt: Date.now() };
+      
+      try {
+        const docRef = await addDoc(collection(db, "users", currentUser.uid, "transactions"), newTx);
+        newTx.id = docRef.id;
+        transactions.unshift(newTx);
+
+        document.getElementById('amount').value = '';
+        document.getElementById('note').value = '';
+        setDefaultDate();
+        renderApp();
+        switchTab('summary');
+        showToast("Guardado en la nube");
+      } catch (error) {
+        showToast("Error al guardar en la nube");
+      }
+    }
+
+    async function deleteTransaction(id) {
+      if (!currentUser) return;
+      try {
+        await deleteDoc(doc(db, "users", currentUser.uid, "transactions", id));
+        transactions = transactions.filter(t => t.id !== id);
+        renderApp();
+        showToast("Transacción eliminada");
+      } catch (error) {
+        showToast("Error al eliminar");
+      }
+    }
+
+    // Export & Import JSON Backup
+    function exportJSONBackup() {
+      if (!transactions.length) return showToast("No hay datos para exportar");
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(transactions));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `finanzas_backup_${new Date().toISOString().split('T')[0]}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showToast("Copia de seguridad descargada");
+    }
+
+    async function importJSONBackup(event) {
+      const file = event.target.files[0];
+      if (!file || !currentUser) return;
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        try {
+          const importedData = JSON.parse(e.target.result);
+          if (!Array.isArray(importedData)) return showToast("Archivo inválido");
+          
+          for (const item of importedData) {
+            delete item.id; // remove old local id
+            await addDoc(collection(db, "users", currentUser.uid, "transactions"), item);
+          }
+          await loadTransactions();
+          showToast("¡Datos restaurados con éxito!");
+        } catch (err) {
+          showToast("Error al leer el archivo JSON");
+        }
+      };
+      reader.readAsText(file);
     }
 
     // Voice Assistant Setup
@@ -389,4 +577,232 @@
 
       recognition.onstart = () => {
         isListening = true;
-        document.getElementById('voiceMicBtn').classList.add
+        document.getElementById('voiceMicBtn').classList.add('pulse-ring', 'bg-emerald-500');
+        document.getElementById('voiceMicBtn').classList.remove('bg-rose-500');
+        document.getElementById('voiceStatusText').innerText = "Escuchando...";
+        document.getElementById('voiceSubtext').innerText = "Di tu gasto o ingreso...";
+      };
+
+      recognition.onend = () => {
+        isListening = false;
+        document.getElementById('voiceMicBtn').classList.remove('pulse-ring', 'bg-emerald-500');
+        document.getElementById('voiceMicBtn').classList.add('bg-rose-500');
+        document.getElementById('voiceStatusText').innerText = "Asistente por Voz";
+        document.getElementById('voiceSubtext').innerText = "Toca el micro y habla";
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        processVoiceCommand(transcript);
+      };
+
+      recognition.onerror = () => showToast("No se pudo reconocer la voz");
+    }
+
+    function toggleVoiceRecognition() {
+      if (!recognition) {
+        initVoiceRecognition();
+        if (!recognition) return showToast("Reconocimiento de voz no soportado");
+      }
+      if (isListening) recognition.stop();
+      else recognition.start();
+    }
+
+    function speakText(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'es-PE';
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    async function processVoiceCommand(text) {
+      const lower = text.toLowerCase();
+      if (lower.includes('ir a resumen')) return switchTab('summary');
+      if (lower.includes('ir a historial')) return switchTab('history');
+      if (lower.includes('ir a agregar')) return switchTab('add');
+      if (lower.includes('cerrar sesión')) return logout();
+
+      const numberMatch = lower.match(/\d+(\.\d+)?/);
+      if (!numberMatch) {
+        showToast("No detecté ningún monto");
+        speakText("No entendí el monto.");
+        return;
+      }
+      const amount = parseFloat(numberMatch[0]);
+
+      let type = 'expense';
+      if (lower.includes('ingreso') || lower.includes('cobré') || lower.includes('gané') || lower.includes('sueldo')) {
+        type = 'income';
+      }
+
+      let category = 'Otros';
+      if (lower.includes('comida') || lower.includes('almuerzo')) category = 'Comida';
+      else if (lower.includes('taxi') || lower.includes('pasaje')) category = 'Transporte';
+      else if (lower.includes('moto') || lower.includes('repuesto')) category = 'Moto';
+      else if (lower.includes('carrera') || lower.includes('pedido')) category = 'Trabajo';
+
+      const today = new Date().toISOString().split('T')[0];
+      const newTx = { type, amount, category, date: today, note: `Voz: "${text}"`, createdAt: Date.now() };
+
+      try {
+        const docRef = await addDoc(collection(db, "users", currentUser.uid, "transactions"), newTx);
+        newTx.id = docRef.id;
+        transactions.unshift(newTx);
+        renderApp();
+        const msg = `Registrado ${type === 'expense' ? 'gasto' : 'ingreso'} de ${amount} soles`;
+        showToast(msg);
+        speakText(msg);
+      } catch (err) {
+        showToast("Error al registrar por voz");
+      }
+    }
+
+    function toggleVoiceManual() {
+      document.getElementById('voiceManualModal').classList.toggle('hidden');
+    }
+
+    function demoVoiceText(text) {
+      processVoiceCommand(text);
+      toggleVoiceManual();
+    }
+
+    function setType(type) {
+      currentType = type;
+      const btnExpense = document.getElementById('typeExpenseBtn');
+      const btnIncome = document.getElementById('typeIncomeBtn');
+      if (type === 'expense') {
+        btnExpense.className = 'py-2.5 rounded-lg text-white bg-rose-500 shadow-sm transition';
+        btnIncome.className = 'py-2.5 rounded-lg text-slate-600 transition';
+      } else {
+        btnIncome.className = 'py-2.5 rounded-lg text-white bg-emerald-500 shadow-sm transition';
+        btnExpense.className = 'py-2.5 rounded-lg text-slate-600 transition';
+      }
+    }
+
+    function switchTab(tab) {
+      document.getElementById('viewSummary').classList.add('hidden');
+      document.getElementById('viewAdd').classList.add('hidden');
+      document.getElementById('viewHistory').classList.add('hidden');
+
+      document.getElementById('tabSummary').className = 'flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-600 py-1 px-4';
+      document.getElementById('tabHistory').className = 'flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-600 py-1 px-4';
+
+      if (tab === 'summary') {
+        document.getElementById('viewSummary').classList.remove('hidden');
+        document.getElementById('tabSummary').className = 'flex flex-col items-center gap-1 text-emerald-600 py-1 px-4';
+      } else if (tab === 'add') {
+        document.getElementById('viewAdd').classList.remove('hidden');
+        setDefaultDate();
+      } else if (tab === 'history') {
+        document.getElementById('viewHistory').classList.remove('hidden');
+        document.getElementById('tabHistory').className = 'flex flex-col items-center gap-1 text-emerald-600 py-1 px-4';
+        renderHistory();
+      }
+    }
+
+    function renderApp() {
+      let income = 0, expense = 0;
+      transactions.forEach(t => t.type === 'income' ? income += t.amount : expense += t.amount);
+      
+      document.getElementById('totalBalance').innerText = `S/ ${(income - expense).toFixed(2)}`;
+      document.getElementById('totalIncome').innerText = `S/ ${income.toFixed(2)}`;
+      document.getElementById('totalExpense').innerText = `S/ ${expense.toFixed(2)}`;
+
+      renderChart();
+      renderRecent();
+    }
+
+    function renderChart() {
+      const ctx = document.getElementById('categoryChart').getContext('2d');
+      const expenses = transactions.filter(t => t.type === 'expense');
+      const categoryTotals = {};
+
+      expenses.forEach(t => categoryTotals[t.category] = (categoryTotals[t.category] || 0) + t.amount);
+      const labels = Object.keys(categoryTotals);
+      const data = Object.values(categoryTotals);
+
+      if (chartInstance) chartInstance.destroy();
+
+      chartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels.length ? labels : ['Sin Gastos'],
+          datasets: [{
+            data: data.length ? data : [1],
+            backgroundColor: data.length ? ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#64748b'] : ['#e2e8f0']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } }
+        }
+      });
+    }
+
+    function renderRecent() {
+      const list = document.getElementById('recentTransactionsList');
+      if (!list) return;
+      list.innerHTML = '';
+      transactions.slice(0, 4).forEach(t => list.appendChild(createTxElement(t)));
+    }
+
+    function renderHistory() {
+      const list = document.getElementById('fullHistoryList');
+      const category = document.getElementById('filterCategory').value;
+      if (!list) return;
+      list.innerHTML = '';
+      
+      const filtered = category === 'ALL' ? transactions : transactions.filter(t => t.category === category);
+      filtered.forEach(t => list.appendChild(createTxElement(t)));
+    }
+
+    function createTxElement(t) {
+      const div = document.createElement('div');
+      div.className = 'flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100';
+      const isInc = t.type === 'income';
+      div.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs ${isInc ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}">
+            <i class="fa-solid ${isInc ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
+          </div>
+          <div>
+            <p class="text-xs font-bold text-slate-800">${t.category}</p>
+            <p class="text-[10px] text-slate-400">${t.date} ${t.note ? '• ' + t.note : ''}</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-extrabold ${isInc ? 'text-emerald-600' : 'text-rose-600'}">
+            ${isInc ? '+' : '-'} S/ ${t.amount.toFixed(2)}
+          </span>
+          <button onclick="deleteTransaction('${t.id}')" class="text-slate-300 hover:text-rose-500 text-xs">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      `;
+      return div;
+    }
+
+    // Auth State Listener
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        document.getElementById('authContainer').classList.add('hidden');
+        document.getElementById('forgotPasswordContainer').classList.add('hidden');
+        document.getElementById('appContainer').classList.remove('hidden');
+        document.getElementById('userNameDisplay').innerText = user.displayName || user.email.split('@')[0];
+        document.getElementById('userInitial').innerText = (user.displayName || user.email)[0].toUpperCase();
+        loadTransactions();
+        setDefaultDate();
+        initVoiceRecognition();
+      } else {
+        currentUser = null;
+        document.getElementById('appContainer').classList.add('hidden');
+        document.getElementById('authContainer').classList.remove('hidden');
+      }
+    });
+  </script>
+</body>
+</html>
