@@ -3,168 +3,237 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="page-title">Mis Finanzas App</title>
+    <title id="page-title">Mis Finanzas</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+<body class="bg-slate-900 text-slate-800 min-h-screen flex flex-col justify-between font-sans">
 
-    <!-- Pantalla de Autenticación -->
-    <div id="auth-screen" class="flex-1 flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md p-6 rounded-2xl shadow-xl">
-            <div class="text-center mb-6">
-                <div class="bg-emerald-100 text-emerald-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
-                    <i class="fa-solid fa-wallet"></i>
+    <!-- Container Principal de la App Mobile -->
+    <div class="max-w-md w-full mx-auto bg-slate-100 min-h-screen flex flex-col shadow-2xl relative pb-20">
+
+        <!-- Screen Autenticación -->
+        <div id="auth-screen" class="flex-1 flex flex-col justify-center p-6 bg-slate-900 text-white">
+            <div class="text-center mb-8">
+                <div class="bg-emerald-500 text-white w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/30">
+                    <i class="fa-solid fa-wallet text-3xl"></i>
                 </div>
                 <h1 id="auth-title" class="text-2xl font-bold">Iniciar Sesión</h1>
-                <p class="text-sm text-slate-500">Tus finanzas seguras en la nube</p>
+                <p class="text-xs text-slate-400 mt-1">Tus finanzas seguras en la nube</p>
             </div>
 
-            <div id="auth-error" class="hidden bg-red-100 text-red-700 p-3 rounded-lg text-sm mb-4 text-center"></div>
+            <div id="auth-error" class="hidden bg-red-500/20 text-red-300 p-3 rounded-xl text-xs mb-4 text-center border border-red-500/30"></div>
 
             <form id="auth-form" class="space-y-4">
                 <div id="name-field" class="hidden">
-                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Nombre Completo</label>
-                    <input type="text" id="auth-name" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+                    <label class="block text-[10px] font-bold uppercase text-slate-400 tracking-wider mb-1">Nombre Completo</label>
+                    <input type="text" id="auth-name" class="w-full px-4 py-3 bg-slate-800 border border-slate-700 text-white rounded-xl focus:border-emerald-500 outline-none text-sm">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Correo Electrónico</label>
-                    <input type="email" id="auth-email" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+                    <label class="block text-[10px] font-bold uppercase text-slate-400 tracking-wider mb-1">Correo Electrónico</label>
+                    <input type="email" id="auth-email" required class="w-full px-4 py-3 bg-slate-800 border border-slate-700 text-white rounded-xl focus:border-emerald-500 outline-none text-sm">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Contraseña</label>
-                    <input type="password" id="auth-password" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+                    <label class="block text-[10px] font-bold uppercase text-slate-400 tracking-wider mb-1">Contraseña</label>
+                    <input type="password" id="auth-password" required class="w-full px-4 py-3 bg-slate-800 border border-slate-700 text-white rounded-xl focus:border-emerald-500 outline-none text-sm">
                 </div>
-                <button type="submit" id="auth-btn" class="w-full bg-emerald-600 text-white py-2.5 rounded-lg font-semibold hover:bg-emerald-700 transition">Entrar</button>
+                <button type="submit" id="auth-btn" class="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/20 text-sm">Entrar</button>
             </form>
 
-            <div class="text-center mt-4">
-                <button type="button" id="auth-switch" class="text-sm text-emerald-600 hover:underline">¿No tienes cuenta? Regístrate</button>
+            <div class="text-center mt-6">
+                <button type="button" id="auth-switch" class="text-xs text-emerald-400 hover:underline">¿No tienes cuenta? Regístrate</button>
             </div>
         </div>
-    </div>
 
-    <!-- Pantalla Principal de la App -->
-    <div id="app-screen" class="hidden flex-1 flex flex-col">
-        <!-- Barra superior -->
-        <header class="bg-white shadow-sm px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <div class="bg-emerald-600 text-white w-9 h-9 rounded-lg flex items-center justify-center">
-                    <i class="fa-solid fa-wallet"></i>
-                </div>
-                <span id="app-brand-name" class="font-bold text-lg">Mis Finanzas</span>
-            </div>
-            <div class="flex items-center space-x-3">
-                <button onclick="exportJSON()" title="Exportar JSON" class="text-slate-600 hover:text-emerald-600"><i class="fa-solid fa-download"></i></button>
-                <label title="Importar JSON" class="text-slate-600 hover:text-emerald-600 cursor-pointer">
-                    <i class="fa-solid fa-upload"></i>
-                    <input type="file" id="import-file" accept=".json" class="hidden" onchange="importJSON(event)">
-                </label>
-                <button onclick="logout()" title="Cerrar Sesión" class="text-red-500 hover:text-red-700 ml-1"><i class="fa-solid fa-right-from-bracket"></i></button>
-            </div>
-        </header>
-
-        <!-- Contenido Principal -->
-        <main class="flex-1 max-w-lg w-full mx-auto p-4 space-y-4 pb-28">
-            <!-- Saludo Personalizado -->
-            <div class="flex justify-between items-center px-1">
-                <div>
-                    <p class="text-xs text-slate-500">Bienvenido de nuevo,</p>
-                    <h2 id="user-display-name" class="font-bold text-slate-800 text-lg">Usuario</h2>
-                </div>
-            </div>
-
-            <!-- Resumen de Balance -->
-            <div class="bg-emerald-600 text-white p-5 rounded-2xl shadow-md">
-                <p class="text-xs uppercase tracking-wider opacity-80">Balance Total</p>
-                <h2 id="total-balance" class="text-3xl font-extrabold mt-1">S/0.00</h2>
-                <div class="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-emerald-500/50">
-                    <div>
-                        <p class="text-xs opacity-80">Ingresos</p>
-                        <p id="total-income" class="text-lg font-bold">S/0.00</p>
+        <!-- Screen Principal (App Screen) -->
+        <div id="app-screen" class="hidden flex-1 flex flex-col bg-slate-100">
+            
+            <!-- Barra Superior / Header -->
+            <header class="bg-slate-900 text-white px-5 py-4 flex justify-between items-center rounded-b-2xl shadow-md">
+                <div class="flex items-center space-x-2">
+                    <div class="bg-emerald-500 text-white w-8 h-8 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-wallet text-sm"></i>
                     </div>
-                    <div>
-                        <p class="text-xs opacity-80">Gastos</p>
-                        <p id="total-expense" class="text-lg font-bold">S/0.00</p>
-                    </div>
+                    <span id="app-brand-name" class="font-bold text-base">Mis Finanzas</span>
                 </div>
-            </div>
+                <div class="flex items-center space-x-3 text-slate-300">
+                    <button onclick="toggleSettingsModal()" title="Configuración" class="hover:text-emerald-400 text-sm"><i class="fa-solid fa-gear"></i></button>
+                    <button onclick="exportJSON()" title="Exportar JSON" class="hover:text-emerald-400 text-sm"><i class="fa-solid fa-download"></i></button>
+                    <label title="Importar JSON" class="hover:text-emerald-400 cursor-pointer text-sm">
+                        <i class="fa-solid fa-upload"></i>
+                        <input type="file" id="import-file" accept=".json" class="hidden" onchange="importJSON(event)">
+                    </label>
+                    <button onclick="logout()" title="Cerrar Sesión" class="text-red-400 hover:text-red-300 text-sm ml-1"><i class="fa-solid fa-right-from-bracket"></i></button>
+                </div>
+            </header>
 
-            <!-- Panel de Configuración Avanzada -->
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-                <h3 class="text-sm font-bold text-slate-700 mb-2 flex items-center"><i class="fa-solid fa-gears mr-2 text-emerald-600"></i> Configuración Avanzada</h3>
-                <div class="space-y-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">Nombre personalizado de la App</label>
-                        <input type="text" id="setting-app-name" placeholder="Ej. Mis Finanzas Fénix" class="w-full px-3 py-1.5 border text-sm rounded-lg outline-none focus:ring-1 focus:ring-emerald-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">Añadir Nueva Categoría</label>
-                        <div class="flex gap-2">
-                            <input type="text" id="new-category-name" placeholder="Ej. Combustible, Mascotas..." class="flex-1 px-3 py-1.5 border text-sm rounded-lg outline-none focus:ring-1 focus:ring-emerald-500">
-                            <button type="button" onclick="addCategory()" class="bg-slate-800 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-slate-700">Crear</button>
+            <!-- Vista 1: Resumen Dashboard -->
+            <main id="tab-dashboard" class="p-4 space-y-4">
+                <!-- Tarjeta de Balance -->
+                <div class="bg-emerald-600 text-white p-5 rounded-3xl shadow-lg relative overflow-hidden">
+                    <p class="text-[10px] font-bold uppercase tracking-widest opacity-80">BALANCE TOTAL</p>
+                    <h2 id="total-balance" class="text-3xl font-extrabold mt-1">S/ 0.00</h2>
+                    
+                    <div class="grid grid-cols-2 gap-4 mt-5 pt-4 border-t border-emerald-500/60">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-7 h-7 rounded-full bg-emerald-500/80 flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-arrow-down text-emerald-200"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] opacity-80">Ingresos</p>
+                                <p id="total-income" class="text-xs font-bold">S/ 0.00</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-7 h-7 rounded-full bg-emerald-500/80 flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-arrow-up text-emerald-200"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] opacity-80">Gastos</p>
+                                <p id="total-expense" class="text-xs font-bold">S/ 0.00</p>
+                            </div>
                         </div>
                     </div>
-                    <button type="button" onclick="saveSettings()" class="w-full bg-slate-800 text-white py-2 rounded-lg text-sm font-semibold hover:bg-slate-700 transition">Guardar Configuración</button>
+                </div>
+
+                <!-- Tarjeta de Asistente por Voz -->
+                <div class="bg-slate-900 text-white p-4 rounded-2xl flex items-center justify-between shadow-md">
+                    <div class="flex items-center space-x-3">
+                        <button type="button" onclick="startSmartVoice()" class="bg-rose-500 hover:bg-rose-600 w-12 h-12 rounded-2xl flex items-center justify-center text-white text-lg shadow-lg shadow-rose-500/30 transition transform active:scale-95">
+                            <i id="voice-mic-icon" class="fa-solid fa-microphone"></i>
+                        </button>
+                        <div>
+                            <h3 class="text-xs font-bold">Asistente por Voz</h3>
+                            <p id="voice-subtext" class="text-[11px] text-slate-400">Toca el micro y habla</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="toggleVoiceHelp()" class="bg-slate-800 text-amber-400 border border-slate-700 text-[11px] font-semibold px-3 py-1.5 rounded-xl hover:bg-slate-700 flex items-center">
+                        <i class="fa-solid fa-circle-question mr-1 text-amber-400"></i> Ejemplos
+                    </button>
+                </div>
+
+                <!-- Manual / Ejemplos desplegables -->
+                <div id="voice-help-box" class="hidden bg-slate-800 text-slate-300 p-3.5 rounded-2xl text-xs space-y-1.5 border border-slate-700">
+                    <p class="font-bold text-emerald-400"><i class="fa-solid fa-lightbulb mr-1"></i> Comandos sugeridos:</p>
+                    <p>• <i>"Gasto de 15 soles en gasolina"</i></p>
+                    <p>• <i>"Ingreso de 50 soles por pedido"</i></p>
+                    <p>• <i>"Crear categoría Mantenimiento"</i></p>
+                </div>
+
+                <!-- Gastos por Categoría (Gráfico) -->
+                <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/80">
+                    <h3 class="text-xs font-bold text-slate-600 tracking-wider uppercase mb-3">GASTOS POR CATEGORÍA</h3>
+                    <div class="w-48 h-48 mx-auto relative flex items-center justify-center">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Últimos Movimientos -->
+                <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/80">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-xs font-bold text-slate-600 tracking-wider uppercase">ÚLTIMOS MOVIMIENTOS</h3>
+                        <button onclick="switchTab('history')" class="text-xs font-semibold text-emerald-600 hover:underline">Ver todos</button>
+                    </div>
+                    <div id="dashboard-recent-list" class="space-y-2">
+                        <!-- Carga dinámica -->
+                    </div>
+                </div>
+            </main>
+
+            <!-- Vista 2: Formulario Agregar Transacción (Modal u Hoja) -->
+            <main id="tab-add" class="hidden p-4 space-y-4">
+                <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200/80 space-y-4">
+                    <h2 class="text-base font-bold text-slate-800">Nueva Transacción</h2>
+                    
+                    <form id="transaction-form" class="space-y-4">
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" id="btn-type-expense" onclick="setTxType('expense')" class="py-2.5 rounded-xl text-xs font-bold border border-red-500 text-red-500 bg-red-50 transition">Gasto</button>
+                            <button type="button" id="btn-type-income" onclick="setTxType('income')" class="py-2.5 rounded-xl text-xs font-bold border border-slate-200 text-slate-400 transition">Ingreso</button>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Descripción</label>
+                            <input type="text" id="tx-description" placeholder="Ej. Comida, Gasolina" required class="w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Monto (S/)</label>
+                                <input type="number" step="0.01" id="tx-amount" placeholder="0.00" required class="w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Categoría</label>
+                                <select id="tx-category" class="w-full px-3 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-1 focus:ring-emerald-500">
+                                    <!-- Dinámico -->
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20 text-sm">Guardar Transacción</button>
+                    </form>
+                </div>
+            </main>
+
+            <!-- Vista 3: Historial Completo -->
+            <main id="tab-history" class="hidden p-4 space-y-4">
+                <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/80">
+                    <h3 class="text-xs font-bold text-slate-600 tracking-wider uppercase mb-3">HISTORIAL COMPLETO</h3>
+                    <div id="full-history-list" class="space-y-2 max-h-[70vh] overflow-y-auto">
+                        <!-- Dinámico -->
+                    </div>
+                </div>
+            </main>
+
+            <!-- Modal Configuración -->
+            <div id="settings-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div class="bg-white w-full max-w-sm p-5 rounded-3xl shadow-2xl space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-bold text-slate-800"><i class="fa-solid fa-gears text-emerald-600 mr-2"></i> Configuración</h3>
+                        <button onclick="toggleSettingsModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Nombre de la App</label>
+                            <input type="text" id="setting-app-name" placeholder="Mis Finanzas" class="w-full px-3 py-2 border text-sm rounded-xl outline-none focus:ring-1 focus:ring-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Añadir Categoría</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="new-category-name" placeholder="Ej. Combustible" class="flex-1 px-3 py-2 border text-sm rounded-xl outline-none focus:ring-1 focus:ring-emerald-500">
+                                <button type="button" onclick="addCategory()" class="bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs font-bold hover:bg-slate-700">Crear</button>
+                            </div>
+                        </div>
+                        <button type="button" onclick="saveSettings()" class="w-full bg-emerald-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-emerald-700 transition">Guardar Cambios</button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Formulario de Transacción -->
-            <form id="transaction-form" class="bg-white p-4 rounded-2xl shadow-sm space-y-3">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-sm font-bold text-slate-700">Nueva Transacción</h3>
-                    <button type="button" onclick="toggleVoiceManual()" class="text-xs text-emerald-600 hover:underline flex items-center"><i class="fa-solid fa-circle-question mr-1"></i> Manual de Voz Inteligente</button>
-                </div>
+            <!-- Navegación Inferior Estilo App Móvil -->
+            <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-slate-200 px-6 py-2 flex justify-around items-center z-40">
+                <button onclick="switchTab('dashboard')" id="nav-btn-dashboard" class="flex flex-col items-center text-emerald-600 text-[11px] font-bold">
+                    <i class="fa-solid fa-chart-pie text-lg mb-0.5"></i>
+                    <span>Resumen</span>
+                </button>
+                
+                <button onclick="switchTab('add')" id="nav-btn-add" class="flex flex-col items-center">
+                    <div class="w-12 h-12 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center text-xl shadow-lg shadow-emerald-500/40 -mt-6 border-4 border-slate-100 transition transform active:scale-95">
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <span class="text-[10px] text-slate-500 font-semibold mt-0.5">Agregar</span>
+                </button>
 
-                <!-- Manual Desplegable -->
-                <div id="voice-manual" class="hidden bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-xs text-slate-700 space-y-1.5">
-                    <p class="font-bold text-emerald-800"><i class="fa-solid fa-microphone text-emerald-600 mr-1"></i> Comandos de voz disponibles:</p>
-                    <p>• <b>Para crear categoría:</b> Di <i>"Crear categoría Repuestos"</i>.</p>
-                    <p>• <b>Para registrar gasto:</b> Di <i>"Gasto de 15 soles en gasolina"</i>.</p>
-                    <p>• <b>Para registrar ingreso:</b> Di <i>"Ingreso de 50 soles por pedido"</i>.</p>
-                </div>
+                <button onclick="switchTab('history')" id="nav-btn-history" class="flex flex-col items-center text-slate-400 text-[11px] font-semibold hover:text-emerald-600">
+                    <i class="fa-solid fa-list-check text-lg mb-0.5"></i>
+                    <span>Historial</span>
+                </button>
+            </nav>
 
-                <div class="grid grid-cols-2 gap-2">
-                    <button type="button" id="type-expense" onclick="setTxType('expense')" class="py-2 rounded-lg text-sm font-semibold border border-red-500 text-red-500 bg-red-50 transition">Gasto</button>
-                    <button type="button" id="type-income" onclick="setTxType('income')" class="py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-500 transition">Ingreso</button>
-                </div>
-                <div>
-                    <input type="text" id="tx-description" placeholder="Descripción (Ej. Comida, Repuesto)" required class="w-full px-3 py-2 border text-sm rounded-lg outline-none focus:ring-1 focus:ring-emerald-500">
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="number" step="0.01" id="tx-amount" placeholder="Monto (S/)" required class="w-full px-3 py-2 border text-sm rounded-lg outline-none focus:ring-1 focus:ring-emerald-500">
-                    <select id="tx-category" class="w-full px-3 py-2 border text-sm rounded-lg outline-none focus:ring-1 bg-white focus:ring-emerald-500">
-                        <!-- Categorías dinámicas -->
-                    </select>
-                </div>
-                <button type="submit" class="w-full bg-emerald-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition">Guardar Transacción</button>
-            </form>
-
-            <!-- Historial -->
-            <div class="bg-white p-4 rounded-2xl shadow-sm">
-                <h3 class="text-sm font-bold text-slate-700 mb-3">Movimientos Recientes</h3>
-                <div id="transactions-list" class="space-y-2 max-h-60 overflow-y-auto">
-                    <!-- Elementos dinámicos -->
-                </div>
-            </div>
-        </main>
-
-        <!-- Botón Flotante de Voz Inteligente -->
-        <div class="fixed bottom-6 right-6 z-50 flex items-center gap-2">
-            <div id="voice-status" class="hidden bg-slate-900 text-white text-xs py-1.5 px-3 rounded-full shadow-lg font-medium animate-pulse">
-                Escuchando...
-            </div>
-            <button type="button" onclick="startSmartVoice()" class="bg-emerald-600 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-xl hover:bg-emerald-700 transition transform hover:scale-105 active:scale-95" title="Dictado inteligente">
-                <i id="smart-mic-icon" class="fa-solid fa-microphone"></i>
-            </button>
         </div>
     </div>
 
-    <!-- Scripts de Firebase y Lógica -->
+    <!-- Firebase y Lógica JS -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCuwUQojfewTYO-A2iaO75HHp234r-Z0Tg",
@@ -183,44 +252,67 @@
         let currentType = 'expense';
         let transactions = [];
         let categories = ['General', 'Comida', 'Transporte', 'Servicios', 'Salario'];
+        let chartInstance = null;
 
-        window.setTxType = (type) => {
-            currentType = type;
-            const expBtn = document.getElementById('type-expense');
-            const incBtn = document.getElementById('type-income');
-            if(type === 'expense') {
-                expBtn.className = "py-2 rounded-lg text-sm font-semibold border border-red-500 text-red-500 bg-red-50 transition";
-                incBtn.className = "py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-500 transition";
-            } else {
-                incBtn.className = "py-2 rounded-lg text-sm font-semibold border border-emerald-500 text-emerald-500 bg-emerald-50 transition";
-                expBtn.className = "py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-500 transition";
+        // Tabs Navegación
+        window.switchTab = (tab) => {
+            document.getElementById('tab-dashboard').classList.add('hidden');
+            document.getElementById('tab-add').classList.add('hidden');
+            document.getElementById('tab-history').classList.add('hidden');
+
+            document.getElementById('nav-btn-dashboard').className = "flex flex-col items-center text-slate-400 text-[11px] font-semibold";
+            document.getElementById('nav-btn-history').className = "flex flex-col items-center text-slate-400 text-[11px] font-semibold";
+
+            if (tab === 'dashboard') {
+                document.getElementById('tab-dashboard').classList.remove('hidden');
+                document.getElementById('nav-btn-dashboard').className = "flex flex-col items-center text-emerald-600 text-[11px] font-bold";
+            } else if (tab === 'add') {
+                document.getElementById('tab-add').classList.remove('hidden');
+            } else if (tab === 'history') {
+                document.getElementById('tab-history').classList.remove('hidden');
+                document.getElementById('nav-btn-history').className = "flex flex-col items-center text-emerald-600 text-[11px] font-bold";
             }
         };
 
-        window.toggleVoiceManual = () => {
-            const manual = document.getElementById('voice-manual');
-            manual.classList.toggle('hidden');
+        window.setTxType = (type) => {
+            currentType = type;
+            const expBtn = document.getElementById('btn-type-expense');
+            const incBtn = document.getElementById('btn-type-income');
+            if (type === 'expense') {
+                expBtn.className = "py-2.5 rounded-xl text-xs font-bold border border-red-500 text-red-500 bg-red-50 transition";
+                incBtn.className = "py-2.5 rounded-xl text-xs font-bold border border-slate-200 text-slate-400 transition";
+            } else {
+                incBtn.className = "py-2.5 rounded-xl text-xs font-bold border border-emerald-500 text-emerald-600 bg-emerald-50 transition";
+                expBtn.className = "py-2.5 rounded-xl text-xs font-bold border border-slate-200 text-slate-400 transition";
+            }
+        };
+
+        window.toggleVoiceHelp = () => {
+            document.getElementById('voice-help-box').classList.toggle('hidden');
+        };
+
+        window.toggleSettingsModal = () => {
+            document.getElementById('settings-modal').classList.toggle('hidden');
         };
 
         // Dictado Inteligente
         window.startSmartVoice = () => {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
-                alert("Tu navegador no soporta el reconocimiento de voz.");
+                alert("Navegador no soporta voz.");
                 return;
             }
 
             const recognition = new SpeechRecognition();
             recognition.lang = 'es-PE';
             recognition.interimResults = false;
-            recognition.maxAlternatives = 1;
 
-            const micIcon = document.getElementById('smart-mic-icon');
-            const statusTag = document.getElementById('voice-status');
+            const micIcon = document.getElementById('voice-mic-icon');
+            const subtext = document.getElementById('voice-subtext');
 
             recognition.onstart = () => {
                 micIcon.className = "fa-solid fa-spinner fa-spin";
-                statusTag.classList.remove('hidden');
+                subtext.textContent = "Escuchando...";
             };
 
             recognition.onresult = (event) => {
@@ -229,264 +321,17 @@
             };
 
             recognition.onerror = () => {
-                alert("No se pudo entender el audio. Por favor intenta hablar más claro.");
+                alert("No se entendió el audio.");
             };
 
             recognition.onend = () => {
                 micIcon.className = "fa-solid fa-microphone";
-                statusTag.classList.add('hidden');
+                subtext.textContent = "Toca el micro y habla";
             };
 
             recognition.start();
         };
 
         function processSmartVoiceText(text) {
-            if (text.includes('crear categoría') || text.includes('agregar categoría') || text.includes('nueva categoría')) {
-                let catName = text
-                    .replace(/crear categoría|agregar categoría|nueva categoría|de|llamada|que se llame|por nombre/g, '')
-                    .trim();
-                if (catName.length > 0) {
-                    catName = catName.charAt(0).toUpperCase() + catName.slice(1);
-                    if (!categories.includes(catName)) {
-                        categories.push(catName);
-                        renderCategories();
-                        saveSettings();
-                        alert(`¡Categoría "${catName}" creada por voz con éxito!`);
-                    } else {
-                        alert(`La categoría "${catName}" ya existe.`);
-                    }
-                    return;
-                }
-            }
-
-            if (text.includes('ingreso') || text.includes('ganancia') || text.includes('cobro')) {
-                setTxType('income');
-            } else {
-                setTxType('expense');
-            }
-
-            const numbers = text.match(/\d+([.,]\d+)?/g);
-            if (numbers && numbers.length > 0) {
-                const amount = parseFloat(numbers[0].replace(',', '.'));
-                document.getElementById('tx-amount').value = amount;
-            }
-
-            let cleanDescription = text
-                .replace(/gasto|ingreso|de|en|por|soles|sol|\d+([.,]\d+)?/g, '')
-                .trim();
-
-            if (cleanDescription.length > 0) {
-                cleanDescription = cleanDescription.charAt(0).toUpperCase() + cleanDescription.slice(1);
-                document.getElementById('tx-description').value = cleanDescription;
-            } else {
-                document.getElementById('tx-description').value = text;
-            }
-
-            const foundCategory = categories.find(cat => text.includes(cat.toLowerCase()));
-            if (foundCategory) {
-                document.getElementById('tx-category').value = foundCategory;
-            }
-        }
-
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                document.getElementById('auth-screen').classList.add('hidden');
-                document.getElementById('app-screen').classList.remove('hidden');
-                document.getElementById('user-display-name').textContent = user.displayName || user.email;
-                await loadUserData();
-            } else {
-                currentUser = null;
-                document.getElementById('app-screen').classList.add('hidden');
-                document.getElementById('auth-screen').classList.remove('hidden');
-            }
-        });
-
-        let isRegister = false;
-        const switchBtn = document.getElementById('auth-switch');
-        const nameField = document.getElementById('name-field');
-        const authTitle = document.getElementById('auth-title');
-        const authBtn = document.getElementById('auth-btn');
-
-        switchBtn.addEventListener('click', () => {
-            isRegister = !isRegister;
-            nameField.classList.toggle('hidden', !isRegister);
-            authTitle.textContent = isRegister ? 'Crear Cuenta' : 'Iniciar Sesión';
-            authBtn.textContent = isRegister ? 'Registrarse' : 'Entrar';
-            switchBtn.textContent = isRegister ? '¿Ya tienes cuenta? Inicia Sesión' : '¿No tienes cuenta? Regístrate';
-        });
-
-        // Manejador del formulario de autenticación con corrección de autocompletado
-        document.getElementById('auth-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const emailInput = document.getElementById('auth-email');
-            const passwordInput = document.getElementById('auth-password');
-            const nameInput = document.getElementById('auth-name');
-            const errDiv = document.getElementById('auth-error');
-            errDiv.classList.add('hidden');
-
-            const email = emailInput.value.trim();
-            const password = passwordInput.value.trim();
-            const name = nameInput.value.trim();
-
-            try {
-                if (isRegister) {
-                    const res = await createUserWithEmailAndPassword(auth, email, password);
-                    await updateProfile(res.user, { displayName: name });
-                } else {
-                    await signInWithEmailAndPassword(auth, email, password);
-                }
-            } catch (err) {
-                errDiv.textContent = "Ocurrió un error: " + err.message;
-                errDiv.classList.remove('hidden');
-            }
-        });
-
-        window.logout = () => signOut(auth);
-
-        async function loadUserData() {
-            const querySnapTx = await getDocs(collection(db, `users/${currentUser.uid}/transactions`));
-            transactions = [];
-            querySnapTx.forEach((doc) => {
-                transactions.push({ id: doc.id, ...doc.data() });
-            });
-
-            const catDoc = await getDoc(doc(db, `users_config/${currentUser.uid}`));
-            if (catDoc.exists()) {
-                const data = catDoc.data();
-                if (data.categories && data.categories.length > 0) {
-                    categories = data.categories;
-                }
-                if (data.appName) {
-                    document.getElementById('app-brand-name').textContent = data.appName;
-                    document.getElementById('page-title').textContent = data.appName;
-                    document.getElementById('setting-app-name').value = data.appName;
-                }
-            }
-
-            renderCategories();
-            renderUI();
-        }
-
-        window.saveSettings = async () => {
-            const appName = document.getElementById('setting-app-name').value.trim() || "Mis Finanzas";
-            try {
-                await setDoc(doc(db, `users_config/${currentUser.uid}`), {
-                    appName,
-                    categories
-                }, { merge: true });
-                document.getElementById('app-brand-name').textContent = appName;
-                document.getElementById('page-title').textContent = appName;
-            } catch (err) {
-                console.error("Error al guardar config", err);
-            }
-        };
-
-        function renderCategories() {
-            const select = document.getElementById('tx-category');
-            select.innerHTML = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
-        }
-
-        window.addCategory = async () => {
-            const nameInput = document.getElementById('new-category-name');
-            const name = nameInput.value.trim();
-            if (!name) return;
-            if (categories.includes(name)) {
-                alert('La categoría ya existe');
-                return;
-            }
-
-            categories.push(name);
-            nameInput.value = '';
-            renderCategories();
-            await saveSettings();
-            alert("¡Categoría creada con éxito!");
-        };
-
-        document.getElementById('transaction-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const description = document.getElementById('tx-description').value;
-            const amount = parseFloat(document.getElementById('tx-amount').value);
-            const category = document.getElementById('tx-category').value;
-
-            const newTx = {
-                description,
-                amount,
-                type: currentType,
-                category,
-                date: new Date().toISOString()
-            };
-
-            try {
-                const docRef = await addDoc(collection(db, `users/${currentUser.uid}/transactions`), newTx);
-                transactions.push({ id: docRef.id, ...newTx });
-                document.getElementById('transaction-form').reset();
-                setTxType('expense');
-                renderUI();
-            } catch (err) {
-                alert("Error al registrar transacción");
-            }
-        });
-
-        function renderUI() {
-            let income = 0;
-            let expense = 0;
-            const listEl = document.getElementById('transactions-list');
-            listEl.innerHTML = '';
-
-            transactions.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(tx => {
-                if (tx.type === 'income') income += tx.amount;
-                else expense += tx.amount;
-
-                const item = document.createElement('div');
-                item.className = "flex justify-between items-center p-2.5 bg-slate-50 rounded-xl text-sm border border-slate-100";
-                item.innerHTML = `
-                    <div>
-                        <p class="font-semibold text-slate-700">${tx.description}</p>
-                        <span class="text-xs text-slate-400 bg-slate-200 px-2 py-0.5 rounded-full">${tx.category || 'General'}</span>
-                    </div>
-                    <span class="font-bold ${tx.type === 'income' ? 'text-emerald-600' : 'text-red-500'}">
-                        ${tx.type === 'income' ? '+' : '-'}S/${tx.amount.toFixed(2)}
-                    </span>
-                `;
-                listEl.appendChild(item);
-            });
-
-            const balance = income - expense;
-            document.getElementById('total-balance').textContent = `S/${balance.toFixed(2)}`;
-            document.getElementById('total-income').textContent = `S/${income.toFixed(2)}`;
-            document.getElementById('total-expense').textContent = `S/${expense.toFixed(2)}`;
-        }
-
-        window.exportJSON = () => {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ transactions, categories }));
-            const dlAnchorElem = document.createElement('a');
-            dlAnchorElem.setAttribute("href", dataStr);
-            dlAnchorElem.setAttribute("download", "misfinanzas_respaldo.json");
-            dlAnchorElem.click();
-        };
-
-        window.importJSON = async (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (data.transactions) {
-                        for (let t of data.transactions) {
-                            delete t.id;
-                            await addDoc(collection(db, `users/${currentUser.uid}/transactions`), t);
-                        }
-                    }
-                    alert("¡Datos importados con éxito!");
-                    loadUserData();
-                } catch (err) {
-                    alert("El archivo no es válido");
-                }
-            };
-            reader.readAsText(file);
-        };
-    </script>
-</body>
-</html>
+            if (text.includes('crear categoría') || text.includes('agregar categoría')) {
+                let catName
