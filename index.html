@@ -140,6 +140,16 @@
                     </div>
                 </div>
 
+                <!-- TARJETA DE AGENDA DE DEUDAS (AMISTADES) -->
+                <div class="bg-slate-900 text-white p-4 rounded-3xl shadow-md border border-slate-800 space-y-2">
+                    <div class="flex justify-between items-center px-1">
+                        <h3 class="text-xs font-bold text-amber-400 tracking-wider uppercase"><i class="fa-solid fa-address-book mr-1"></i> Agenda de Deudas (Amistades)</h3>
+                        <span id="total-debt-amount" class="text-xs font-extrabold text-amber-400">S/ 0.00</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 px-1">Dinero pendiente por devolver a amistades.</p>
+                    <div id="debtors-list" class="space-y-1.5 pt-1 max-h-32 overflow-y-auto"></div>
+                </div>
+
                 <!-- Asistente por Voz -->
                 <div class="bg-slate-900 text-white p-4 rounded-2xl flex items-center justify-between shadow-md">
                     <div class="flex items-center space-x-3">
@@ -158,9 +168,8 @@
 
                 <div id="voice-help-box" class="hidden bg-slate-800 text-slate-300 p-3.5 rounded-2xl text-xs space-y-1.5 border border-slate-700">
                     <p class="font-bold text-emerald-400"><i class="fa-solid fa-lightbulb mr-1"></i> Comandos de voz:</p>
-                    <p>• <i>"Crear categoría Repuestos"</i></p>
-                    <p>• <i>"Gasto de 15 soles en gasolina"</i></p>
-                    <p>• <i>"Ingreso de 50 soles por pedido"</i></p>
+                    <p>• <i>"Crear categoría Deudas"</i></p>
+                    <p>• <i>"Gasto de 50 soles en Deudas"</i></p>
                 </div>
 
                 <!-- Gráfico de Barras Estilo Aplicación Financiera -->
@@ -245,8 +254,8 @@
                             <input type="date" id="tx-date" required class="w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Nota / Descripción (Opcional)</label>
-                            <input type="text" id="tx-description" placeholder="Ej. Repuesto de moto, pedido..." class="w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Nota / Descripción (Ej. Préstamo de Juan)</label>
+                            <input type="text" id="tx-description" placeholder="Ej. Juan Pérez - Préstamo" class="w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500">
                         </div>
 
                         <!-- SECCIÓN DE FOTO / COMPROBANTE -->
@@ -312,8 +321,8 @@
                         <div>
                             <label class="block text-xs font-semibold text-slate-500 mb-1">Añadir Nueva Categoría con Color</label>
                             <div class="flex items-center gap-2">
-                                <input type="text" id="new-category-name" placeholder="Ej. Combustible" class="flex-1 px-3 py-2 border text-sm rounded-xl outline-none focus:ring-1 focus:ring-emerald-500">
-                                <input type="color" id="new-category-color" value="#10B981" title="Elige un color" class="w-9 h-9 p-0.5 border rounded-xl cursor-pointer bg-slate-50">
+                                <input type="text" id="new-category-name" placeholder="Ej. Deudas" class="flex-1 px-3 py-2 border text-sm rounded-xl outline-none focus:ring-1 focus:ring-emerald-500">
+                                <input type="color" id="new-category-color" value="#8B5CF6" title="Elige un color" class="w-9 h-9 p-0.5 border rounded-xl cursor-pointer bg-slate-50">
                                 <button type="button" onclick="addCategory()" class="bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs font-bold hover:bg-slate-700">Crear</button>
                             </div>
                         </div>
@@ -381,14 +390,14 @@
             { name: 'Transporte', color: '#3B82F6' },
             { name: 'Servicios', color: '#F59E0B' },
             { name: 'Salario', color: '#10B981' },
-            { name: 'General', color: '#8B5CF6' }
+            { name: 'Deudas', color: '#8B5CF6' },
+            { name: 'General', color: '#64748B' }
         ];
         let chartInstance = null;
         let barChartInstance = null;
 
         document.getElementById('tx-date').valueAsDate = new Date();
 
-        // MODAL DE IMAGEN
         window.openImageModal = (photoUrl) => {
             document.getElementById('modal-image-view').src = photoUrl;
             document.getElementById('image-modal').classList.remove('hidden');
@@ -399,7 +408,6 @@
             document.getElementById('modal-image-view').src = '';
         };
 
-        // FOTO EN ALTA RESOLUCIÓN Y NITIDEZ
         window.previewTxPhoto = (event) => {
             const file = event.target.files[0];
             if (!file) return;
@@ -563,7 +571,6 @@
         };
 
         window.handleAuthSubmit = async () => {
-            // Ocultar teclado inmediatamente para evitar bloqueo de UI por autocompletado
             document.getElementById('auth-email').blur();
             document.getElementById('auth-password').blur();
 
@@ -670,7 +677,6 @@
 
             const categoryTotals = {};
             const monthlyDataMap = {};
-
             const monthNames = ['may', 'jun', 'jul', 'ago', 'sept', 'oct', 'nov', 'dic', 'ene', 'feb', 'mar', 'abr'];
 
             const timeFilteredTransactions = transactions.filter(tx => {
@@ -679,6 +685,28 @@
                 if (timeFilter === 'month') return isSameMonth(tx.date, now);
                 return true;
             });
+
+            // LÓGICA DE LA AGENDA DE DEUDAS (AMISTADES)
+            let totalDebt = 0;
+            const debtorsEl = document.getElementById('debtors-list');
+            debtorsEl.innerHTML = '';
+
+            const debtTransactions = timeFilteredTransactions.filter(tx => (tx.category || '').toLowerCase().includes('deuda'));
+
+            debtTransactions.forEach(tx => {
+                totalDebt += tx.amount;
+                debtorsEl.innerHTML += `
+                    <div class="flex justify-between items-center bg-slate-800 px-3 py-2 rounded-xl text-xs">
+                        <span class="text-slate-200 font-medium">${tx.description}</span>
+                        <span class="font-bold text-amber-400">S/ ${tx.amount.toFixed(2)}</span>
+                    </div>
+                `;
+            });
+
+            if (debtTransactions.length === 0) {
+                debtorsEl.innerHTML = `<p class="text-[11px] text-slate-500 text-center py-1">No tienes deudas registradas ¡Excelente!</p>`;
+            }
+            document.getElementById('total-debt-amount').textContent = `S/ ${totalDebt.toFixed(2)}`;
 
             timeFilteredTransactions.forEach(tx => {
                 const txDate = new Date(tx.date || Date.now());
