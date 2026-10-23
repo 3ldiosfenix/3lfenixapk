@@ -24,6 +24,7 @@
             </div>
 
             <div id="auth-error" class="hidden bg-red-500/20 text-red-300 p-3 rounded-xl text-xs mb-4 text-center border border-red-500/30"></div>
+            <div id="auth-success" class="hidden bg-emerald-500/20 text-emerald-300 p-3 rounded-xl text-xs mb-4 text-center border border-emerald-500/30"></div>
 
             <form id="auth-form" class="space-y-4">
                 <div id="name-field" class="hidden">
@@ -35,7 +36,10 @@
                     <input type="email" id="auth-email" required class="w-full px-4 py-3 bg-slate-800 border border-slate-700 text-white rounded-xl focus:border-emerald-500 outline-none text-sm">
                 </div>
                 <div>
-                    <label class="block text-[10px] font-bold uppercase text-slate-400 tracking-wider mb-1">Contraseña</label>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-[10px] font-bold uppercase text-slate-400 tracking-wider">Contraseña</label>
+                        <button type="button" id="forgot-password-link" onclick="handleForgotPassword()" class="text-[11px] text-emerald-400 hover:underline">¿Olvidaste tu contraseña?</button>
+                    </div>
                     <input type="password" id="auth-password" required class="w-full px-4 py-3 bg-slate-800 border border-slate-700 text-white rounded-xl focus:border-emerald-500 outline-none text-sm">
                 </div>
                 <button type="submit" id="auth-btn" class="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/20 text-sm">Iniciar Sesión</button>
@@ -212,9 +216,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-500 mb-1">Listado de Categorías (Modificar o Eliminar)</label>
-                            <div id="categories-management-list" class="space-y-2 max-h-48 overflow-y-auto border p-2 rounded-xl bg-slate-50">
-                                <!-- Listado dinámico para modificar/eliminar categorías -->
-                            </div>
+                            <div id="categories-management-list" class="space-y-2 max-h-48 overflow-y-auto border p-2 rounded-xl bg-slate-50"></div>
                         </div>
                         <button type="button" onclick="saveSettings()" class="w-full bg-emerald-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-emerald-700 transition">Cerrar y Guardar</button>
                     </div>
@@ -247,7 +249,7 @@
     <!-- Scripts de Firebase y Lógica -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -312,7 +314,31 @@
             document.getElementById('settings-modal').classList.toggle('hidden');
         };
 
-        // Asistente de Voz Maestro
+        // Función para recuperar contraseña con Firebase
+        window.handleForgotPassword = async () => {
+            const email = document.getElementById('auth-email').value.trim();
+            const errDiv = document.getElementById('auth-error');
+            const successDiv = document.getElementById('auth-success');
+            errDiv.classList.add('hidden');
+            successDiv.classList.add('hidden');
+
+            if (!email) {
+                errDiv.textContent = "Por favor, escribe tu correo electrónico primero para recuperar tu contraseña.";
+                errDiv.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                await sendPasswordResetEmail(auth, email);
+                successDiv.textContent = "¡Correo de recuperación enviado! Revisa tu bandeja de entrada.";
+                successDiv.classList.remove('hidden');
+            } catch (err) {
+                errDiv.textContent = "No se pudo enviar el correo. Verifica que esté bien escrito.";
+                errDiv.classList.remove('hidden');
+            }
+        };
+
+        // Asistente de Voz Maestro Robusto
         window.startMasterVoiceAssistant = () => {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
@@ -333,7 +359,7 @@
             };
 
             recognition.onresult = async (event) => {
-                const text = event.results[0][0].transcript.toLowerCase();
+                const text = event.results[0][0].transcript;
                 await processVoiceCommand(text);
             };
 
@@ -349,42 +375,60 @@
             recognition.start();
         };
 
-        async function processVoiceCommand(text) {
-            if (text.includes('crear categoría') || text.includes('agregar categoría')) {
-                let catName = text.replace(/crear categoría|agregar categoría|nueva categoría|de|llamada|que se llame/g, '').trim();
-                if (catName.length > 0) {
-                    catName = catName.charAt(0).toUpperCase() + catName.slice(1);
-                    if (!categories.includes(catName)) {
-                        categories.push(catName);
-                        renderCategories();
-                        await saveSettingsToCloud();
-                        alert(`¡Categoría "${catName}" creada por voz!`);
-                    } else {
-                        alert(`La categoría ya existe.`);
+        async function processVoiceCommand(rawText) {
+            const textNormalized = rawText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+            if (textNormalized.includes('categoria') || textNormalized.includes('crear') || textNormalized.includes('agregar')) {
+                const keywords = ['crear categoria', 'agregar categoria', 'nueva categoria', 'categoria'];
+                let isCategoryCommand = false;
+                let cleanCatName = rawText;
+
+                for (let kw of keywords) {
+                    if (textNormalized.includes(kw)) {
+                        isCategoryCommand = true;
+                        const regex = new RegExp(kw, 'gi');
+                        cleanCatName = cleanCatName.replace(regex, '');
                     }
-                    return;
+                }
+
+                if (isCategoryCommand) {
+                    cleanCatName = cleanCatName.replace(/de|llamada|que se llame|para/gi, '').trim();
+                    if (cleanCatName.length > 0) {
+                        cleanCatName = cleanCatName.charAt(0).toUpperCase() + cleanCatName.slice(1);
+                        if (!categories.includes(cleanCatName)) {
+                            categories.push(cleanCatName);
+                            renderCategories();
+                            renderCategoriesManagement();
+                            await saveSettingsToCloud();
+                            alert(`¡Categoría "${cleanCatName}" creada con éxito!`);
+                        } else {
+                            alert(`La categoría "${cleanCatName}" ya existe.`);
+                        }
+                        return;
+                    }
                 }
             }
 
             let txType = 'expense';
-            if (text.includes('ingreso') || text.includes('ganancia') || text.includes('cobro') || text.includes('gané')) {
+            if (textNormalized.includes('ingreso') || textNormalized.includes('ganancia') || textNormalized.includes('cobro') || textNormalized.includes('gane')) {
                 txType = 'income';
             }
 
-            const numbers = text.match(/\d+([.,]\d+)?/g);
+            const numbers = rawText.match(/\d+([.,]\d+)?/g);
             if (!numbers || numbers.length === 0) {
-                alert("No detecté el monto. Ejemplo: 'Gasto de 20 soles en comida'");
+                alert("No detecté el monto en tu voz. Ejemplo: 'Gasto de 20 soles en comida'");
                 return;
             }
             const amount = parseFloat(numbers[0].replace(',', '.'));
 
-            let description = text.replace(/gasto|ingreso|de|en|por|soles|sol|ganancia|gané|cobro|\d+([.,]\d+)?/g, '').trim();
+            let description = rawText.replace(/gasto|ingreso|de|en|por|soles|sol|ganancia|gané|cobro|\d+([.,]\d+)?/gi, '').trim();
             if (description.length === 0) description = "Movimiento por voz";
             description = description.charAt(0).toUpperCase() + description.slice(1);
 
             let matchedCategory = categories[0];
             for (let cat of categories) {
-                if (text.includes(cat.toLowerCase().split('/')[0].trim())) {
+                const normCat = cat.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                if (textNormalized.includes(normCat.split('/')[0].trim())) {
                     matchedCategory = cat;
                     break;
                 }
@@ -403,7 +447,7 @@
                 transactions.push({ id: docRef.id, ...newTx });
                 renderUI();
                 switchTab('dashboard');
-                alert(`¡Registrado!\n${txType === 'income' ? 'Ingreso' : 'Gasto'}: S/ ${amount.toFixed(2)} (${description})`);
+                alert(`¡Registrado con éxito!\n${txType === 'income' ? 'Ingreso' : 'Gasto'}: S/ ${amount.toFixed(2)} (${description})`);
             } catch (err) {
                 alert("Error al guardar en la nube.");
             }
@@ -439,7 +483,9 @@
             const password = document.getElementById('auth-password').value.trim();
             const name = document.getElementById('auth-name').value.trim();
             const errDiv = document.getElementById('auth-error');
+            const successDiv = document.getElementById('auth-success');
             errDiv.classList.add('hidden');
+            successDiv.classList.add('hidden');
 
             try {
                 if (isRegister) {
@@ -498,7 +544,6 @@
             select.innerHTML = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
         }
 
-        // Renderizar lista interactiva para modificar o eliminar categorías en ajustes
         function renderCategoriesManagement() {
             const listEl = document.getElementById('categories-management-list');
             listEl.innerHTML = categories.map((cat, index) => `
@@ -541,7 +586,6 @@
             await saveSettingsToCloud();
         };
 
-        // Registrar o Modificar Transacción Manual
         document.getElementById('transaction-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const editId = document.getElementById('tx-edit-id').value;
