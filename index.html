@@ -248,7 +248,29 @@
                             <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Nota / Descripción (Opcional)</label>
                             <input type="text" id="tx-description" placeholder="Ej. Repuesto de moto, pedido..." class="w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500">
                         </div>
-                        <div class="flex gap-2">
+
+                        <!-- SECCIÓN DE FOTO / COMPROBANTE -->
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Foto / Comprobante (Opcional)</label>
+                            <div class="flex items-center gap-3">
+                                <!-- Botón Cuadrado con símbolo + -->
+                                <label id="photo-upload-box" class="w-20 h-20 border-2 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center cursor-pointer bg-slate-50 hover:bg-slate-100 transition relative overflow-hidden">
+                                    <i class="fa-solid fa-plus text-slate-400 text-lg"></i>
+                                    <span class="text-[9px] text-slate-400 mt-1 font-semibold">Añadir</span>
+                                    <input type="file" id="tx-photo-file" accept="image/*" class="hidden" onchange="previewTxPhoto(event)">
+                                </label>
+
+                                <!-- Contenedor de Vista Previa -->
+                                <div id="photo-preview-container" class="hidden relative w-20 h-20 rounded-2xl overflow-hidden border border-slate-300 shadow-sm">
+                                    <img id="photo-preview-img" src="" alt="Comprobante" class="w-full h-full object-cover">
+                                    <button type="button" onclick="removeTxPhoto()" class="absolute top-1 right-1 bg-rose-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] shadow" title="Eliminar foto">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2 pt-2">
                             <button type="submit" id="form-submit-btn" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition shadow-md text-sm">Guardar Transacción</button>
                             <button type="button" onclick="cancelEdit()" id="form-cancel-btn" class="hidden bg-slate-200 text-slate-600 px-4 py-3 rounded-xl font-bold hover:bg-slate-300 text-sm">Cancelar</button>
                         </div>
@@ -341,6 +363,7 @@
         let isBalanceVisible = false;
         let isAudioPlaying = false;
         let isRegister = false;
+        let currentPhotoBase64 = null;
 
         let categories = [
             { name: 'Comida / Alimentos', color: '#EF4444' },
@@ -353,6 +376,55 @@
         let barChartInstance = null;
 
         document.getElementById('tx-date').valueAsDate = new Date();
+
+        window.previewTxPhoto = (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const MAX_WIDTH = 400;
+                    const MAX_HEIGHT = 400;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+                    currentPhotoBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                    
+                    document.getElementById('photo-preview-img').src = currentPhotoBase64;
+                    document.getElementById('photo-upload-box').classList.add('hidden');
+                    document.getElementById('photo-preview-container').classList.remove('hidden');
+                }
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.removeTxPhoto = () => {
+            currentPhotoBase64 = null;
+            document.getElementById('tx-photo-file').value = '';
+            document.getElementById('photo-preview-img').src = '';
+            document.getElementById('photo-preview-container').classList.add('hidden');
+            document.getElementById('photo-upload-box').classList.remove('hidden');
+        };
 
         window.toggleIntroMusic = () => {
             const audio = document.getElementById('intro-audio');
@@ -455,7 +527,6 @@
 
         window.logout = () => signOut(auth);
 
-        // FUNCIÓN CAMBIO DE MODO REGISTRO / LOGIN (GLOBAL)
         window.toggleAuthMode = (e) => {
             if (e) {
                 e.preventDefault();
@@ -468,7 +539,6 @@
             document.getElementById('auth-switch').textContent = isRegister ? '¿Ya tienes cuenta? Inicia Sesión' : '¿No tienes cuenta? Regístrate';
         };
 
-        // FUNCIÓN QUE CAPTURA DIRECTAMENTE LOS VALORES DE LOS INPUTS (EVITA ERRORES DE AUTOCOMPLETADO)
         window.handleAuthSubmit = async () => {
             const email = document.getElementById('auth-email').value.trim();
             const password = document.getElementById('auth-password').value.trim();
@@ -613,6 +683,8 @@
                 const textColor = getContrastTextColor(catColor);
 
                 const formattedDate = tx.date ? tx.date.split('T')[0] : '';
+                const photoBadge = tx.photo ? `<span class="ml-1 text-emerald-600" title="Tiene comprobante"><i class="fa-solid fa-image"></i></span>` : '';
+
                 const itemHTML = `
                     <div class="flex justify-between items-center p-3 bg-slate-50 rounded-2xl border border-slate-100">
                         <div class="flex items-center space-x-3">
@@ -620,7 +692,7 @@
                                 <i class="fa-solid ${tx.type === 'income' ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
                             </div>
                             <div>
-                                <p class="font-bold text-slate-800 text-xs">${tx.description}</p>
+                                <p class="font-bold text-slate-800 text-xs">${tx.description} ${photoBadge}</p>
                                 <p class="text-[10px] text-slate-400">${formattedDate} • <span class="px-2 py-0.5 rounded-full font-semibold text-[9px]" style="background-color: ${catColor}; color: ${textColor};">${tx.category || 'General'}</span></p>
                             </div>
                         </div>
@@ -868,7 +940,8 @@
                 amount,
                 type: currentType,
                 category,
-                date: new Date(dateVal + 'T12:00:00').toISOString()
+                date: new Date(dateVal + 'T12:00:00').toISOString(),
+                photo: currentPhotoBase64 || null
             };
 
             try {
@@ -883,6 +956,7 @@
                     transactions.push({ id: docRef.id, ...txData });
                     document.getElementById('transaction-form').reset();
                     document.getElementById('tx-date').valueAsDate = new Date();
+                    removeTxPhoto();
                     setTxType('expense');
                 }
                 renderUI();
@@ -903,6 +977,15 @@
             document.getElementById('tx-description').value = tx.description;
             setTxType(tx.type);
 
+            if (tx.photo) {
+                currentPhotoBase64 = tx.photo;
+                document.getElementById('photo-preview-img').src = currentPhotoBase64;
+                document.getElementById('photo-upload-box').classList.add('hidden');
+                document.getElementById('photo-preview-container').classList.remove('hidden');
+            } else {
+                removeTxPhoto();
+            }
+
             document.getElementById('form-title').textContent = "MODIFICAR REGISTRO";
             document.getElementById('form-submit-btn').textContent = "Actualizar Transacción";
             document.getElementById('form-cancel-btn').classList.remove('hidden');
@@ -914,6 +997,7 @@
             document.getElementById('transaction-form').reset();
             document.getElementById('tx-edit-id').value = '';
             document.getElementById('tx-date').valueAsDate = new Date();
+            removeTxPhoto();
             setTxType('expense');
 
             document.getElementById('form-title').textContent = "NUEVO REGISTRO";
@@ -1028,7 +1112,8 @@
                 amount,
                 type: txType,
                 category: matchedCategory,
-                date: new Date().toISOString()
+                date: new Date().toISOString(),
+                photo: null
             };
 
             try {
