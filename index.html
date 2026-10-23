@@ -13,7 +13,7 @@
     <!-- Container Principal de la App Mobile -->
     <div class="max-w-md w-full mx-auto bg-slate-100 min-h-screen flex flex-col shadow-2xl relative pb-24">
 
-        <!-- Screen Autenticación (Sin huella, limpio) -->
+        <!-- Screen Autenticación -->
         <div id="auth-screen" class="flex-1 flex flex-col justify-center p-6 bg-slate-900 text-white">
             <div class="text-center mb-8">
                 <div class="bg-emerald-500 text-white w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/30">
@@ -35,9 +35,7 @@
                     <input type="email" id="auth-email" required class="w-full px-4 py-3 bg-slate-800 border border-slate-700 text-white rounded-xl focus:border-emerald-500 outline-none text-sm">
                 </div>
                 <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <label class="block text-[10px] font-bold uppercase text-slate-400 tracking-wider">Contraseña</label>
-                    </div>
+                    <label class="block text-[10px] font-bold uppercase text-slate-400 tracking-wider mb-1">Contraseña</label>
                     <input type="password" id="auth-password" required class="w-full px-4 py-3 bg-slate-800 border border-slate-700 text-white rounded-xl focus:border-emerald-500 outline-none text-sm">
                 </div>
                 <button type="submit" id="auth-btn" class="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/20 text-sm">Iniciar Sesión</button>
@@ -60,7 +58,7 @@
                     <span id="app-brand-name" class="font-bold text-base">Mis Finanzas</span>
                 </div>
                 <div class="flex items-center space-x-3 text-slate-300">
-                    <button onclick="toggleSettingsModal()" title="Configuración" class="hover:text-emerald-400 text-sm"><i class="fa-solid fa-gear"></i></button>
+                    <button onclick="toggleSettingsModal()" title="Configuración y Categorías" class="hover:text-emerald-400 text-sm"><i class="fa-solid fa-gear"></i></button>
                     <button onclick="exportJSON()" title="Exportar JSON" class="hover:text-emerald-400 text-sm"><i class="fa-solid fa-download"></i></button>
                     <label title="Importar JSON" class="hover:text-emerald-400 cursor-pointer text-sm">
                         <i class="fa-solid fa-upload"></i>
@@ -72,7 +70,6 @@
 
             <!-- Vista 1: Resumen Dashboard -->
             <main id="tab-dashboard" class="p-4 space-y-4">
-                <!-- Saludo -->
                 <div class="flex justify-between items-center px-1">
                     <div>
                         <p class="text-[11px] text-slate-500">Hola,</p>
@@ -107,7 +104,7 @@
                     </div>
                 </div>
 
-                <!-- Tarjeta de Asistente por Voz Maestro (Controla todo) -->
+                <!-- Tarjeta de Asistente por Voz -->
                 <div class="bg-slate-900 text-white p-4 rounded-2xl flex items-center justify-between shadow-md">
                     <div class="flex items-center space-x-3">
                         <button type="button" onclick="startMasterVoiceAssistant()" class="bg-rose-500 hover:bg-rose-600 w-12 h-12 rounded-2xl flex items-center justify-center text-white text-lg shadow-lg shadow-rose-500/30 transition transform active:scale-95">
@@ -125,13 +122,13 @@
 
                 <!-- Manual / Ejemplos desplegables -->
                 <div id="voice-help-box" class="hidden bg-slate-800 text-slate-300 p-3.5 rounded-2xl text-xs space-y-1.5 border border-slate-700">
-                    <p class="font-bold text-emerald-400"><i class="fa-solid fa-lightbulb mr-1"></i> Comandos de voz inteligentes:</p>
-                    <p>• <i>"Gasto de 15 soles en gasolina"</i> (Registra automático)</p>
-                    <p>• <i>"Ingreso de 50 soles por pedido"</i> (Registra ingreso)</p>
-                    <p>• <i>"Crear categoría Repuestos"</i> (Crea categoría nueva)</p>
+                    <p class="font-bold text-emerald-400"><i class="fa-solid fa-lightbulb mr-1"></i> Comandos de voz:</p>
+                    <p>• <i>"Crear categoría Repuestos"</i></p>
+                    <p>• <i>"Gasto de 15 soles en gasolina"</i></p>
+                    <p>• <i>"Ingreso de 50 soles por pedido"</i></p>
                 </div>
 
-                <!-- Gastos por Categoría (Gráfico) -->
+                <!-- Gráfico de Gastos por Categoría -->
                 <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/80">
                     <h3 class="text-xs font-bold text-slate-600 tracking-wider uppercase mb-3">GASTOS POR CATEGORÍA</h3>
                     <div class="w-48 h-48 mx-auto relative flex items-center justify-center">
@@ -145,18 +142,17 @@
                         <h3 class="text-xs font-bold text-slate-600 tracking-wider uppercase">ÚLTIMOS MOVIMIENTOS</h3>
                         <button onclick="switchTab('history')" class="text-xs font-semibold text-emerald-600 hover:underline">Ver todos</button>
                     </div>
-                    <div id="dashboard-recent-list" class="space-y-2">
-                        <!-- Dinámico -->
-                    </div>
+                    <div id="dashboard-recent-list" class="space-y-2"></div>
                 </div>
             </main>
 
-            <!-- Vista 2: Formulario Manual de Transacción -->
+            <!-- Vista 2: Formulario de Transacción (Crear o Modificar) -->
             <main id="tab-add" class="hidden p-4 space-y-4">
                 <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200/80 space-y-4">
-                    <h2 class="text-base font-bold text-slate-800">NUEVO REGISTRO</h2>
+                    <h2 id="form-title" class="text-base font-bold text-slate-800">NUEVO REGISTRO</h2>
                     
                     <form id="transaction-form" class="space-y-4">
+                        <input type="hidden" id="tx-edit-id" value="">
                         <div class="grid grid-cols-2 gap-2">
                             <button type="button" id="btn-type-expense" onclick="setTxType('expense')" class="py-2.5 rounded-xl text-xs font-bold border border-red-500 text-red-500 bg-red-50 transition">Gasto</button>
                             <button type="button" id="btn-type-income" onclick="setTxType('income')" class="py-2.5 rounded-xl text-xs font-bold border border-slate-200 text-slate-400 transition">Ingreso</button>
@@ -179,7 +175,10 @@
                             <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Nota / Descripción (Opcional)</label>
                             <input type="text" id="tx-description" placeholder="Ej. Repuesto de moto, pedido..." class="w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500">
                         </div>
-                        <button type="submit" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20 text-sm">Guardar Transacción</button>
+                        <div class="flex gap-2">
+                            <button type="submit" id="form-submit-btn" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition shadow-md text-sm">Guardar Transacción</button>
+                            <button type="button" onclick="cancelEdit()" id="form-cancel-btn" class="hidden bg-slate-200 text-slate-600 px-4 py-3 rounded-xl font-bold hover:bg-slate-300 text-sm">Cancelar</button>
+                        </div>
                     </form>
                 </div>
             </main>
@@ -188,20 +187,18 @@
             <main id="tab-history" class="hidden p-4 space-y-4">
                 <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/80">
                     <h3 class="text-xs font-bold text-slate-600 tracking-wider uppercase mb-3">HISTORIAL COMPLETO</h3>
-                    <div id="full-history-list" class="space-y-2 max-h-[70vh] overflow-y-auto">
-                        <!-- Dinámico -->
-                    </div>
+                    <div id="full-history-list" class="space-y-2 max-h-[70vh] overflow-y-auto"></div>
                 </div>
             </main>
 
-            <!-- Modal Configuración -->
+            <!-- Modal Configuración y Gestión de Categorías -->
             <div id="settings-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                <div class="bg-white w-full max-w-sm p-5 rounded-3xl shadow-2xl space-y-4">
+                <div class="bg-white w-full max-w-sm p-5 rounded-3xl shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
                     <div class="flex justify-between items-center">
                         <h3 class="text-sm font-bold text-slate-800"><i class="fa-solid fa-gears text-emerald-600 mr-2"></i> Configuración</h3>
                         <button onclick="toggleSettingsModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
                     </div>
-                    <div class="space-y-3">
+                    <div class="space-y-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-500 mb-1">Nombre de la App</label>
                             <input type="text" id="setting-app-name" placeholder="Mis Finanzas" class="w-full px-3 py-2 border text-sm rounded-xl outline-none focus:ring-1 focus:ring-emerald-500">
@@ -211,6 +208,12 @@
                             <div class="flex gap-2">
                                 <input type="text" id="new-category-name" placeholder="Ej. Combustible" class="flex-1 px-3 py-2 border text-sm rounded-xl outline-none focus:ring-1 focus:ring-emerald-500">
                                 <button type="button" onclick="addCategory()" class="bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs font-bold hover:bg-slate-700">Crear</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Eliminar Categorías Existentes</label>
+                            <div id="categories-management-list" class="space-y-1.5 max-h-40 overflow-y-auto border p-2 rounded-xl bg-slate-50">
+                                <!-- Lista de eliminación de categorías -->
                             </div>
                         </div>
                         <button type="button" onclick="saveSettings()" class="w-full bg-emerald-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-emerald-700 transition">Guardar Cambios</button>
@@ -241,11 +244,11 @@
         </div>
     </div>
 
-    <!-- Scripts de Firebase y Lógica Inteligente -->
+    <!-- Scripts de Firebase y Lógica -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCuwUQojfewTYO-A2iaO75HHp234r-Z0Tg",
@@ -266,7 +269,6 @@
         let categories = ['Comida / Alimentos', 'Transporte', 'Servicios', 'Salario', 'General'];
         let chartInstance = null;
 
-        // Establecer fecha actual por defecto en el formulario manual
         document.getElementById('tx-date').valueAsDate = new Date();
 
         window.switchTab = (tab) => {
@@ -306,10 +308,11 @@
         };
 
         window.toggleSettingsModal = () => {
+            renderCategoriesManagement();
             document.getElementById('settings-modal').classList.toggle('hidden');
         };
 
-        // ASISTENTE DE VOZ MAESTRO (Controla categorías y transacciones globales automáticamente)
+        // Asistente de Voz Maestro (Crear categorías o registrar transacciones)
         window.startMasterVoiceAssistant = () => {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
@@ -335,7 +338,7 @@
             };
 
             recognition.onerror = () => {
-                alert("No se pudo reconocer la voz. Inténtalo de nuevo.");
+                alert("No se pudo reconocer la voz.");
             };
 
             recognition.onend = () => {
@@ -347,8 +350,7 @@
         };
 
         async function processVoiceCommand(text) {
-            // 1. Comando por voz para crear categoría
-            if (text.includes('crear categoría') || text.includes('agregar categoría') || text.includes('nueva categoría')) {
+            if (text.includes('crear categoría') || text.includes('agregar categoría')) {
                 let catName = text.replace(/crear categoría|agregar categoría|nueva categoría|de|llamada|que se llame/g, '').trim();
                 if (catName.length > 0) {
                     catName = catName.charAt(0).toUpperCase() + catName.slice(1);
@@ -356,15 +358,14 @@
                         categories.push(catName);
                         renderCategories();
                         await saveSettingsToCloud();
-                        alert(`¡Categoría "${catName}" creada exitosamente por voz!`);
+                        alert(`¡Categoría "${catName}" creada por voz!`);
                     } else {
-                        alert(`La categoría "${catName}" ya existe.`);
+                        alert(`La categoría ya existe.`);
                     }
                     return;
                 }
             }
 
-            // 2. Comando por voz para registrar transacción automática
             let txType = 'expense';
             if (text.includes('ingreso') || text.includes('ganancia') || text.includes('cobro') || text.includes('gané')) {
                 txType = 'income';
@@ -372,19 +373,15 @@
 
             const numbers = text.match(/\d+([.,]\d+)?/g);
             if (!numbers || numbers.length === 0) {
-                alert("No detecté el monto en tu voz. Ejemplo: 'Gasto de 20 soles en comida'");
+                alert("No detecté el monto. Ejemplo: 'Gasto de 20 soles en comida'");
                 return;
             }
             const amount = parseFloat(numbers[0].replace(',', '.'));
 
-            let description = text
-                .replace(/gasto|ingreso|de|en|por|soles|sol|ganancia|gané|cobro|\d+([.,]\d+)?/g, '')
-                .trim();
-            
+            let description = text.replace(/gasto|ingreso|de|en|por|soles|sol|ganancia|gané|cobro|\d+([.,]\d+)?/g, '').trim();
             if (description.length === 0) description = "Movimiento por voz";
             description = description.charAt(0).toUpperCase() + description.slice(1);
 
-            // Emparejar categoría si se menciona
             let matchedCategory = categories[0];
             for (let cat of categories) {
                 if (text.includes(cat.toLowerCase().split('/')[0].trim())) {
@@ -406,13 +403,13 @@
                 transactions.push({ id: docRef.id, ...newTx });
                 renderUI();
                 switchTab('dashboard');
-                alert(`¡Registrado con éxito!\n${txType === 'income' ? 'Ingreso' : 'Gasto'}: S/ ${amount.toFixed(2)} (${description})`);
+                alert(`¡Registrado!\n${txType === 'income' ? 'Ingreso' : 'Gasto'}: S/ ${amount.toFixed(2)} (${description})`);
             } catch (err) {
-                alert("Error al guardar transacción por voz en la nube.");
+                alert("Error al guardar en la nube.");
             }
         }
 
-        // Firebase Auth
+        // Auth
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
@@ -501,6 +498,16 @@
             select.innerHTML = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
         }
 
+        function renderCategoriesManagement() {
+            const listEl = document.getElementById('categories-management-list');
+            listEl.innerHTML = categories.map(cat => `
+                <div class="flex justify-between items-center text-xs p-1.5 bg-white border rounded-lg">
+                    <span>${cat}</span>
+                    <button type="button" onclick="deleteCategory('${cat}')" class="text-red-500 hover:text-red-700 font-bold px-2 py-0.5"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+            `).join('');
+        }
+
         window.addCategory = async () => {
             const nameInput = document.getElementById('new-category-name');
             const name = nameInput.value.trim();
@@ -508,19 +515,32 @@
             categories.push(name);
             nameInput.value = '';
             renderCategories();
+            renderCategoriesManagement();
             await saveSettingsToCloud();
             alert("¡Categoría creada!");
         };
 
-        // Formulario manual
+        window.deleteCategory = async (catName) => {
+            if (categories.length <= 1) {
+                alert("Debes tener al menos una categoría.");
+                return;
+            }
+            categories = categories.filter(c => c !== catName);
+            renderCategories();
+            renderCategoriesManagement();
+            await saveSettingsToCloud();
+        };
+
+        // Registrar o Modificar Transacción Manual
         document.getElementById('transaction-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const editId = document.getElementById('tx-edit-id').value;
             const description = document.getElementById('tx-description').value.trim() || "Sin descripción";
             const amount = parseFloat(document.getElementById('tx-amount').value);
             const category = document.getElementById('tx-category').value;
             const dateVal = document.getElementById('tx-date').value;
 
-            const newTx = {
+            const txData = {
                 description,
                 amount,
                 type: currentType,
@@ -529,19 +549,61 @@
             };
 
             try {
-                const docRef = await addDoc(collection(db, `users/${currentUser.uid}/transactions`), newTx);
-                transactions.push({ id: docRef.id, ...newTx });
-                document.getElementById('transaction-form').reset();
-                document.getElementById('tx-date').valueAsDate = new Date();
-                setTxType('expense');
+                if (editId) {
+                    // Modificar / Actualizar
+                    await updateDoc(doc(db, `users/${currentUser.uid}/transactions/${editId}`), txData);
+                    const index = transactions.findIndex(t => t.id === editId);
+                    if (index !== -1) transactions[index] = { id: editId, ...txData };
+                    alert("¡Transacción modificada con éxito!");
+                    cancelEdit();
+                } else {
+                    // Crear nuevo
+                    const docRef = await addDoc(collection(db, `users/${currentUser.uid}/transactions`), txData);
+                    transactions.push({ id: docRef.id, ...txData });
+                    document.getElementById('transaction-form').reset();
+                    document.getElementById('tx-date').valueAsDate = new Date();
+                    setTxType('expense');
+                }
                 renderUI();
                 switchTab('dashboard');
             } catch (err) {
-                alert("Error al registrar transacción");
+                alert("Error al guardar o modificar la transacción.");
             }
         });
 
+        // Cargar datos en el formulario para Editar
+        window.editTx = (id) => {
+            const tx = transactions.find(t => t.id === id);
+            if (!tx) return;
+
+            document.getElementById('tx-edit-id').value = tx.id;
+            document.getElementById('tx-amount').value = tx.amount;
+            document.getElementById('tx-category').value = tx.category || categories[0];
+            document.getElementById('tx-date').value = tx.date ? tx.date.split('T')[0] : '';
+            document.getElementById('tx-description').value = tx.description;
+            setTxType(tx.type);
+
+            document.getElementById('form-title').textContent = "MODIFICAR REGISTRO";
+            document.getElementById('form-submit-btn').textContent = "Actualizar Transacción";
+            document.getElementById('form-cancel-btn').classList.remove('hidden');
+
+            switchTab('add');
+        };
+
+        window.cancelEdit = () => {
+            document.getElementById('transaction-form').reset();
+            document.getElementById('tx-edit-id').value = '';
+            document.getElementById('tx-date').valueAsDate = new Date();
+            setTxType('expense');
+
+            document.getElementById('form-title').textContent = "NUEVO REGISTRO";
+            document.getElementById('form-submit-btn').textContent = "Guardar Transacción";
+            document.getElementById('form-cancel-btn').classList.add('hidden');
+            switchTab('dashboard');
+        };
+
         window.deleteTx = async (id) => {
+            if (!confirm("¿Deseas eliminar este movimiento?")) return;
             try {
                 await deleteDoc(doc(db, `users/${currentUser.uid}/transactions/${id}`));
                 transactions = transactions.filter(t => t.id !== id);
@@ -584,7 +646,8 @@
                             <span class="font-extrabold text-xs ${tx.type === 'income' ? 'text-emerald-600' : 'text-slate-800'}">
                                 ${tx.type === 'income' ? '+' : '-'} S/ ${tx.amount.toFixed(2)}
                             </span>
-                            <button onclick="deleteTx('${tx.id}')" class="text-slate-300 hover:text-red-500 text-xs pl-1"><i class="fa-solid fa-trash-can"></i></button>
+                            <button onclick="editTx('${tx.id}')" title="Modificar" class="text-blue-400 hover:text-blue-600 text-xs pl-1"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteTx('${tx.id}')" title="Eliminar" class="text-slate-300 hover:text-red-500 text-xs pl-1"><i class="fa-solid fa-trash-can"></i></button>
                         </div>
                     </div>
                 `;
