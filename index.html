@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="page-title">Mis Finanzas</title>
+    <!-- Icono de la pestaña -->
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3135/3135706.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -314,7 +316,6 @@
             document.getElementById('settings-modal').classList.toggle('hidden');
         };
 
-        // Función para recuperar contraseña con Firebase
         window.handleForgotPassword = async () => {
             const email = document.getElementById('auth-email').value.trim();
             const errDiv = document.getElementById('auth-error');
@@ -323,22 +324,21 @@
             successDiv.classList.add('hidden');
 
             if (!email) {
-                errDiv.textContent = "Por favor, escribe tu correo electrónico primero para recuperar tu contraseña.";
+                errDiv.textContent = "Por favor, escribe tu correo electrónico primero.";
                 errDiv.classList.remove('hidden');
                 return;
             }
 
             try {
                 await sendPasswordResetEmail(auth, email);
-                successDiv.textContent = "¡Correo de recuperación enviado! Revisa tu bandeja de entrada.";
+                successDiv.textContent = "¡Correo de recuperación enviado!";
                 successDiv.classList.remove('hidden');
             } catch (err) {
-                errDiv.textContent = "No se pudo enviar el correo. Verifica que esté bien escrito.";
+                errDiv.textContent = "No se pudo enviar el correo.";
                 errDiv.classList.remove('hidden');
             }
         };
 
-        // Asistente de Voz Maestro Robusto
         window.startMasterVoiceAssistant = () => {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
@@ -376,36 +376,31 @@
         };
 
         async function processVoiceCommand(rawText) {
-            const textNormalized = rawText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            const textNormalized = rawText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
-            if (textNormalized.includes('categoria') || textNormalized.includes('crear') || textNormalized.includes('agregar')) {
-                const keywords = ['crear categoria', 'agregar categoria', 'nueva categoria', 'categoria'];
-                let isCategoryCommand = false;
-                let cleanCatName = rawText;
+            const isCategoryIntent = textNormalized.includes('categoria') || 
+                                     textNormalized.includes('crear') || 
+                                     textNormalized.includes('anadir') || 
+                                     textNormalized.includes('agregar');
 
-                for (let kw of keywords) {
-                    if (textNormalized.includes(kw)) {
-                        isCategoryCommand = true;
-                        const regex = new RegExp(kw, 'gi');
-                        cleanCatName = cleanCatName.replace(regex, '');
+            if (isCategoryIntent) {
+                let cleanCatName = rawText
+                    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                    .replace(/crear|anadir|añadir|agregar|nueva|categoria|categoría|de|llamada|que se llame|para/gi, '')
+                    .trim();
+
+                if (cleanCatName.length > 0) {
+                    cleanCatName = cleanCatName.charAt(0).toUpperCase() + cleanCatName.slice(1).toLowerCase();
+                    if (!categories.includes(cleanCatName)) {
+                        categories.push(cleanCatName);
+                        renderCategories();
+                        renderCategoriesManagement();
+                        await saveSettingsToCloud();
+                        alert(`¡Categoría "${cleanCatName}" creada con éxito!`);
+                    } else {
+                        alert(`La categoría "${cleanCatName}" ya existe.`);
                     }
-                }
-
-                if (isCategoryCommand) {
-                    cleanCatName = cleanCatName.replace(/de|llamada|que se llame|para/gi, '').trim();
-                    if (cleanCatName.length > 0) {
-                        cleanCatName = cleanCatName.charAt(0).toUpperCase() + cleanCatName.slice(1);
-                        if (!categories.includes(cleanCatName)) {
-                            categories.push(cleanCatName);
-                            renderCategories();
-                            renderCategoriesManagement();
-                            await saveSettingsToCloud();
-                            alert(`¡Categoría "${cleanCatName}" creada con éxito!`);
-                        } else {
-                            alert(`La categoría "${cleanCatName}" ya existe.`);
-                        }
-                        return;
-                    }
+                    return;
                 }
             }
 
@@ -416,7 +411,7 @@
 
             const numbers = rawText.match(/\d+([.,]\d+)?/g);
             if (!numbers || numbers.length === 0) {
-                alert("No detecté el monto en tu voz. Ejemplo: 'Gasto de 20 soles en comida'");
+                alert("No detecté el monto. Ejemplo: 'Gasto de 20 soles en comida'");
                 return;
             }
             const amount = parseFloat(numbers[0].replace(',', '.'));
@@ -453,7 +448,6 @@
             }
         }
 
-        // Auth
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
