@@ -11,16 +11,16 @@
 <body class="bg-slate-900 text-slate-800 min-h-screen flex flex-col justify-between font-sans">
 
     <!-- Container Principal de la App Mobile -->
-    <div class="max-w-md w-full mx-auto bg-slate-100 min-h-screen flex flex-col shadow-2xl relative pb-20">
+    <div class="max-w-md w-full mx-auto bg-slate-100 min-h-screen flex flex-col shadow-2xl relative pb-24">
 
-        <!-- Screen Autenticación -->
+        <!-- Screen Autenticación (Sin huella, limpio) -->
         <div id="auth-screen" class="flex-1 flex flex-col justify-center p-6 bg-slate-900 text-white">
             <div class="text-center mb-8">
                 <div class="bg-emerald-500 text-white w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/30">
                     <i class="fa-solid fa-wallet text-3xl"></i>
                 </div>
                 <h1 id="auth-title" class="text-2xl font-bold">Iniciar Sesión</h1>
-                <p class="text-xs text-slate-400 mt-1">Tus finanzas seguras en la nube</p>
+                <p class="text-xs text-slate-400 mt-1">Gestiona tus finanzas personales de forma fácil</p>
             </div>
 
             <div id="auth-error" class="hidden bg-red-500/20 text-red-300 p-3 rounded-xl text-xs mb-4 text-center border border-red-500/30"></div>
@@ -35,10 +35,12 @@
                     <input type="email" id="auth-email" required class="w-full px-4 py-3 bg-slate-800 border border-slate-700 text-white rounded-xl focus:border-emerald-500 outline-none text-sm">
                 </div>
                 <div>
-                    <label class="block text-[10px] font-bold uppercase text-slate-400 tracking-wider mb-1">Contraseña</label>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-[10px] font-bold uppercase text-slate-400 tracking-wider">Contraseña</label>
+                    </div>
                     <input type="password" id="auth-password" required class="w-full px-4 py-3 bg-slate-800 border border-slate-700 text-white rounded-xl focus:border-emerald-500 outline-none text-sm">
                 </div>
-                <button type="submit" id="auth-btn" class="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/20 text-sm">Entrar</button>
+                <button type="submit" id="auth-btn" class="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/20 text-sm">Iniciar Sesión</button>
             </form>
 
             <div class="text-center mt-6">
@@ -70,6 +72,14 @@
 
             <!-- Vista 1: Resumen Dashboard -->
             <main id="tab-dashboard" class="p-4 space-y-4">
+                <!-- Saludo -->
+                <div class="flex justify-between items-center px-1">
+                    <div>
+                        <p class="text-[11px] text-slate-500">Hola,</p>
+                        <h2 id="user-display-name" class="font-bold text-slate-800 text-sm">Usuario</h2>
+                    </div>
+                </div>
+
                 <!-- Tarjeta de Balance -->
                 <div class="bg-emerald-600 text-white p-5 rounded-3xl shadow-lg relative overflow-hidden">
                     <p class="text-[10px] font-bold uppercase tracking-widest opacity-80">BALANCE TOTAL</p>
@@ -97,10 +107,10 @@
                     </div>
                 </div>
 
-                <!-- Tarjeta de Asistente por Voz -->
+                <!-- Tarjeta de Asistente por Voz Maestro (Controla todo) -->
                 <div class="bg-slate-900 text-white p-4 rounded-2xl flex items-center justify-between shadow-md">
                     <div class="flex items-center space-x-3">
-                        <button type="button" onclick="startSmartVoice()" class="bg-rose-500 hover:bg-rose-600 w-12 h-12 rounded-2xl flex items-center justify-center text-white text-lg shadow-lg shadow-rose-500/30 transition transform active:scale-95">
+                        <button type="button" onclick="startMasterVoiceAssistant()" class="bg-rose-500 hover:bg-rose-600 w-12 h-12 rounded-2xl flex items-center justify-center text-white text-lg shadow-lg shadow-rose-500/30 transition transform active:scale-95">
                             <i id="voice-mic-icon" class="fa-solid fa-microphone"></i>
                         </button>
                         <div>
@@ -115,10 +125,10 @@
 
                 <!-- Manual / Ejemplos desplegables -->
                 <div id="voice-help-box" class="hidden bg-slate-800 text-slate-300 p-3.5 rounded-2xl text-xs space-y-1.5 border border-slate-700">
-                    <p class="font-bold text-emerald-400"><i class="fa-solid fa-lightbulb mr-1"></i> Comandos sugeridos:</p>
-                    <p>• <i>"Gasto de 15 soles en gasolina"</i></p>
-                    <p>• <i>"Ingreso de 50 soles por pedido"</i></p>
-                    <p>• <i>"Crear categoría Mantenimiento"</i></p>
+                    <p class="font-bold text-emerald-400"><i class="fa-solid fa-lightbulb mr-1"></i> Comandos de voz inteligentes:</p>
+                    <p>• <i>"Gasto de 15 soles en gasolina"</i> (Registra automático)</p>
+                    <p>• <i>"Ingreso de 50 soles por pedido"</i> (Registra ingreso)</p>
+                    <p>• <i>"Crear categoría Repuestos"</i> (Crea categoría nueva)</p>
                 </div>
 
                 <!-- Gastos por Categoría (Gráfico) -->
@@ -136,15 +146,15 @@
                         <button onclick="switchTab('history')" class="text-xs font-semibold text-emerald-600 hover:underline">Ver todos</button>
                     </div>
                     <div id="dashboard-recent-list" class="space-y-2">
-                        <!-- Carga dinámica -->
+                        <!-- Dinámico -->
                     </div>
                 </div>
             </main>
 
-            <!-- Vista 2: Formulario Agregar Transacción (Modal u Hoja) -->
+            <!-- Vista 2: Formulario Manual de Transacción -->
             <main id="tab-add" class="hidden p-4 space-y-4">
                 <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200/80 space-y-4">
-                    <h2 class="text-base font-bold text-slate-800">Nueva Transacción</h2>
+                    <h2 class="text-base font-bold text-slate-800">NUEVO REGISTRO</h2>
                     
                     <form id="transaction-form" class="space-y-4">
                         <div class="grid grid-cols-2 gap-2">
@@ -152,20 +162,22 @@
                             <button type="button" id="btn-type-income" onclick="setTxType('income')" class="py-2.5 rounded-xl text-xs font-bold border border-slate-200 text-slate-400 transition">Ingreso</button>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Descripción</label>
-                            <input type="text" id="tx-description" placeholder="Ej. Comida, Gasolina" required class="w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Monto (S/)</label>
+                            <input type="number" step="0.01" id="tx-amount" placeholder="0.00" required class="w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500">
                         </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Monto (S/)</label>
-                                <input type="number" step="0.01" id="tx-amount" placeholder="0.00" required class="w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Categoría</label>
-                                <select id="tx-category" class="w-full px-3 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-1 focus:ring-emerald-500">
-                                    <!-- Dinámico -->
-                                </select>
-                            </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Categoría</label>
+                            <select id="tx-category" class="w-full px-3 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-1 focus:ring-emerald-500">
+                                <!-- Dinámico -->
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Fecha</label>
+                            <input type="date" id="tx-date" required class="w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Nota / Descripción (Opcional)</label>
+                            <input type="text" id="tx-description" placeholder="Ej. Repuesto de moto, pedido..." class="w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500">
                         </div>
                         <button type="submit" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20 text-sm">Guardar Transacción</button>
                     </form>
@@ -206,7 +218,7 @@
                 </div>
             </div>
 
-            <!-- Navegación Inferior Estilo App Móvil -->
+            <!-- Navegación Inferior -->
             <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-slate-200 px-6 py-2 flex justify-around items-center z-40">
                 <button onclick="switchTab('dashboard')" id="nav-btn-dashboard" class="flex flex-col items-center text-emerald-600 text-[11px] font-bold">
                     <i class="fa-solid fa-chart-pie text-lg mb-0.5"></i>
@@ -229,7 +241,7 @@
         </div>
     </div>
 
-    <!-- Firebase y Lógica JS -->
+    <!-- Scripts de Firebase y Lógica Inteligente -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -251,10 +263,12 @@
         let currentUser = null;
         let currentType = 'expense';
         let transactions = [];
-        let categories = ['General', 'Comida', 'Transporte', 'Servicios', 'Salario'];
+        let categories = ['Comida / Alimentos', 'Transporte', 'Servicios', 'Salario', 'General'];
         let chartInstance = null;
 
-        // Tabs Navegación
+        // Establecer fecha actual por defecto en el formulario manual
+        document.getElementById('tx-date').valueAsDate = new Date();
+
         window.switchTab = (tab) => {
             document.getElementById('tab-dashboard').classList.add('hidden');
             document.getElementById('tab-add').classList.add('hidden');
@@ -295,11 +309,11 @@
             document.getElementById('settings-modal').classList.toggle('hidden');
         };
 
-        // Dictado Inteligente
-        window.startSmartVoice = () => {
+        // ASISTENTE DE VOZ MAESTRO (Controla categorías y transacciones globales automáticamente)
+        window.startMasterVoiceAssistant = () => {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
-                alert("Navegador no soporta voz.");
+                alert("Tu navegador no soporta el reconocimiento de voz.");
                 return;
             }
 
@@ -312,16 +326,16 @@
 
             recognition.onstart = () => {
                 micIcon.className = "fa-solid fa-spinner fa-spin";
-                subtext.textContent = "Escuchando...";
+                subtext.textContent = "Escuchando orden...";
             };
 
-            recognition.onresult = (event) => {
+            recognition.onresult = async (event) => {
                 const text = event.results[0][0].transcript.toLowerCase();
-                processSmartVoiceText(text);
+                await processVoiceCommand(text);
             };
 
             recognition.onerror = () => {
-                alert("No se entendió el audio.");
+                alert("No se pudo reconocer la voz. Inténtalo de nuevo.");
             };
 
             recognition.onend = () => {
@@ -332,6 +346,330 @@
             recognition.start();
         };
 
-        function processSmartVoiceText(text) {
-            if (text.includes('crear categoría') || text.includes('agregar categoría')) {
-                let catName
+        async function processVoiceCommand(text) {
+            // 1. Comando por voz para crear categoría
+            if (text.includes('crear categoría') || text.includes('agregar categoría') || text.includes('nueva categoría')) {
+                let catName = text.replace(/crear categoría|agregar categoría|nueva categoría|de|llamada|que se llame/g, '').trim();
+                if (catName.length > 0) {
+                    catName = catName.charAt(0).toUpperCase() + catName.slice(1);
+                    if (!categories.includes(catName)) {
+                        categories.push(catName);
+                        renderCategories();
+                        await saveSettingsToCloud();
+                        alert(`¡Categoría "${catName}" creada exitosamente por voz!`);
+                    } else {
+                        alert(`La categoría "${catName}" ya existe.`);
+                    }
+                    return;
+                }
+            }
+
+            // 2. Comando por voz para registrar transacción automática
+            let txType = 'expense';
+            if (text.includes('ingreso') || text.includes('ganancia') || text.includes('cobro') || text.includes('gané')) {
+                txType = 'income';
+            }
+
+            const numbers = text.match(/\d+([.,]\d+)?/g);
+            if (!numbers || numbers.length === 0) {
+                alert("No detecté el monto en tu voz. Ejemplo: 'Gasto de 20 soles en comida'");
+                return;
+            }
+            const amount = parseFloat(numbers[0].replace(',', '.'));
+
+            let description = text
+                .replace(/gasto|ingreso|de|en|por|soles|sol|ganancia|gané|cobro|\d+([.,]\d+)?/g, '')
+                .trim();
+            
+            if (description.length === 0) description = "Movimiento por voz";
+            description = description.charAt(0).toUpperCase() + description.slice(1);
+
+            // Emparejar categoría si se menciona
+            let matchedCategory = categories[0];
+            for (let cat of categories) {
+                if (text.includes(cat.toLowerCase().split('/')[0].trim())) {
+                    matchedCategory = cat;
+                    break;
+                }
+            }
+
+            const newTx = {
+                description,
+                amount,
+                type: txType,
+                category: matchedCategory,
+                date: new Date().toISOString()
+            };
+
+            try {
+                const docRef = await addDoc(collection(db, `users/${currentUser.uid}/transactions`), newTx);
+                transactions.push({ id: docRef.id, ...newTx });
+                renderUI();
+                switchTab('dashboard');
+                alert(`¡Registrado con éxito!\n${txType === 'income' ? 'Ingreso' : 'Gasto'}: S/ ${amount.toFixed(2)} (${description})`);
+            } catch (err) {
+                alert("Error al guardar transacción por voz en la nube.");
+            }
+        }
+
+        // Firebase Auth
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('app-screen').classList.remove('hidden');
+                document.getElementById('user-display-name').textContent = user.displayName || user.email;
+                await loadUserData();
+            } else {
+                currentUser = null;
+                document.getElementById('app-screen').classList.add('hidden');
+                document.getElementById('auth-screen').classList.remove('hidden');
+            }
+        });
+
+        let isRegister = false;
+        document.getElementById('auth-switch').addEventListener('click', () => {
+            isRegister = !isRegister;
+            document.getElementById('name-field').classList.toggle('hidden', !isRegister);
+            document.getElementById('auth-title').textContent = isRegister ? 'Crear Cuenta' : 'Iniciar Sesión';
+            document.getElementById('auth-btn').textContent = isRegister ? 'Registrarse' : 'Iniciar Sesión';
+            document.getElementById('auth-switch').textContent = isRegister ? '¿Ya tienes cuenta? Inicia Sesión' : '¿No tienes cuenta? Regístrate';
+        });
+
+        document.getElementById('auth-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value.trim();
+            const name = document.getElementById('auth-name').value.trim();
+            const errDiv = document.getElementById('auth-error');
+            errDiv.classList.add('hidden');
+
+            try {
+                if (isRegister) {
+                    const res = await createUserWithEmailAndPassword(auth, email, password);
+                    await updateProfile(res.user, { displayName: name });
+                } else {
+                    await signInWithEmailAndPassword(auth, email, password);
+                }
+            } catch (err) {
+                errDiv.textContent = "Correo o contraseña incorrectos.";
+                errDiv.classList.remove('hidden');
+            }
+        });
+
+        window.logout = () => signOut(auth);
+
+        async function loadUserData() {
+            const querySnapTx = await getDocs(collection(db, `users/${currentUser.uid}/transactions`));
+            transactions = [];
+            querySnapTx.forEach((doc) => {
+                transactions.push({ id: doc.id, ...doc.data() });
+            });
+
+            const catDoc = await getDoc(doc(db, `users_config/${currentUser.uid}`));
+            if (catDoc.exists()) {
+                const data = catDoc.data();
+                if (data.categories && data.categories.length > 0) categories = data.categories;
+                if (data.appName) {
+                    document.getElementById('app-brand-name').textContent = data.appName;
+                    document.getElementById('setting-app-name').value = data.appName;
+                }
+            }
+
+            renderCategories();
+            renderUI();
+        }
+
+        async function saveSettingsToCloud() {
+            const appName = document.getElementById('setting-app-name').value.trim() || "Mis Finanzas";
+            try {
+                await setDoc(doc(db, `users_config/${currentUser.uid}`), { appName, categories }, { merge: true });
+                document.getElementById('app-brand-name').textContent = appName;
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        window.saveSettings = async () => {
+            await saveSettingsToCloud();
+            toggleSettingsModal();
+            alert("¡Configuración guardada!");
+        };
+
+        function renderCategories() {
+            const select = document.getElementById('tx-category');
+            select.innerHTML = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+        }
+
+        window.addCategory = async () => {
+            const nameInput = document.getElementById('new-category-name');
+            const name = nameInput.value.trim();
+            if (!name || categories.includes(name)) return;
+            categories.push(name);
+            nameInput.value = '';
+            renderCategories();
+            await saveSettingsToCloud();
+            alert("¡Categoría creada!");
+        };
+
+        // Formulario manual
+        document.getElementById('transaction-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const description = document.getElementById('tx-description').value.trim() || "Sin descripción";
+            const amount = parseFloat(document.getElementById('tx-amount').value);
+            const category = document.getElementById('tx-category').value;
+            const dateVal = document.getElementById('tx-date').value;
+
+            const newTx = {
+                description,
+                amount,
+                type: currentType,
+                category,
+                date: new Date(dateVal + 'T12:00:00').toISOString()
+            };
+
+            try {
+                const docRef = await addDoc(collection(db, `users/${currentUser.uid}/transactions`), newTx);
+                transactions.push({ id: docRef.id, ...newTx });
+                document.getElementById('transaction-form').reset();
+                document.getElementById('tx-date').valueAsDate = new Date();
+                setTxType('expense');
+                renderUI();
+                switchTab('dashboard');
+            } catch (err) {
+                alert("Error al registrar transacción");
+            }
+        });
+
+        window.deleteTx = async (id) => {
+            try {
+                await deleteDoc(doc(db, `users/${currentUser.uid}/transactions/${id}`));
+                transactions = transactions.filter(t => t.id !== id);
+                renderUI();
+            } catch (err) {
+                alert("Error al eliminar");
+            }
+        };
+
+        function renderUI() {
+            let income = 0;
+            let expense = 0;
+            const recentEl = document.getElementById('dashboard-recent-list');
+            const fullHistoryEl = document.getElementById('full-history-list');
+            recentEl.innerHTML = '';
+            fullHistoryEl.innerHTML = '';
+
+            const categoryTotals = {};
+
+            transactions.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((tx, idx) => {
+                if (tx.type === 'income') income += tx.amount;
+                else {
+                    expense += tx.amount;
+                    categoryTotals[tx.category || 'Otros'] = (categoryTotals[tx.category || 'Otros'] || 0) + tx.amount;
+                }
+
+                const formattedDate = tx.date ? tx.date.split('T')[0] : '';
+                const itemHTML = `
+                    <div class="flex justify-between items-center p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-full ${tx.type === 'income' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-500'} flex items-center justify-center text-xs">
+                                <i class="fa-solid ${tx.type === 'income' ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-800 text-xs">${tx.description}</p>
+                                <p class="text-[10px] text-slate-400">${formattedDate} • <span class="bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-full">${tx.category || 'General'}</span></p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="font-extrabold text-xs ${tx.type === 'income' ? 'text-emerald-600' : 'text-slate-800'}">
+                                ${tx.type === 'income' ? '+' : '-'} S/ ${tx.amount.toFixed(2)}
+                            </span>
+                            <button onclick="deleteTx('${tx.id}')" class="text-slate-300 hover:text-red-500 text-xs pl-1"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>
+                `;
+
+                if (idx < 3) recentEl.innerHTML += itemHTML;
+                fullHistoryEl.innerHTML += itemHTML;
+            });
+
+            if (transactions.length === 0) {
+                recentEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">Sin movimientos recientes</p>`;
+                fullHistoryEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Sin movimientos</p>`;
+            }
+
+            const balance = income - expense;
+            document.getElementById('total-balance').textContent = `S/ ${balance.toFixed(2)}`;
+            document.getElementById('total-income').textContent = `S/ ${income.toFixed(2)}`;
+            document.getElementById('total-expense').textContent = `S/ ${expense.toFixed(2)}`;
+
+            renderChart(categoryTotals);
+        }
+
+        function renderChart(categoryTotals) {
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            const labels = Object.keys(categoryTotals);
+            const data = Object.values(categoryTotals);
+
+            if (chartInstance) chartInstance.destroy();
+
+            if (labels.length === 0) {
+                chartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Sin Gastos'],
+                        datasets: [{ data: [1], backgroundColor: ['#E2E8F0'] }]
+                    },
+                    options: { plugins: { legend: { display: false } }, cutout: '75%' }
+                });
+                return;
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#3B82F6', '#8B5CF6', '#EC4899']
+                    }]
+                },
+                options: {
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        window.exportJSON = () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ transactions, categories }));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", "misfinanzas_respaldo.json");
+            dlAnchorElem.click();
+        };
+
+        window.importJSON = async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.transactions) {
+                        for (let t of data.transactions) {
+                            delete t.id;
+                            await addDoc(collection(db, `users/${currentUser.uid}/transactions`), t);
+                        }
+                    }
+                    alert("¡Datos importados con éxito!");
+                    loadUserData();
+                } catch (err) {
+                    alert("Archivo no válido");
+                }
+            };
+            reader.readAsText(file);
+        };
+    </script>
+</body>
+</html>
