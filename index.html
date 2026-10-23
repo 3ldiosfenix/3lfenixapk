@@ -46,7 +46,6 @@
             <div id="auth-error" class="hidden bg-red-500/20 text-red-300 p-3 rounded-xl text-xs mb-4 text-center border border-red-500/30"></div>
             <div id="auth-success" class="hidden bg-emerald-500/20 text-emerald-300 p-3 rounded-xl text-xs mb-4 text-center border border-emerald-500/30"></div>
 
-            <!-- FORMULARIO AUTOFILL CORREGIDO -->
             <form id="auth-form" action="javascript:void(0);" onsubmit="handleAuthSubmit(event)" class="space-y-4">
                 <div id="name-field" class="hidden">
                     <label class="block text-[10px] font-bold uppercase text-slate-400 tracking-wider mb-1">Nombre Completo</label>
@@ -144,7 +143,7 @@
                     </div>
                 </div>
 
-                <!-- AGENDA DE DEUDAS (AMISTADES) -->
+                <!-- Agenda de Deudas -->
                 <div class="bg-slate-900 text-white p-4 rounded-3xl shadow-md border border-slate-800 space-y-2">
                     <div class="flex justify-between items-center px-1">
                         <div class="flex items-center gap-2">
@@ -212,15 +211,15 @@
                     </div>
                 </div>
 
-                <!-- Gráfico Dona (con montos totales ordenados) -->
+                <!-- Gráfico Dona (LEYENDA ORDENADA A UN COSTADO) -->
                 <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/80">
                     <h3 class="text-xs font-bold text-slate-600 tracking-wider uppercase mb-3">GASTOS POR CATEGORÍA</h3>
-                    <div class="w-56 h-auto mx-auto relative flex flex-col items-center justify-center">
+                    <div class="w-full h-48 relative flex items-center justify-center">
                         <canvas id="categoryChart"></canvas>
                     </div>
                 </div>
 
-                <!-- Movimientos y Selector de Categorías con Montos Totales -->
+                <!-- Movimientos -->
                 <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/80 space-y-3">
                     <div class="flex justify-between items-center">
                         <h3 class="text-xs font-bold text-slate-600 tracking-wider uppercase">MOVIMIENTOS</h3>
@@ -702,7 +701,7 @@
                 return true;
             });
 
-            // AGENDA DE DEUDAS (AMISTADES)
+            // AGENDA DE DEUDAS
             let totalDebt = 0;
             const debtorsEl = document.getElementById('debtors-list');
             debtorsEl.innerHTML = '';
@@ -752,7 +751,7 @@
                 }
             });
 
-            // ACTUALIZAR OPCIONES DEL SELECTOR CON MONTOS TOTALES A SU COSTADO
+            // ACTUALIZAR SELECTOR CON MONTOS TOTALES
             const currentSelected = categoryFilter || 'all';
             let selectHTML = `<option value="all">🔍 Todas las Categorías (Total: S/ ${expense.toFixed(2)})</option>`;
             categories.forEach(cat => {
@@ -856,17 +855,15 @@
             return date1.getFullYear() === date2.getFullYear() && date1.getMonth() === date2.getMonth();
         }
 
-        // RENDERIZAR GRÁFICO CON MONTOS TOTALES ORDENADOS EN LA LEYENDA
+        // DIBUJAR EL GRÁFICO DE DONA CON LEYENDA A LA DERECHA (UN COSTADO)
         function renderChart(categoryTotals) {
             const ctx = document.getElementById('categoryChart').getContext('2d');
             
-            // Ordenar de mayor a menor monto
             const sortedCategories = Object.keys(categoryTotals).map(catName => ({
                 name: catName,
                 amount: categoryTotals[catName]
             })).sort((a, b) => b.amount - a.amount);
 
-            // Crear etiquetas con el monto incluido
             const labels = sortedCategories.map(item => `${item.name}: S/ ${item.amount.toFixed(2)}`);
             const data = sortedCategories.map(item => item.amount);
 
@@ -899,17 +896,19 @@
                     }]
                 },
                 options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
                     plugins: { 
                         legend: { 
-                            position: 'bottom', 
+                            position: 'right', 
                             labels: { 
                                 boxWidth: 10, 
-                                font: { size: 10, weight: 'bold' },
-                                padding: 8
+                                font: { size: 10, weight: '600' },
+                                padding: 6
                             } 
                         } 
                     },
-                    cutout: '68%'
+                    cutout: '65%'
                 }
             });
         }
