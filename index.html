@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis Gastos e Ingresos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .pulse-ring {
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 font-sans min-h-screen flex justify-center items-center p-0 sm:p-4">
+
+  <!-- Mobile Container -->
+  <div class="w-full max-w-md bg-white min-h-screen sm:min-h-[844px] sm:rounded-3xl shadow-2xl flex flex-col justify-between overflow-hidden relative">
+
+    <!-- LOGIN & REGISTER SECTION -->
+    <div id="authContainer" class="p-6 flex-1 flex flex-col justify-center">
+      <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg text-white text-2xl">
+          <i class="fa-solid fa-wallet"></i>
+        </div>
+        <h1 class="text-2xl font-bold text-slate-800" id="authTitle">Iniciar Sesión</h1>
+        <p class="text-xs text-slate-500 mt-1" id="authSubtitle">Gestiona tus finanzas personales de forma fácil</p>
+      </div>
+
+      <!-- Auth Form -->
+      <form id="authForm" onsubmit="handleAuth(event)" class="space-y-4">
+        <div id="nameFieldContainer" class="hidden">
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Nombre Completo</label>
+          <input type="text" id="authName" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Correo Electrónico</label>
+          <input type="email" id="authEmail" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+
+        <div id="passwordFieldContainer">
+          <div class="flex justify-between items-center mb-1">
+            <label class="block text-xs font-semibold text-slate-600">Contraseña</label>
+            <button type="button" onclick="showForgotPassword()" id="forgotPasswordBtn" class="text-xs text-emerald-600 font-medium hover:underline">¿Olvidaste tu contraseña?</button>
+          </div>
+          <div class="relative">
+            <input type="password" id="authPassword" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <button type="button" onclick="togglePasswordVisibility('authPassword', 'authPasswordIcon')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1">
+              <i class="fa-solid fa-eye" id="authPasswordIcon"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" id="authSubmitBtn" class="w-full bg-emerald-500 text-white font-semibold py-3.5 rounded-xl text-sm shadow-lg shadow-emerald-200 active:scale-95 transition">
+          Iniciar Sesión
+        </button>
+      </form>
+
+      <!-- Biometric Login Button -->
+      <button type="button" onclick="loginWithBiometrics()" id="biometricLoginBtn" class="mt-3 w-full bg-slate-800 text-white font-semibold py-3.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-md active:scale-95 transition">
+        <i class="fa-solid fa-fingerprint text-lg text-emerald-400"></i> Ingresar con Huella
+      </button>
+
+      <div class="mt-6 text-center">
+        <button onclick="toggleAuthMode()" id="toggleAuthBtn" class="text-xs text-slate-500 hover:text-emerald-600 font-medium">
+          ¿No tienes cuenta? <span class="text-emerald-600 font-semibold">Regístrate</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- FORGOT PASSWORD CONTAINER -->
+    <div id="forgotPasswordContainer" class="hidden p-6 flex-1 flex flex-col justify-center">
+      <div class="text-center mb-6">
+        <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl">
+          <i class="fa-solid fa-key"></i>
+        </div>
+        <h2 class="text-xl font-bold text-slate-800">Recuperar Contraseña</h2>
+        <p class="text-xs text-slate-500 mt-1">Ingresa tu correo registrado para restablecer tu contraseña</p>
+      </div>
+
+      <div id="recoveryStep1" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Correo Electrónico</label>
+          <input type="email" id="recoveryEmail" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+        <button onclick="verifyRecoveryEmail()" class="w-full bg-emerald-500 text-white font-semibold py-3.5 rounded-xl text-sm shadow-md active:scale-95 transition">
+          Verificar Correo
+        </button>
+      </div>
+
+      <div id="recoveryStep2" class="hidden space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Nueva Contraseña</label>
+          <div class="relative">
+            <input type="password" id="newPassword" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <button type="button" onclick="togglePasswordVisibility('newPassword', 'newPasswordIcon')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1">
+              <i class="fa-solid fa-eye" id="newPasswordIcon"></i>
+            </button>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Confirmar Nueva Contraseña</label>
+          <div class="relative">
+            <input type="password" id="confirmNewPassword" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <button type="button" onclick="togglePasswordVisibility('confirmNewPassword', 'confirmNewPasswordIcon')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1">
+              <i class="fa-solid fa-eye" id="confirmNewPasswordIcon"></i>
+            </button>
+          </div>
+        </div>
+        <button onclick="resetPassword()" class="w-full bg-emerald-500 text-white font-semibold py-3.5 rounded-xl text-sm shadow-md active:scale-95 transition">
+          Guardar Nueva Contraseña
+        </button>
+      </div>
+
+      <button onclick="hideForgotPassword()" class="mt-6 text-xs text-slate-500 text-center font-medium hover:text-slate-700">
+        <i class="fa-solid fa-arrow-left mr-1"></i> Volver al Inicio de Sesión
+      </button>
+    </div>
+
+    <!-- MAIN APP SECTION (Hidden until login) -->
+    <div id="appContainer" class="hidden flex-1 flex flex-col justify-between">
+      
+      <!-- Top Bar -->
+      <div class="bg-slate-900 text-white p-4 pt-6 rounded-b-3xl shadow-lg relative">
+        <div class="flex justify-between items-center mb-4">
+          <div class="flex items-center gap-2">
+            <div class="w-9 h-9 bg-emerald-500 rounded-full flex items-center justify-center font-bold text-slate-900 text-sm" id="userInitial">
+              U
+            </div>
+            <div>
+              <p class="text-xs text-slate-400">Hola,</p>
+              <h2 class="text-sm font-bold text-white leading-none" id="userNameDisplay">Usuario</h2>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="registerBiometrics()" title="Vincular Huella Digital" class="w-8 h-8 bg-slate-800 hover:bg-slate-700 rounded-full flex items-center justify-center text-emerald-400 text-xs">
+              <i class="fa-solid fa-fingerprint"></i>
+            </button>
+            <button onclick="toggleVoiceManual()" title="Manual de Comandos de Voz" class="w-8 h-8 bg-slate-800 hover:bg-slate-700 rounded-full flex items-center justify-center text-amber-400 text-xs">
+              <i class="fa-solid fa-book-open"></i>
+            </button>
+            <button onclick="logout()" title="Cerrar Sesión" class="w-8 h-8 bg-slate-800 hover:bg-slate-700 rounded-full flex items-center justify-center text-slate-300 text-xs">
+              <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Total Balance Card -->
+        <div class="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl p-4 shadow-md text-white">
+          <p class="text-xs opacity-80 uppercase tracking-wider font-semibold">Balance Total</p>
+          <h1 class="text-3xl font-extrabold mt-1" id="totalBalance">S/ 0.00</h1>
+          
+          <div class="flex justify-between mt-4 pt-3 border-t border-emerald-500/40 text-xs">
+            <div class="flex items-center gap-2">
+              <div class="w-6 h-6 bg-emerald-400/20 rounded-full flex items-center justify-center text-emerald-300">
+                <i class="fa-solid fa-arrow-down text-xs"></i>
+              </div>
+              <div>
+                <span class="block text-[10px] opacity-75">Ingresos</span>
+                <span class="font-bold text-emerald-200" id="totalIncome">S/ 0.00</span>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <div class="w-6 h-6 bg-rose-400/20 rounded-full flex items-center justify-center text-rose-300">
+                <i class="fa-solid fa-arrow-up text-xs"></i>
+              </div>
+              <div>
+                <span class="block text-[10px] opacity-75">Gastos</span>
+                <span class="font-bold text-rose-200" id="totalExpense">S/ 0.00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Views -->
+      <div class="flex-1 overflow-y-auto p-4 space-y-4">
+        
+        <!-- VOICE FLOATING CONTROLLER BANNER -->
+        <div class="bg-slate-900 text-white rounded-2xl p-3 flex items-center justify-between shadow-md">
+          <div class="flex items-center gap-3">
+            <button id="voiceMicBtn" onclick="toggleVoiceRecognition()" class="w-11 h-11 bg-rose-500 text-white rounded-full flex items-center justify-center text-lg shadow-lg active:scale-90 transition">
+              <i class="fa-solid fa-microphone"></i>
+            </button>
+            <div>
+              <p class="text-xs font-bold text-slate-100" id="voiceStatusText">Asistente por Voz</p>
+              <p class="text-[11px] text-slate-400" id="voiceSubtext">Toca el micro y habla</p>
+            </div>
+          </div>
+          <button onclick="toggleVoiceManual()" class="text-xs text-amber-400 bg-slate-800 px-2.5 py-1.5 rounded-lg border border-slate-700 hover:bg-slate-700">
+            <i class="fa-solid fa-circle-question mr-1"></i> Ejemplos
+          </button>
+        </div>
+
+        <!-- VOICE MANUAL MODAL -->
+        <div id="voiceManualModal" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-4 text-xs space-y-3">
+          <div class="flex justify-between items-center text-amber-900 font-bold border-b border-amber-200 pb-2">
+            <span><i class="fa-solid fa-book-open mr-1"></i> Manual de Comandos de Voz</span>
+            <button onclick="toggleVoiceManual()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-sm"></i></button>
+          </div>
+          <p class="text-slate-600">Presiona el micrófono rojo y pronuncia frases como estas:</p>
+          
+          <div class="space-y-2">
+            <div class="bg-white p-2.5 rounded-xl border border-amber-100 shadow-sm">
+              <span class="font-bold text-rose-600 block mb-0.5"> Registrar Gastos:</span>
+              <ul class="list-disc list-inside text-slate-600 space-y-1">
+                <li class="cursor-pointer hover:text-emerald-600" onclick="demoVoiceText('Gasté 25 soles en almuerzo')">"Gasté 25 soles en almuerzo"</li>
+                <li class="cursor-pointer hover:text-emerald-600" onclick="demoVoiceText('Gasto de 15 en taxi')">"Gasto de 15 en taxi"</li>
+                <li class="cursor-pointer hover:text-emerald-600" onclick="demoVoiceText('Compré repuesto de moto por 80')">"Compré repuesto por 80"</li>
+              </ul>
+            </div>
+
+            <div class="bg-white p-2.5 rounded-xl border border-amber-100 shadow-sm">
+              <span class="font-bold text-emerald-600 block mb-0.5"> Registrar Ingresos:</span>
+              <ul class="list-disc list-inside text-slate-600 space-y-1">
+                <li class="cursor-pointer hover:text-emerald-600" onclick="demoVoiceText('Cobré 150 soles de carrera')">"Cobré 150 soles de carrera"</li>
+                <li class="cursor-pointer hover:text-emerald-600" onclick="demoVoiceText('Ingreso de 50 soles por pedido')">"Ingreso de 50 soles por pedido"</li>
+                <li class="cursor-pointer hover:text-emerald-600" onclick="demoVoiceText('Gané 300 soles de sueldo')">"Gané 300 soles de sueldo"</li>
+              </ul>
+            </div>
+
+            <div class="bg-white p-2.5 rounded-xl border border-amber-100 shadow-sm">
+              <span class="font-bold text-slate-700 block mb-0.5"> Navegación:</span>
+              <p class="text-slate-600">"Ir a historial", "Ir a resumen", "Ir a agregar", "Cerrar sesión".</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW 1: RESUMEN (Chart) -->
+        <div id="viewSummary" class="space-y-4">
+          <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+            <h3 class="text-xs font-bold text-slate-700 mb-3 uppercase tracking-wider">Gastos por Categoría</h3>
+            <div class="relative h-48 w-full flex justify-center items-center">
+              <canvas id="categoryChart"></canvas>
+            </div>
+          </div>
+
+          <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+            <div class="flex justify-between items-center mb-3">
+              <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Últimos Movimientos</h3>
+              <button onclick="switchTab('history')" class="text-xs text-emerald-600 font-semibold">Ver todos</button>
+            </div>
+            <div id="recentTransactionsList" class="space-y-2">
+              <!-- Dynamic List -->
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW 2: AGREGAR -->
+        <div id="viewAdd" class="hidden bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+          <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Nuevo Registro</h3>
+          
+          <form id="transactionForm" onsubmit="addTransaction(event)" class="space-y-3">
+            <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl text-xs font-semibold">
+              <button type="button" id="typeExpenseBtn" onclick="setType('expense')" class="py-2.5 rounded-lg text-white bg-rose-500 shadow-sm transition">Gasto</button>
+              <button type="button" id="typeIncomeBtn" onclick="setType('income')" class="py-2.5 rounded-lg text-slate-600 transition">Ingreso</button>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1">Monto (S/)</label>
+              <input type="number" step="0.01" id="amount" required placeholder="0.00" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-lg font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1">Categoría</label>
+              <select id="category" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="Comida">Comida / Alimentos</option>
+                <option value="Transporte">Transporte / Combustible</option>
+                <option value="Moto">Mantenimiento Moto</option>
+                <option value="Servicios">Servicios / Luz / Agua</option>
+                <option value="Trabajo">Trabajo / Entregas</option>
+                <option value="Entretenimiento">Entretenimiento</option>
+                <option value="Otros">Otros</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1">Fecha</label>
+              <input type="date" id="date" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1">Nota / Descripción (Opcional)</label>
+              <input type="text" id="note" placeholder="Ej. Repuesto de moto, pedido..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            </div>
+
+            <button type="submit" class="w-full bg-emerald-500 text-white font-semibold py-3 rounded-xl text-xs shadow-md shadow-emerald-200 active:scale-95 transition mt-2">
+              Guardar Transacción
+            </button>
+          </form>
+        </div>
+
+        <!-- VIEW 3: HISTORIAL -->
+        <div id="viewHistory" class="hidden space-y-3">
+          <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex gap-2">
+            <select id="filterCategory" onchange="renderHistory()" class="bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 text-xs text-slate-700 focus:outline-none flex-1">
+              <option value="ALL">Todas las categorías</option>
+              <option value="Comida">Comida</option>
+              <option value="Transporte">Transporte</option>
+              <option value="Moto">Moto</option>
+              <option value="Servicios">Servicios</option>
+              <option value="Trabajo">Trabajo</option>
+              <option value="Entretenimiento">Entretenimiento</option>
+              <option value="Otros">Otros</option>
+            </select>
+          </div>
+
+          <div id="fullHistoryList" class="space-y-2">
+            <!-- Full History List -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Navigation Bar -->
+      <div class="bg-white border-t border-slate-100 p-2 flex justify-around items-center">
+        <button onclick="switchTab('summary')" id="tabSummary" class="flex flex-col items-center gap-1 text-emerald-600 py-1 px-4">
+          <i class="fa-solid fa-chart-pie text-base"></i>
+          <span class="text-[10px] font-semibold">Resumen</span>
+        </button>
+        <button onclick="switchTab('add')" id="tabAdd" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-600 py-1 px-4">
+          <div class="w-10 h-10 bg-emerald-500 text-white rounded-full flex items-center justify-center -mt-5 shadow-lg shadow-emerald-200">
+            <i class="fa-solid fa-plus text-lg"></i>
+          </div>
+          <span class="text-[10px] font-semibold">Agregar</span>
+        </button>
+        <button onclick="switchTab('history')" id="tabHistory" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-600 py-1 px-4">
+          <i class="fa-solid fa-list-ul text-base"></i>
+          <span class="text-[10px] font-semibold">Historial</span>
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // App State
+    let currentUser = null;
+    let transactions = [];
+    let currentType = 'expense';
+    let chartInstance = null;
+    let isRegisterMode = false;
+    let recognition = null;
+    let isListening = false;
+
+    // Toggle Password Visibility Function
+    function togglePasswordVisibility(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    }
+
+    // Toast Notification helper
+    function showToast(msg) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs px-4 py-2 rounded-full shadow-xl z-50 transition opacity-0';
+      toast.innerText = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.classList.remove('opacity-0'), 10);
+      setTimeout(() => {
+        toast.classList.add('opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      }, 2500);
+    }
+
+    function setDefaultDate() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('date').value = today;
+    }
+
+    // Voice Assistant Setup
+    function initVoiceRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) return;
+
+      recognition = new SpeechRecognition();
+      recognition.lang = 'es-PE';
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      recognition.onstart = () => {
+        isListening = true;
+        document.getElementById('voiceMicBtn').classList.add('pulse-ring', 'bg-emerald-500');
+        document.getElementById('voiceMicBtn').classList.remove('bg-rose-500');
+        document.getElementById('voiceStatusText').innerText = "Escuchando...";
+        document.getElementById('voiceSubtext').innerText = "Di tu gasto o ingreso...";
+      };
+
+      recognition.onend = () => {
+        isListening = false;
+        document.getElementById('voiceMicBtn').classList.remove('pulse-ring', 'bg-emerald-500');
+        document.getElementById('voiceMicBtn').classList.add('bg-rose-500');
+        document.getElementById('voiceStatusText').innerText = "Asistente por Voz";
+        document.getElementById('voiceSubtext').innerText = "Toca el micro y habla";
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        processVoiceCommand(transcript);
+      };
+
+      recognition.onerror = () => showToast("No se pudo reconocer la voz");
+    }
+
+    function toggleVoiceRecognition() {
+      if (!recognition) {
+        initVoiceRecognition();
+        if (!recognition) return showToast("Reconocimiento de voz no soportado en este navegador");
+      }
+      if (isListening) recognition.stop();
+      else recognition.start();
+    }
+
+    function speakText(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'es-PE';
+        utterance.rate = 1.0;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function processVoiceCommand(text) {
+      const lower = text.toLowerCase();
+      
+      // Nav Commands
+      if (lower.includes('ir a resumen') || lower.includes('resumen')) return switchTab('summary');
+      if (lower.includes('ir a historial') || lower.includes('historial')) return switchTab('history');
+      if (lower.includes('ir a agregar') || lower.includes('agregar')) return switchTab('add');
+      if (lower.includes('cerrar sesión') || lower.includes('salir')) return logout();
+
+      // Extract Numbers
+      const numberMatch = lower.match(/\d+(\.\d+)?/);
+      if (!numberMatch) {
+        showToast("No detecté ningún monto en la frase");
+        speakText("No entendí el monto. Intenta de nuevo.");
+        return;
+      }
+      const amount = parseFloat(numberMatch[0]);
+
+      // Detect Type
+      let type = 'expense';
+      if (lower.includes('ingreso') || lower.includes('cobré') || lower.includes('gané') || lower.includes('sueldo') || lower.includes('pago')) {
+        type = 'income';
+      }
+
+      // Detect Category
+      let category = 'Otros';
+      if (lower.includes('comida') || lower.includes('almuerzo') || lower.includes('cena') || lower.includes('desayuno') || lower.includes('pan')) category = 'Comida';
+      else if (lower.includes('taxi') || lower.includes('bus') || lower.includes('pasaje') || lower.includes('gasolina') || lower.includes('transporte')) category = 'Transporte';
+      else if (lower.includes('moto') || lower.includes('repuesto') || lower.includes('taller') || lower.includes('aceite')) category = 'Moto';
+      else if (lower.includes('luz') || lower.includes('agua') || lower.includes('internet') || lower.includes('servicio')) category = 'Servicios';
+      else if (lower.includes('carrera') || lower.includes('pedido') || lower.includes('trabajo') || lower.includes('entrega')) category = 'Trabajo';
+
+      // Save Transaction
+      const today = new Date().toISOString().split('T')[0];
+      const newTx = {
+        id: Date.now(),
+        type,
+        amount,
+        category,
+        date: today,
+        note: `Voz: "${text}"`
+      };
+
+      transactions.unshift(newTx);
+      saveTransactions();
+      renderApp();
+
+      const responseMsg = `Registrado ${type === 'expense' ? 'gasto' : 'ingreso'} de ${amount} soles en ${category}`;
+      showToast(responseMsg);
+      speakText(responseMsg);
+    }
+
+    function toggleVoiceManual() {
+      document.getElementById('voiceManualModal').classList.toggle('hidden');
+    }
+
+    function demoVoiceText(text) {
+      processVoiceCommand(text);
+      toggleVoiceManual();
+    }
+
+    // Auth Functions
+    function toggleAuthMode() {
+      isRegisterMode = !isRegisterMode;
+      document.getElementById('nameFieldContainer').classList.toggle('hidden', !isRegisterMode);
+      document.getElementById('forgotPasswordBtn').classList.toggle('hidden', isRegisterMode);
+      document.getElementById('authTitle').innerText = isRegisterMode ? "Crear Cuenta" : "Iniciar Sesión";
+      document.getElementById('authSubtitle').innerText = isRegisterMode ? "Regístrate para guardar tus finanzas" : "Gestiona tus finanzas personales de forma fácil";
+      document.getElementById('authSubmitBtn').innerText = isRegisterMode ? "Registrarse" : "Iniciar Sesión";
+      document.getElementById('toggleAuthBtn').innerHTML = isRegisterMode ? 
+        '¿Ya tienes cuenta? <span class="text-emerald-600 font-semibold">Inicia Sesión</span>' : 
+        '¿No tienes cuenta? <span class="text-emerald-600 font-semibold">Regístrate</span>';
+    }
+
+    function handleAuth(e) {
+      e.preventDefault();
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value;
+      let users = JSON.parse(localStorage.getItem('android_finances_users') || '[]');
+
+      if (isRegisterMode) {
+        const name = document.getElementById('authName').value.trim();
+        if (users.find(u => u.email === email)) return showToast("El correo ya está registrado");
+        const newUser = { id: Date.now().toString(), name, email, password };
+        users.push(newUser);
+        localStorage.setItem('android_finances_users', JSON.stringify(users));
+        loginUser(newUser);
+      } else {
+        const user = users.find(u => u.email === email && u.password === password);
+        if (!user) return showToast("Correo o contraseña incorrectos");
+        loginUser(user);
+      }
+    }
+
+    function loginUser(user) {
+      currentUser = user;
+      localStorage.setItem('android_finances_session', JSON.stringify(user));
+      document.getElementById('authContainer').classList.add('hidden');
+      document.getElementById('appContainer').classList.remove('hidden');
+      document.getElementById('userNameDisplay').innerText = user.name || user.email.split('@')[0];
+      document.getElementById('userInitial').innerText = (user.name || user.email)[0].toUpperCase();
+      loadTransactions();
+      setDefaultDate();
+      renderApp();
+      showToast(`¡Bienvenido/a, ${user.name || 'Usuario'}!`);
+    }
+
+    function logout() {
+      currentUser = null;
+      localStorage.removeItem('android_finances_session');
+      document.getElementById('appContainer').classList.add('hidden');
+      document.getElementById('authContainer').classList.remove('hidden');
+    }
+
+    // Biometrics Integration
+    async function registerBiometrics() {
+      if (!window.PublicKeyCredential) return showToast("Tu dispositivo no soporta biometría");
+      try {
+        const challenge = new Uint8Array(32);
+        window.crypto.getRandomValues(challenge);
+        const credential = await navigator.credentials.create({
+          publicKey: {
+            challenge,
+            rp: { name: "Finanzas App" },
+            user: {
+              id: Uint8Array.from(currentUser.id, c => c.charCodeAt(0)),
+              name: currentUser.email,
+              displayName: currentUser.name || currentUser.email
+            },
+            pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+            timeout: 60000
+          }
+        });
+        let biometrics = JSON.parse(localStorage.getItem('android_finances_bio') || '{}');
+        biometrics[currentUser.id] = credential.id;
+        localStorage.setItem('android_finances_bio', JSON.stringify(biometrics));
+        showToast("¡Huella digital vinculada correctamente!");
+      } catch (err) {
+        showToast("Error o biometría no disponible");
+      }
+    }
+
+    async function loginWithBiometrics() {
+      if (!window.PublicKeyCredential) return showToast("Tu navegador/dispositivo no soporta biometría");
+      try {
+        const challenge = new Uint8Array(32);
+        window.crypto.getRandomValues(challenge);
+        const assertion = await navigator.credentials.get({
+          publicKey: { challenge, timeout: 60000 }
+        });
+        let biometrics = JSON.parse(localStorage.getItem('android_finances_bio') || '{}');
+        let users = JSON.parse(localStorage.getItem('android_finances_users') || '[]');
+        let userId = Object.keys(biometrics).find(id => biometrics[id] === assertion.id);
+        let user = users.find(u => u.id === userId);
+        if (user) loginUser(user);
+        else showToast("Huella no reconocida");
+      } catch (err) {
+        showToast("Verificación de huella cancelada");
+      }
+    }
+
+    // Forgot Password Flow
+    function showForgotPassword() {
+      document.getElementById('authContainer').classList.add('hidden');
+      document.getElementById('forgotPasswordContainer').classList.remove('hidden');
+      document.getElementById('recoveryStep1').classList.remove('hidden');
+      document.getElementById('recoveryStep2').classList.add('hidden');
+    }
+
+    function hideForgotPassword() {
+      document.getElementById('forgotPasswordContainer').classList.add('hidden');
+      document.getElementById('authContainer').classList.remove('hidden');
+    }
+
+    function verifyRecoveryEmail() {
+      const email = document.getElementById('recoveryEmail').value.trim();
+      let users = JSON.parse(localStorage.getItem('android_finances_users') || '[]');
+      const user = users.find(u => u.email === email);
+      if (!user) return showToast("El correo no está registrado");
+      document.getElementById('recoveryStep1').classList.add('hidden');
+      document.getElementById('recoveryStep2').classList.remove('hidden');
+    }
+
+    function resetPassword() {
+      const email = document.getElementById('recoveryEmail').value.trim();
+      const p1 = document.getElementById('newPassword').value;
+      const p2 = document.getElementById('confirmNewPassword').value;
+      if (!p1 || p1 !== p2) return showToast("Las contraseñas no coinciden");
+      let users = JSON.parse(localStorage.getItem('android_finances_users') || '[]');
+      let user = users.find(u => u.email === email);
+      if (user) {
+        user.password = p1;
+        localStorage.setItem('android_finances_users', JSON.stringify(users));
+        showToast("¡Contraseña actualizada!");
+        hideForgotPassword();
+      }
+    }
+
+    // Data Management
+    function loadTransactions() {
+      if (!currentUser) return;
+      const data = localStorage.getItem(`android_finances_data_${currentUser.id}`);
+      transactions = data ? JSON.parse(data) : [];
+    }
+
+    function saveTransactions() {
+      if (!currentUser) return;
+      localStorage.setItem(`android_finances_data_${currentUser.id}`, JSON.stringify(transactions));
+    }
+
+    function addTransaction(e) {
+      e.preventDefault();
+      const amount = parseFloat(document.getElementById('amount').value);
+      const category = document.getElementById('category').value;
+      const date = document.getElementById('date').value;
+      const note = document.getElementById('note').value;
+
+      const newTx = { id: Date.now(), type: currentType, amount, category, date, note };
+      transactions.unshift(newTx);
+      saveTransactions();
+
+      document.getElementById('amount').value = '';
+      document.getElementById('note').value = '';
+      setDefaultDate();
+      renderApp();
+      switchTab('summary');
+      showToast("Transacción agregada");
+    }
+
+    function deleteTransaction(id) {
+      transactions = transactions.filter(t => t.id !== id);
+      saveTransactions();
+      renderApp();
+      showToast("Transacción eliminada");
+    }
+
+    function setType(type) {
+      currentType = type;
+      const btnExpense = document.getElementById('typeExpenseBtn');
+      const btnIncome = document.getElementById('typeIncomeBtn');
+      if (type === 'expense') {
+        btnExpense.className = 'py-2.5 rounded-lg text-white bg-rose-500 shadow-sm transition';
+        btnIncome.className = 'py-2.5 rounded-lg text-slate-600 transition';
+      } else {
+        btnIncome.className = 'py-2.5 rounded-lg text-white bg-emerald-500 shadow-sm transition';
+        btnExpense.className = 'py-2.5 rounded-lg text-slate-600 transition';
+      }
+    }
+
+    function switchTab(tab) {
+      document.getElementById('viewSummary').classList.add('hidden');
+      document.getElementById('viewAdd').classList.add('hidden');
+      document.getElementById('viewHistory').classList.add('hidden');
+
+      document.getElementById('tabSummary').className = 'flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-600 py-1 px-4';
+      document.getElementById('tabHistory').className = 'flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-600 py-1 px-4';
+
+      if (tab === 'summary') {
+        document.getElementById('viewSummary').classList.remove('hidden');
+        document.getElementById('tabSummary').className = 'flex flex-col items-center gap-1 text-emerald-600 py-1 px-4';
+      } else if (tab === 'add') {
+        document.getElementById('viewAdd').classList.remove('hidden');
+        setDefaultDate();
+      } else if (tab === 'history') {
+        document.getElementById('viewHistory').classList.remove('hidden');
+        document.getElementById('tabHistory').className = 'flex flex-col items-center gap-1 text-emerald-600 py-1 px-4';
+        renderHistory();
+      }
+    }
+
+    function renderApp() {
+      let income = 0, expense = 0;
+      transactions.forEach(t => t.type === 'income' ? income += t.amount : expense += t.amount);
+      
+      document.getElementById('totalBalance').innerText = `S/ ${(income - expense).toFixed(2)}`;
+      document.getElementById('totalIncome').innerText = `S/ ${income.toFixed(2)}`;
+      document.getElementById('totalExpense').innerText = `S/ ${expense.toFixed(2)}`;
+
+      renderChart();
+      renderRecent();
+    }
+
+    function renderChart() {
+      const ctx = document.getElementById('categoryChart').getContext('2d');
+      const expenses = transactions.filter(t => t.type === 'expense');
+      const categoryTotals = {};
+
+      expenses.forEach(t => categoryTotals[t.category] = (categoryTotals[t.category] || 0) + t.amount);
+      
+      const labels = Object.keys(categoryTotals);
+      const data = Object.values(categoryTotals);
+
+      if (chartInstance) chartInstance.destroy();
+
+      chartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels.length ? labels : ['Sin Gastos'],
+          datasets: [{
+            data: data.length ? data : [1],
+            backgroundColor: data.length ? ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#64748b'] : ['#e2e8f0']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } }
+        }
+      });
+    }
+
+    function renderRecent() {
+      const list = document.getElementById('recentTransactionsList');
+      list.innerHTML = '';
+      transactions.slice(0, 4).forEach(t => list.appendChild(createTxElement(t)));
+    }
+
+    function renderHistory() {
+      const list = document.getElementById('fullHistoryList');
+      const category = document.getElementById('filterCategory').value;
+      list.innerHTML = '';
+      
+      const filtered = category === 'ALL' ? transactions : transactions.filter(t => t.category === category);
+      filtered.forEach(t => list.appendChild(createTxElement(t)));
+    }
+
+    function createTxElement(t) {
+      const div = document.createElement('div');
+      div.className = 'flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100';
+      const isInc = t.type === 'income';
+      div.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs ${isInc ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}">
+            <i class="fa-solid ${isInc ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
+          </div>
+          <div>
+            <p class="text-xs font-bold text-slate-800">${t.category}</p>
+            <p class="text-[10px] text-slate-400">${t.date} ${t.note ? '• ' + t.note : ''}</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-extrabold ${isInc ? 'text-emerald-600' : 'text-rose-600'}">
+            ${isInc ? '+' : '-'} S/ ${t.amount.toFixed(2)}
+          </span>
+          <button onclick="deleteTransaction(${t.id})" class="text-slate-300 hover:text-rose-500 text-xs">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      `;
+      return div;
+    }
+
+    // Auto Session Load
+    window.onload = () => {
+      initVoiceRecognition();
+      const savedSession = localStorage.getItem('android_finances_session');
+      if (savedSession) {
+        loginUser(JSON.parse(savedSession));
+      }
+    };
+  </script>
+</body>
+</html>
