@@ -19,10 +19,10 @@
 
         <!-- Screen Autenticación -->
         <div id="auth-screen" class="flex-1 flex flex-col justify-center p-6 bg-slate-900 text-white z-10 relative">
-            <div class="text-center mb-8">
-                <div id="music-btn" onclick="toggleIntroMusic()" class="bg-emerald-500 text-white w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/30 cursor-pointer transition transform hover:scale-105 active:scale-95 relative" title="Toca para reproducir / pausar música">
-                    <i id="music-icon" class="fa-solid fa-play text-3xl ml-1"></i>
-                    <span id="music-badge" class="absolute -top-1 -right-1 bg-rose-500 text-[9px] font-bold px-2 py-0.5 rounded-full border-2 border-slate-900 hidden">PLAYING</span>
+            <div class="text-center mb-6">
+                <!-- Imagen Tipo Admin (mismo tamaño w-20 h-20) -->
+                <div class="w-20 h-20 rounded-3xl mx-auto mb-4 overflow-hidden border-2 border-emerald-500/50 shadow-lg shadow-emerald-500/20 bg-slate-800 flex items-center justify-center">
+                    <img id="admin-avatar" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Admin" class="w-full h-full object-cover">
                 </div>
                 <h1 id="auth-title" class="text-2xl font-bold">Iniciar Sesión</h1>
                 <p class="text-xs text-slate-400 mt-1">Gestiona tus finanzas personales de forma fácil</p>
@@ -53,8 +53,17 @@
                 <button type="submit" id="auth-btn" class="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/20 text-sm active:opacity-80">Iniciar Sesión</button>
             </form>
 
-            <div class="text-center mt-6">
-                <button type="button" id="auth-switch" class="text-xs text-emerald-400 hover:underline py-2">¿No tienes cuenta? Regístrate</button>
+            <div class="text-center mt-4 space-y-4">
+                <button type="button" id="auth-switch" class="text-xs text-emerald-400 hover:underline py-1 block mx-auto">¿No tienes cuenta? Regístrate</button>
+
+                <!-- Botón de Música Abajo y Centrado -->
+                <div class="pt-2 flex justify-center">
+                    <button type="button" id="music-btn" onclick="toggleIntroMusic()" class="bg-slate-800 border border-slate-700 text-emerald-400 px-4 py-2 rounded-2xl flex items-center space-x-2 text-xs font-semibold hover:bg-slate-700 transition active:scale-95 shadow-md relative">
+                        <i id="music-icon" class="fa-solid fa-play text-sm"></i>
+                        <span>Intro Música</span>
+                        <span id="music-badge" class="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full hidden">PLAYING</span>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -356,13 +365,13 @@
             if (isAudioPlaying) {
                 audio.pause();
                 isAudioPlaying = false;
-                if (musicIcon) musicIcon.className = "fa-solid fa-play text-3xl ml-1";
+                if (musicIcon) musicIcon.className = "fa-solid fa-play text-sm";
                 if (musicBadge) musicBadge.classList.add('hidden');
                 if (headerIcon) headerIcon.className = "fa-solid fa-music text-xs opacity-70";
             } else {
                 audio.play().then(() => {
                     isAudioPlaying = true;
-                    if (musicIcon) musicIcon.className = "fa-solid fa-pause text-3xl";
+                    if (musicIcon) musicIcon.className = "fa-solid fa-pause text-sm";
                     if (musicBadge) musicBadge.classList.remove('hidden');
                     if (headerIcon) headerIcon.className = "fa-solid fa-volume-high text-xs text-amber-300 animate-pulse";
                 }).catch(e => console.log("Audio no iniciado por interacción de navegador"));
@@ -377,7 +386,7 @@
                     const musicIcon = document.getElementById('music-icon');
                     const musicBadge = document.getElementById('music-badge');
                     const headerIcon = document.getElementById('header-music-icon');
-                    if (musicIcon) musicIcon.className = "fa-solid fa-play text-3xl ml-1";
+                    if (musicIcon) musicIcon.className = "fa-solid fa-play text-sm";
                     if (musicBadge) musicBadge.classList.add('hidden');
                     if (headerIcon) headerIcon.className = "fa-solid fa-music text-xs opacity-70";
                 });
@@ -576,88 +585,13 @@
                 transactions.push({ id: docRef.id, ...newTx });
                 renderUI();
                 switchTab('dashboard');
-                alert(`¡Registrado con éxito!\n${txType === 'income' ? 'Ingreso' : 'Gasto'}: S/ ${amount.toFixed(2)} (${description})`);
-            } catch (err) {
-                alert("Error al guardar en la nube.");
-            }
-        }
-
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                document.getElementById('auth-screen').classList.add('hidden');
-                document.getElementById('app-screen').classList.remove('hidden');
-                document.getElementById('user-display-name').textContent = user.displayName || user.email;
-                await loadUserData();
-            } else {
-                currentUser = null;
-                document.getElementById('app-screen').classList.add('hidden');
-                document.getElementById('auth-screen').classList.remove('hidden');
-            }
-        });
-
-        let isRegister = false;
-        document.getElementById('auth-switch').addEventListener('click', (e) => {
-            e.preventDefault();
-            isRegister = !isRegister;
-            document.getElementById('name-field').classList.toggle('hidden', !isRegister);
-            document.getElementById('auth-title').textContent = isRegister ? 'Crear Cuenta' : 'Iniciar Sesión';
-            document.getElementById('auth-btn').textContent = isRegister ? 'Registrarse' : 'Iniciar Sesión';
-            document.getElementById('auth-switch').textContent = isRegister ? '¿Ya tienes cuenta? Inicia Sesión' : '¿No tienes cuenta? Regístrate';
-        });
-
-        document.getElementById('auth-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('auth-email').value.trim();
-            const password = document.getElementById('auth-password').value.trim();
-            const name = document.getElementById('auth-name').value.trim();
-            const errDiv = document.getElementById('auth-error');
-            const successDiv = document.getElementById('auth-success');
-            errDiv.classList.add('hidden');
-            successDiv.classList.add('hidden');
-
-            try {
-                if (isRegister) {
-                    const res = await createUserWithEmailAndPassword(auth, email, password);
-                    await updateProfile(res.user, { displayName: name });
-                } else {
-                    await signInWithEmailAndPassword(auth, email, password);
-                }
-            } catch (err) {
-                errDiv.textContent = "Correo o contraseña incorrectos.";
-                errDiv.classList.remove('hidden');
-            }
-        });
-
-        window.logout = () => signOut(auth);
-
-        async function loadUserData() {
-            const querySnapTx = await getDocs(collection(db, `users/${currentUser.uid}/transactions`));
+                alert(`¡Registrado con éxito!\n${txType === 'income' ? 'Ingreso' : 'Gasto'}: S/ ${amount.toFixed(2)} (${description})`); } catch (err) { alert("Error al guardar en la nube."); } }  onAuthStateChanged(auth, async (user) => { if (user) { currentUser = user; document.getElementById('auth-screen').classList.add('hidden'); document.getElementById('app-screen').classList.remove('hidden'); document.getElementById('user-display-name').textContent = user.displayName \vert{}\vert{} user.email; await loadUserData(); } else { currentUser = null; document.getElementById('app-screen').classList.add('hidden'); document.getElementById('auth-screen').classList.remove('hidden'); } });  let isRegister = false; document.getElementById('auth-switch').addEventListener('click', (e) => { e.preventDefault(); isRegister = !isRegister; document.getElementById('name-field').classList.toggle('hidden', !isRegister); document.getElementById('auth-title').textContent = isRegister ? 'Crear Cuenta' : 'Iniciar Sesión'; document.getElementById('auth-btn').textContent = isRegister ? 'Registrarse' : 'Iniciar Sesión'; document.getElementById('auth-switch').textContent = isRegister ? '¿Ya tienes cuenta? Inicia Sesión' : '¿No tienes cuenta? Regístrate'; });  document.getElementById('auth-form').addEventListener('submit', async (e) => { e.preventDefault(); const email = document.getElementById('auth-email').value.trim(); const password = document.getElementById('auth-password').value.trim(); const name = document.getElementById('auth-name').value.trim(); const errDiv = document.getElementById('auth-error'); const successDiv = document.getElementById('auth-success'); errDiv.classList.add('hidden'); successDiv.classList.add('hidden');  try { if (isRegister) { const res = await createUserWithEmailAndPassword(auth, email, password); await updateProfile(res.user, { displayName: name }); } else { await signInWithEmailAndPassword(auth, email, password); } } catch (err) { errDiv.textContent = "Correo o contraseña incorrectos."; errDiv.classList.remove('hidden'); } });  window.logout = () => signOut(auth);  async function loadUserData() { const querySnapTx = await getDocs(collection(db, `users/${currentUser.uid}/transactions`));
             transactions = [];
             querySnapTx.forEach((doc) => {
                 transactions.push({ id: doc.id, ...doc.data() });
             });
 
-            const catDoc = await getDoc(doc(db, `users_config/${currentUser.uid}`));
-            if (catDoc.exists()) {
-                const data = catDoc.data();
-                if (data.categories && data.categories.length > 0) {
-                    categories = data.categories.map(c => typeof c === 'string' ? { name: c, color: '#3B82F6' } : c);
-                }
-                if (data.appName) {
-                    document.getElementById('app-brand-name').textContent = data.appName;
-                    document.getElementById('setting-app-name').value = data.appName;
-                }
-            }
-
-            renderCategories();
-            renderUI();
-        }
-
-        async function saveSettingsToCloud() {
-            const appName = document.getElementById('setting-app-name').value.trim() || "Mis Finanzas";
-            try {
-                await setDoc(doc(db, `users_config/${currentUser.uid}`), { appName, categories }, { merge: true });
+            const catDoc = await getDoc(doc(db, `users_config/${currentUser.uid}`)); if (catDoc.exists()) { const data = catDoc.data(); if (data.categories && data.categories.length > 0) { categories = data.categories.map(c => typeof c === 'string' ? { name: c, color: '#3B82F6' } : c); } if (data.appName) { document.getElementById('app-brand-name').textContent = data.appName; document.getElementById('setting-app-name').value = data.appName; } }  renderCategories(); renderUI(); }  async function saveSettingsToCloud() { const appName = document.getElementById('setting-app-name').value.trim() \vert{}\vert{} "Mis Finanzas"; try { await setDoc(doc(db, `users_config/${currentUser.uid}`), { appName, categories }, { merge: true });
                 document.getElementById('app-brand-name').textContent = appName;
             } catch (err) {
                 console.error(err);
@@ -703,65 +637,7 @@
         };
 
         window.updateCategoryColor = (index) => {
-            const input = document.getElementById(`cat-color-${index}`);
-            categories[index].color = input.value;
-            renderUI();
-            saveSettingsToCloud();
-        };
-
-        window.addCategory = async () => {
-            const nameInput = document.getElementById('new-category-name');
-            const colorInput = document.getElementById('new-category-color');
-            const name = nameInput.value.trim();
-            const color = colorInput.value;
-            
-            if (!name || categories.some(c => c.name.toLowerCase() === name.toLowerCase())) return;
-            
-            categories.push({ name, color });
-            nameInput.value = '';
-            colorInput.value = '#10B981';
-            renderCategories();
-            renderCategoriesManagement();
-            await saveSettingsToCloud();
-            alert("¡Categoría creada!");
-        };
-
-        window.deleteCategory = async (index) => {
-            if (categories.length <= 1) {
-                alert("Debes tener al menos una categoría.");
-                return;
-            }
-            categories.splice(index, 1);
-            renderCategories();
-            renderCategoriesManagement();
-            await saveSettingsToCloud();
-        };
-
-        document.getElementById('transaction-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const editId = document.getElementById('tx-edit-id').value;
-            const description = document.getElementById('tx-description').value.trim() || "Sin descripción";
-            const amount = parseFloat(document.getElementById('tx-amount').value);
-            const category = document.getElementById('tx-category').value;
-            const dateVal = document.getElementById('tx-date').value;
-
-            const txData = {
-                description,
-                amount,
-                type: currentType,
-                category,
-                date: new Date(dateVal + 'T12:00:00').toISOString()
-            };
-
-            try {
-                if (editId) {
-                    await updateDoc(doc(db, `users/${currentUser.uid}/transactions/${editId}`), txData);
-                    const index = transactions.findIndex(t => t.id === editId);
-                    if (index !== -1) transactions[index] = { id: editId, ...txData };
-                    alert("¡Transacción modificada con éxito!");
-                    cancelEdit();
-                } else {
-                    const docRef = await addDoc(collection(db, `users/${currentUser.uid}/transactions`), txData);
+            const input = document.getElementById(`cat-color-${index}`); categories[index].color = input.value; renderUI(); saveSettingsToCloud(); };  window.addCategory = async () => { const nameInput = document.getElementById('new-category-name'); const colorInput = document.getElementById('new-category-color'); const name = nameInput.value.trim(); const color = colorInput.value;  if (!name \vert{}\vert{} categories.some(c => c.name.toLowerCase() === name.toLowerCase())) return;  categories.push({ name, color }); nameInput.value = ''; colorInput.value = '#10B981'; renderCategories(); renderCategoriesManagement(); await saveSettingsToCloud(); alert("¡Categoría creada!"); };  window.deleteCategory = async (index) => { if (categories.length <= 1) { alert("Debes tener al menos una categoría."); return; } categories.splice(index, 1); renderCategories(); renderCategoriesManagement(); await saveSettingsToCloud(); };  document.getElementById('transaction-form').addEventListener('submit', async (e) => { e.preventDefault(); const editId = document.getElementById('tx-edit-id').value; const description = document.getElementById('tx-description').value.trim() \vert{}\vert{} "Sin descripción"; const amount = parseFloat(document.getElementById('tx-amount').value); const category = document.getElementById('tx-category').value; const dateVal = document.getElementById('tx-date').value;  const txData = { description, amount, type: currentType, category, date: new Date(dateVal + 'T12:00:00').toISOString() };  try { if (editId) { await updateDoc(doc(db, `users/${currentUser.uid}/transactions/${editId}`), txData); const index = transactions.findIndex(t => t.id === editId); if (index !== -1) transactions[index] = { id: editId, ...txData }; alert("¡Transacción modificada con éxito!"); cancelEdit(); } else { const docRef = await addDoc(collection(db, `users/${currentUser.uid}/transactions`), txData);
                     transactions.push({ id: docRef.id, ...txData });
                     document.getElementById('transaction-form').reset();
                     document.getElementById('tx-date').valueAsDate = new Date();
@@ -871,7 +747,6 @@
                 }
             });
 
-            // Calcular beneficio o pérdida neta por mes
             Object.keys(monthlyDataMap).forEach(m => {
                 monthlyDataMap[m].net = monthlyDataMap[m].income - monthlyDataMap[m].expense;
             });
@@ -925,143 +800,4 @@
             const balance = income - expense;
 
             if (isBalanceVisible) {
-                document.getElementById('total-balance').textContent = `S/ ${balance.toFixed(2)}`;
-                document.getElementById('total-income').textContent = `S/ ${income.toFixed(2)}`;
-                document.getElementById('total-expense').textContent = `S/ ${expense.toFixed(2)}`;
-            } else {
-                document.getElementById('total-balance').textContent = `S/ *****`;
-                document.getElementById('total-income').textContent = `S/ *****`;
-                document.getElementById('total-expense').textContent = `S/ *****`;
-            }
-
-            renderChart(categoryTotals);
-            renderFinancialBarChart(monthlyDataMap);
-        };
-
-        function renderChart(categoryTotals) {
-            const ctx = document.getElementById('categoryChart').getContext('2d');
-            const labels = Object.keys(categoryTotals);
-            const data = Object.values(categoryTotals);
-
-            const bgColors = labels.map(label => {
-                const found = categories.find(c => c.name === label);
-                return found ? found.color : '#3B82F6';
-            });
-
-            if (chartInstance) chartInstance.destroy();
-
-            if (labels.length === 0) {
-                chartInstance = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Sin Gastos'],
-                        datasets: [{ data: [1], backgroundColor: ['#E2E8F0'] }]
-                    },
-                    options: { plugins: { legend: { display: false } }, cutout: '75%' }
-                });
-                return;
-            }
-
-            chartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: bgColors
-                    }]
-                },
-                options: {
-                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
-                    cutout: '70%'
-                }
-            });
-        }
-
-        function renderFinancialBarChart(monthlyDataMap) {
-            const ctx = document.getElementById('financialBarChart').getContext('2d');
-            
-            const labels = Object.keys(monthlyDataMap);
-            const incomeData = labels.map(l => monthlyDataMap[l].income);
-            const expenseData = labels.map(l => monthlyDataMap[l].expense);
-            const netData = labels.map(l => monthlyDataMap[l].net);
-            
-            // Lógica ajustada: solo muestra beneficio noto si > 0, y pérdida neta solo cuando exista saldo negativo
-            const benefitData = netData.map(v => v > 0 ? v : 0);
-            const lossData = netData.map(v => v < 0 ? Math.abs(v) : 0);
-
-            if (barChartInstance) barChartInstance.destroy();
-
-            if (labels.length === 0) {
-                barChartInstance = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['may', 'jun', 'jul', 'ago', 'sept', 'oct'],
-                        datasets: [{ data: [0,0,0,0,0,0], backgroundColor: '#10B981' }]
-                    },
-                    options: { plugins: { legend: { display: false } } }
-                });
-                return;
-            }
-
-            barChartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        { label: 'Ingresos', data: incomeData, backgroundColor: '#10B981', borderRadius: 4 },
-                        { label: 'Gastos', data: expenseData, backgroundColor: '#F59E0B', borderRadius: 4 },
-                        { label: 'Beneficio', data: benefitData, backgroundColor: '#3B82F6', borderRadius: 4 },
-                        { label: 'Pérdida Neta', data: lossData, backgroundColor: '#FB7185', borderRadius: 4 }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#94A3B8', font: { size: 10 } }
-                        },
-                        y: {
-                            grid: { color: '#334155' },
-                            ticks: { color: '#94A3B8', font: { size: 9 } }
-                        }
-                    }
-                }
-            });
-        }
-
-        window.exportJSON = () => {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ transactions, categories }));
-            const dlAnchorElem = document.createElement('a');
-            dlAnchorElem.setAttribute("href", dataStr);
-            dlAnchorElem.setAttribute("download", "misfinanzas_respaldo.json");
-            dlAnchorElem.click();
-        };
-
-        window.importJSON = async (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (data.transactions) {
-                        for (let t of data.transactions) {
-                            delete t.id;
-                            await addDoc(collection(db, `users/${currentUser.uid}/transactions`), t);
-                        }
-                    }
-                    alert("¡Datos importados con éxito!");
-                    loadUserData();
-                } catch (err) {
-                    alert("Archivo no válido");
-                }
-            };
-            reader.readAsText(file);
-        };
-    </script>
-</body>
-</html>
+                document.getElementById('total-balance').textContent = `S/ ${balance.toFixed(2)}`; document.getElementById('total-income').textContent = `S/ ${income.
