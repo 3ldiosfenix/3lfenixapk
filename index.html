@@ -141,7 +141,7 @@
                     <p>• <i>"Ingreso de 50 soles por pedido"</i></p>
                 </div>
 
-                <!-- Gráfico con colores personalizados -->
+                <!-- Gráfico de Gastos por Categoría -->
                 <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/80">
                     <h3 class="text-xs font-bold text-slate-600 tracking-wider uppercase mb-3">GASTOS POR CATEGORÍA</h3>
                     <div class="w-48 h-48 mx-auto relative flex items-center justify-center">
@@ -220,12 +220,12 @@
                             <label class="block text-xs font-semibold text-slate-500 mb-1">Añadir Nueva Categoría con Color</label>
                             <div class="flex items-center gap-2">
                                 <input type="text" id="new-category-name" placeholder="Ej. Combustible" class="flex-1 px-3 py-2 border text-sm rounded-xl outline-none focus:ring-1 focus:ring-emerald-500">
-                                <input type="color" id="new-category-color" value="#10B981" title="Elige un color para esta categoría" class="w-9 h-9 p-0.5 border rounded-xl cursor-pointer bg-slate-50">
+                                <input type="color" id="new-category-color" value="#10B981" title="Elige un color" class="w-9 h-9 p-0.5 border rounded-xl cursor-pointer bg-slate-50">
                                 <button type="button" onclick="addCategory()" class="bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs font-bold hover:bg-slate-700">Crear</button>
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-500 mb-1">Listado (Define tu propio color y nombre)</label>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Listado de Categorías</label>
                             <div id="categories-management-list" class="space-y-2 max-h-48 overflow-y-auto border p-2 rounded-xl bg-slate-50"></div>
                         </div>
                         <button type="button" onclick="saveSettings()" class="w-full bg-emerald-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-emerald-700 transition">Cerrar y Guardar</button>
@@ -279,7 +279,6 @@
         let currentType = 'expense';
         let transactions = [];
         
-        // Categorías iniciales con colores asignados explícitamente
         let categories = [
             { name: 'Comida / Alimentos', color: '#EF4444' },
             { name: 'Transporte', color: '#3B82F6' },
@@ -291,10 +290,26 @@
 
         document.getElementById('tx-date').valueAsDate = new Date();
 
+        // Función para determinar si un color HEX es claro u oscuro y contrastar el texto adecuadamente
+        function getContrastTextColor(hexColor) {
+            if (!hexColor) return '#FFFFFF';
+            let hex = hexColor.replace('#', '');
+            if (hex.length === 3) {
+                hex = hex.split('').map(char => char + char).join('');
+            }
+            const r = parseInt(hex.substring(0, 2), 16) || 0;
+            const g = parseInt(hex.substring(2, 4), 16) || 0;
+            const b = parseInt(hex.substring(4, 6), 16) || 0;
+            
+            // Fórmula Luma para brillo
+            const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+            return (yiq >= 150) ? '#1E293B' : '#FFFFFF'; // Si es claro usa gris oscuro, si es oscuro usa blanco
+        }
+
         window.playIntroMusic = () => {
             const audio = document.getElementById('intro-audio');
             audio.currentTime = 0;
-            audio.play().catch(e => console.log("Audio no iniciado por interacción previa"));
+            audio.play().catch(e => console.log("Audio bloqueado sin interacción inicial"));
         };
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -418,7 +433,6 @@
                 if (cleanCatName.length > 0) {
                     cleanCatName = cleanCatName.charAt(0).toUpperCase() + cleanCatName.slice(1).toLowerCase();
                     if (!categories.some(c => c.name.toLowerCase() === cleanCatName.toLowerCase())) {
-                        // Asigna un color azul base al crear por voz; el usuario lo puede cambiar luego
                         categories.push({ name: cleanCatName, color: '#3B82F6' });
                         renderCategories();
                         renderCategoriesManagement();
@@ -534,7 +548,6 @@
             if (catDoc.exists()) {
                 const data = catDoc.data();
                 if (data.categories && data.categories.length > 0) {
-                    // Mantiene retrocompatibilidad en caso de cadenas simples guardadas previamente
                     categories = data.categories.map(c => typeof c === 'string' ? { name: c, color: '#3B82F6' } : c);
                 }
                 if (data.appName) {
@@ -588,7 +601,6 @@
             saveSettingsToCloud();
         };
 
-        // Permite al usuario definir manualmente el color de cada categoría
         window.updateCategoryColor = (index) => {
             const input = document.getElementById(`cat-color-${index}`);
             categories[index].color = input.value;
@@ -719,9 +731,12 @@
                     categoryTotals[tx.category || 'General'] = (categoryTotals[tx.category || 'General'] || 0) + tx.amount;
                 }
 
-                // Obtener el color que el usuario definió para la categoría
+                // Buscar objeto de categoría para obtener su color
                 const catObj = categories.find(c => c.name === (tx.category || 'General'));
-                const catColor = catObj ? catObj.color : '#64748B';
+                const catColor = catObj ? catObj.color : '#000000';
+                
+                // Determina si el texto debe ser blanco o negro/oscuro según el color de fondo
+                const textColor = getContrastTextColor(catColor);
 
                 const formattedDate = tx.date ? tx.date.split('T')[0] : '';
                 const itemHTML = `
@@ -732,7 +747,7 @@
                             </div>
                             <div>
                                 <p class="font-bold text-slate-800 text-xs">${tx.description}</p>
-                                <p class="text-[10px] text-slate-400">${formattedDate} • <span class="px-2 py-0.5 rounded-full text-white font-semibold text-[9px]" style="background-color: ${catColor};">${tx.category || 'General'}</span></p>
+                                <p class="text-[10px] text-slate-400">${formattedDate} • <span class="px-2 py-0.5 rounded-full font-semibold text-[9px]" style="background-color: ${catColor}; color: ${textColor};">${tx.category || 'General'}</span></p>
                             </div>
                         </div>
                         <div class="flex items-center space-x-2">
@@ -767,7 +782,6 @@
             const labels = Object.keys(categoryTotals);
             const data = Object.values(categoryTotals);
 
-            // Mapeo directo de los colores definidos manualmente por el usuario
             const bgColors = labels.map(label => {
                 const found = categories.find(c => c.name === label);
                 return found ? found.color : '#3B82F6';
