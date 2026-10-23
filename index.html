@@ -65,7 +65,7 @@
         </header>
 
         <!-- Contenido Principal -->
-        <main class="flex-1 max-w-lg w-full mx-auto p-4 space-y-4 pb-20">
+        <main class="flex-1 max-w-lg w-full mx-auto p-4 space-y-4 pb-28">
             <!-- Saludo Personalizado -->
             <div class="flex justify-between items-center px-1">
                 <div>
@@ -113,15 +113,19 @@
             <form id="transaction-form" class="bg-white p-4 rounded-2xl shadow-sm space-y-3">
                 <div class="flex justify-between items-center">
                     <h3 class="text-sm font-bold text-slate-700">Nueva Transacción</h3>
-                    <button type="button" onclick="toggleVoiceManual()" class="text-xs text-emerald-600 hover:underline flex items-center"><i class="fa-solid fa-circle-question mr-1"></i> Manual de Voz</button>
+                    <button type="button" onclick="toggleVoiceManual()" class="text-xs text-emerald-600 hover:underline flex items-center"><i class="fa-solid fa-circle-question mr-1"></i> Manual de Voz Inteligente</button>
                 </div>
 
-                <!-- Manual Desplegable de Dictado por Voz -->
+                <!-- Manual Desplegable de Dictado Inteligente -->
                 <div id="voice-manual" class="hidden bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-xs text-slate-700 space-y-1.5">
-                    <p class="font-bold text-emerald-800"><i class="fa-solid fa-microphone text-emerald-600 mr-1"></i> ¿Cómo usar el dictado por voz?</p>
-                    <p>1. Toca el botón del micrófono <i class="fa-solid fa-microphone text-emerald-600"></i>.</p>
-                    <p>2. Habla claro para dictar la descripción de tu gasto o ingreso.</p>
-                    <p class="text-slate-500 italic">Nota: Si tu navegador te pide permiso para usar el micrófono, asegúrate de aceptarlo.</p>
+                    <p class="font-bold text-emerald-800"><i class="fa-solid fa-microphone text-emerald-600 mr-1"></i> Dictado por voz inteligente:</p>
+                    <p>Presiona el botón flotante verde y habla de forma natural. Ejemplos:</p>
+                    <p class="bg-white p-1.5 rounded border border-emerald-100 font-mono text-[11px] text-emerald-900">
+                        • "Gasto de 15 soles en gasolina"<br>
+                        • "Ingreso de 100 soles por delivery"<br>
+                        • "Comida 25 soles"
+                    </p>
+                    <p class="text-slate-500 italic">La app detectará automáticamente si es gasto o ingreso, el monto y la descripción sin tocar ningún campo.</p>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
@@ -129,10 +133,7 @@
                     <button type="button" id="type-income" onclick="setTxType('income')" class="py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-500 transition">Ingreso</button>
                 </div>
                 <div>
-                    <div class="flex gap-2">
-                        <input type="text" id="tx-description" placeholder="Descripción (Ej. Comida, Repuesto)" required class="flex-1 px-3 py-2 border text-sm rounded-lg outline-none focus:ring-1 focus:ring-emerald-500">
-                        <button type="button" onclick="startSpeechRecognition()" title="Dictar por voz" class="bg-emerald-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-emerald-700 transition"><i class="fa-solid fa-microphone"></i></button>
-                    </div>
+                    <input type="text" id="tx-description" placeholder="Descripción (Ej. Comida, Repuesto)" required class="w-full px-3 py-2 border text-sm rounded-lg outline-none focus:ring-1 focus:ring-emerald-500">
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <input type="number" step="0.01" id="tx-amount" placeholder="Monto ($)" required class="w-full px-3 py-2 border text-sm rounded-lg outline-none focus:ring-1 focus:ring-emerald-500">
@@ -151,6 +152,16 @@
                 </div>
             </div>
         </main>
+
+        <!-- Botón Flotante de Voz Inteligente -->
+        <div class="fixed bottom-6 right-6 z-50 flex items-center gap-2">
+            <div id="voice-status" class="hidden bg-slate-900 text-white text-xs py-1.5 px-3 rounded-full shadow-lg font-medium animate-pulse">
+                Escuchando...
+            </div>
+            <button type="button" onclick="startSmartVoice()" class="bg-emerald-600 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-xl hover:bg-emerald-700 transition transform hover:scale-105 active:scale-95" title="Dictado inteligente">
+                <i id="smart-mic-icon" class="fa-solid fa-microphone"></i>
+            </button>
+        </div>
     </div>
 
     <!-- Scripts de Firebase y Lógica -->
@@ -195,11 +206,11 @@
             manual.classList.toggle('hidden');
         };
 
-        // Dictado por voz restaurado y optimizado
-        window.startSpeechRecognition = () => {
+        // Dictado Inteligente Automático
+        window.startSmartVoice = () => {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
-                alert("Tu navegador no soporta el dictado por voz directo. Puedes usar el dictado integrado de tu teclado (el ícono de micrófono del teclado).");
+                alert("Tu navegador no soporta el reconocimiento de voz.");
                 return;
             }
 
@@ -208,26 +219,65 @@
             recognition.interimResults = false;
             recognition.maxAlternatives = 1;
 
+            const micIcon = document.getElementById('smart-mic-icon');
+            const statusTag = document.getElementById('voice-status');
+
             recognition.onstart = () => {
-                const descInput = document.getElementById('tx-description');
-                descInput.placeholder = "Escuchando...";
+                micIcon.className = "fa-solid fa-spinner fa-spin";
+                statusTag.classList.remove('hidden');
             };
 
             recognition.onresult = (event) => {
-                const speechResult = event.results[0][0].transcript;
-                document.getElementById('tx-description').value = speechResult;
+                const text = event.results[0][0].transcript.toLowerCase();
+                processSmartVoiceText(text);
             };
 
-            recognition.onerror = (event) => {
-                alert("Error en el reconocimiento de voz. Inténtalo de nuevo.");
+            recognition.onerror = () => {
+                alert("No se pudo entender el audio. Por favor intenta hablar más claro.");
             };
 
             recognition.onend = () => {
-                document.getElementById('tx-description').placeholder = "Descripción (Ej. Comida, Repuesto)";
+                micIcon.className = "fa-solid fa-microphone";
+                statusTag.classList.add('hidden');
             };
 
             recognition.start();
         };
+
+        // Lógica de procesamiento automático del texto dictado
+        function processSmartVoiceText(text) {
+            // 1. Detectar si es Ingreso o Gasto
+            if (text.includes('ingreso') || text.includes('ganancia') || text.includes('cobro') || text.includes('pago recibido')) {
+                setTxType('income');
+            } else {
+                setTxType('expense');
+            }
+
+            // 2. Extraer Números (Monto)
+            const numbers = text.match(/\d+([.,]\d+)?/g);
+            if (numbers && numbers.length > 0) {
+                const amount = parseFloat(numbers[0].replace(',', '.'));
+                document.getElementById('tx-amount').value = amount;
+            }
+
+            // 3. Extraer Descripción limpia (remueve palabras comunes de comandos y números)
+            let cleanDescription = text
+                .replace(/gasto|ingreso|de|en|por|soles|dólares|dolares|pesos|\d+([.,]\d+)?/g, '')
+                .trim();
+
+            if (cleanDescription.length > 0) {
+                cleanDescription = cleanDescription.charAt(0).toUpperCase() + cleanDescription.slice(1);
+                document.getElementById('tx-description').value = cleanDescription;
+            } else {
+                document.getElementById('tx-description').value = text;
+            }
+
+            // 4. Intentar emparejar automáticamente la categoría si se menciona
+            const foundCategory = categories.find(cat => text.includes(cat.toLowerCase()));
+            if (foundCategory) {
+                document.getElementById('tx-category').value = foundCategory;
+            }
+        }
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
