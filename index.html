@@ -144,13 +144,14 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        // Tus credenciales reales de Firebase
         const firebaseConfig = {
-            apiKey: "AIzaSyCx... [Tus credenciales]",
+            apiKey: "AIzaSyCuwUQojfewTYO-A2iaO75HHp234r-Z0Tg",
             authDomain: "misfinanzasapp-dc2d1.firebaseapp.com",
             projectId: "misfinanzasapp-dc2d1",
-            storageBucket: "misfinanzasapp-dc2d1.appspot.com",
-            messagingSenderId: "...",
-            appId: "..."
+            storageBucket: "misfinanzasapp-dc2d1.firebasestorage.app",
+            messagingSenderId: "735407911555",
+            appId: "1:735407911555:web:2333eeb95dd41548ce21b6"
         };
 
         const app = initializeApp(firebaseConfig);
