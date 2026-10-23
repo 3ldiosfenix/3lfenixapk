@@ -284,6 +284,19 @@
                 </div>
             </main>
 
+            <!-- MODAL POP-UP PARA VER LA FOTO EN GRANDE -->
+            <div id="image-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div class="bg-white w-full max-w-sm p-4 rounded-3xl shadow-2xl relative flex flex-col items-center">
+                    <button onclick="closeImageModal()" class="absolute top-3 right-3 text-slate-500 hover:text-slate-800 text-lg bg-slate-100 w-8 h-8 rounded-full flex items-center justify-center">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                    <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Comprobante de Pago</h3>
+                    <div class="w-full max-h-[70vh] overflow-hidden rounded-2xl border border-slate-200 flex items-center justify-center bg-slate-50">
+                        <img id="modal-image-view" src="" alt="Comprobante en grande" class="w-full h-auto object-contain max-h-[60vh]">
+                    </div>
+                </div>
+            </div>
+
             <!-- Modal Configuración -->
             <div id="settings-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                 <div class="bg-white w-full max-w-sm p-5 rounded-3xl shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
@@ -374,6 +387,17 @@
         let barChartInstance = null;
 
         document.getElementById('tx-date').valueAsDate = new Date();
+
+        // FUNCIONES DEL MODAL DE IMAGEN
+        window.openImageModal = (photoUrl) => {
+            document.getElementById('modal-image-view').src = photoUrl;
+            document.getElementById('image-modal').classList.remove('hidden');
+        };
+
+        window.closeImageModal = () => {
+            document.getElementById('image-modal').classList.add('hidden');
+            document.getElementById('modal-image-view').src = '';
+        };
 
         window.previewTxPhoto = (event) => {
             const file = event.target.files[0];
@@ -675,7 +699,6 @@
                 return (tx.category || 'General') === categoryFilter;
             });
 
-            // ORDENAMIENTO ESTRICTO POR FECHA Y HORA (DEL MÁS RECIENTE AL MÁS ANTIGUO)
             categoryFilteredTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
 
             categoryFilteredTransactions.forEach((tx, idx) => {
@@ -683,7 +706,6 @@
                 const catColor = catObj ? catObj.color : '#000000';
                 const textColor = getContrastTextColor(catColor);
 
-                // Formato de fecha y hora legible (Ej: 2026-10-23 15:30)
                 let formattedDate = '';
                 if (tx.date) {
                     const d = new Date(tx.date);
@@ -695,7 +717,8 @@
                     formattedDate = `${year}-${month}-${day} ${hours}:${minutes}`;
                 }
 
-                const photoBadge = tx.photo ? `<span class="ml-1 text-emerald-600" title="Tiene comprobante"><i class="fa-solid fa-image"></i></span>` : '';
+                // Si tiene foto, agregamos el icono interactivo que abre el pop-up al hacer clic
+                const photoBadge = tx.photo ? `<span onclick="openImageModal('${tx.photo}')" class="ml-1.5 text-emerald-600 cursor-pointer hover:text-emerald-700 inline-block bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200" title="Ver comprobante"><i class="fa-solid fa-image"></i> Ver</span>` : '';
 
                 const itemHTML = `
                     <div class="flex justify-between items-center p-3 bg-slate-50 rounded-2xl border border-slate-100">
@@ -704,8 +727,8 @@
                                 <i class="fa-solid ${tx.type === 'income' ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
                             </div>
                             <div>
-                                <p class="font-bold text-slate-800 text-xs">${tx.description} ${photoBadge}</p>
-                                <p class="text-[10px] text-slate-400">${formattedDate} • <span class="px-2 py-0.5 rounded-full font-semibold text-[9px]" style="background-color: ${catColor}; color: ${textColor};">${tx.category || 'General'}</span></p>
+                                <p class="font-bold text-slate-800 text-xs flex items-center gap-1">${tx.description} ${photoBadge}</p>
+                                <p class="text-[10px] text-slate-400 mt-0.5">${formattedDate} • <span class="px-2 py-0.5 rounded-full font-semibold text-[9px]" style="background-color: ${catColor}; color: ${textColor};">${tx.category || 'General'}</span></p>
                             </div>
                         </div>
                         <div class="flex items-center space-x-2">
@@ -947,7 +970,6 @@
             const category = document.getElementById('tx-category').value;
             const dateVal = document.getElementById('tx-date').value;
 
-            // Mantener la hora actual exacta si es un nuevo registro, o respetar la fecha elegida con hora actual
             let fullDateIso;
             if (editId) {
                 const existingTx = transactions.find(t => t.id === editId);
