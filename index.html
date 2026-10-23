@@ -46,7 +46,7 @@
             <div id="auth-error" class="hidden bg-red-500/20 text-red-300 p-3 rounded-xl text-xs mb-4 text-center border border-red-500/30"></div>
             <div id="auth-success" class="hidden bg-emerald-500/20 text-emerald-300 p-3 rounded-xl text-xs mb-4 text-center border border-emerald-500/30"></div>
 
-            <!-- FORMULARIO CORREGIDO PARA AUTOFILL -->
+            <!-- FORMULARIO AUTOFILL CORREGIDO -->
             <form id="auth-form" action="javascript:void(0);" onsubmit="handleAuthSubmit(event)" class="space-y-4">
                 <div id="name-field" class="hidden">
                     <label class="block text-[10px] font-bold uppercase text-slate-400 tracking-wider mb-1">Nombre Completo</label>
@@ -144,7 +144,7 @@
                     </div>
                 </div>
 
-                <!-- Agenda de Deudas -->
+                <!-- TARJETA DE AGENDA DE DEUDAS (CON BOTONES DE EDITAR Y ELIMINAR) -->
                 <div class="bg-slate-900 text-white p-4 rounded-3xl shadow-md border border-slate-800 space-y-2">
                     <div class="flex justify-between items-center px-1">
                         <div class="flex items-center gap-2">
@@ -568,7 +568,6 @@
             document.getElementById('auth-switch').textContent = isRegister ? '¿Ya tienes cuenta? Inicia Sesión' : '¿No tienes cuenta? Regístrate';
         };
 
-        // LÓGICA DE LOGIN CON SOPORTE COMPLETO PARA GOOGLE AUTOFILL
         window.handleAuthSubmit = async (e) => {
             if (e) e.preventDefault();
 
@@ -702,6 +701,7 @@
                 return true;
             });
 
+            // AGENDA DE DEUDAS CON BOTONES DE EDITAR Y ELIMINAR
             let totalDebt = 0;
             const debtorsEl = document.getElementById('debtors-list');
             debtorsEl.innerHTML = '';
@@ -713,7 +713,15 @@
                 debtorsEl.innerHTML += `
                     <div class="flex justify-between items-center bg-slate-800 px-3 py-2 rounded-xl text-xs">
                         <span class="text-slate-200 font-medium">${tx.description}</span>
-                        <span class="font-bold text-amber-400">S/ ${tx.amount.toFixed(2)}</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-bold text-amber-400 mr-1">S/ ${tx.amount.toFixed(2)}</span>
+                            <button onclick="editTx('${tx.id}')" title="Amortizar / Editar monto" class="text-blue-400 hover:text-blue-300 text-xs transition px-1">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button onclick="deleteTx('${tx.id}')" title="Marcar como pagada / eliminar" class="text-slate-400 hover:text-red-400 text-xs transition px-1">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
                     </div>
                 `;
             });
@@ -1070,7 +1078,10 @@
 
             document.getElementById('tx-edit-id').value = tx.id;
             document.getElementById('tx-amount').value = tx.amount;
+            
+            renderCategories();
             document.getElementById('tx-category').value = tx.category || categories[0].name;
+            
             document.getElementById('tx-date').value = tx.date ? tx.date.split('T')[0] : '';
             document.getElementById('tx-description').value = tx.description;
             setTxType(tx.type);
@@ -1105,13 +1116,13 @@
         };
 
         window.deleteTx = async (id) => {
-            if (!confirm("¿Deseas eliminar este movimiento?")) return;
+            if (!confirm("¿Deseas eliminar este registro o marcarlo como pagado?")) return;
             try {
                 await deleteDoc(doc(db, `users/${currentUser.uid}/transactions/${id}`));
                 transactions = transactions.filter(t => t.id !== id);
                 renderUI();
             } catch (err) {
-                alert("Error al eliminar");
+                alert("Error al eliminar el registro.");
             }
         };
 
