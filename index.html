@@ -1,808 +1,376 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mis Gastos e Ingresos - Cloud</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  <style>
-    .pulse-ring {
-      animation: pulse 1.5s infinite;
-    }
-    @keyframes pulse {
-      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-      70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
-      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Mis Finanzas App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-slate-100 font-sans min-h-screen flex justify-center items-center p-0 sm:p-4">
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
 
-  <!-- Mobile Container -->
-  <div class="w-full max-w-md bg-white min-h-screen sm:min-h-[844px] sm:rounded-3xl shadow-2xl flex flex-col justify-between overflow-hidden relative">
+    <!-- Pantalla de Autenticación -->
+    <div id="auth-screen" class="flex-1 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md p-6 rounded-2xl shadow-xl">
+            <div class="text-center mb-6">
+                <div class="bg-emerald-100 text-emerald-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+                <h1 id="auth-title" class="text-2xl font-bold">Iniciar Sesión</h1>
+                <p class="text-sm text-slate-500">Tus finanzas seguras en la nube</p>
+            </div>
 
-    <!-- LOGIN & REGISTER SECTION -->
-    <div id="authContainer" class="p-6 flex-1 flex flex-col justify-center">
-      <div class="text-center mb-8">
-        <div class="w-16 h-16 bg-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg text-white text-2xl">
-          <i class="fa-solid fa-wallet"></i>
+            <div id="auth-error" class="hidden bg-red-100 text-red-700 p-3 rounded-lg text-sm mb-4 text-center"></div>
+
+            <form id="auth-form" class="space-y-4">
+                <div id="name-field" class="hidden">
+                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Nombre Completo</label>
+                    <input type="text" id="auth-name" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Correo Electrónico</label>
+                    <input type="email" id="auth-email" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Contraseña</label>
+                    <input type="password" id="auth-password" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+                </div>
+                <button type="submit" id="auth-btn" class="w-full bg-emerald-600 text-white py-2.5 rounded-lg font-semibold hover:bg-emerald-700 transition">Entrar</button>
+            </form>
+
+            <div class="text-center mt-4">
+                <button id="auth-switch" class="text-sm text-emerald-600 hover:underline">¿No tienes cuenta? Regístrate</button>
+            </div>
         </div>
-        <h1 class="text-2xl font-bold text-slate-800" id="authTitle">Iniciar Sesión</h1>
-        <p class="text-xs text-slate-500 mt-1" id="authSubtitle">Gestiona tus finanzas en la nube</p>
-      </div>
-
-      <!-- Auth Form -->
-      <form id="authForm" onsubmit="handleAuth(event)" class="space-y-4">
-        <div id="nameFieldContainer" class="hidden">
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Nombre Completo</label>
-          <input type="text" id="authName" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Correo Electrónico</label>
-          <input type="email" id="authEmail" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-        </div>
-
-        <div id="passwordFieldContainer">
-          <div class="flex justify-between items-center mb-1">
-            <label class="block text-xs font-semibold text-slate-600">Contraseña</label>
-            <button type="button" onclick="showForgotPassword()" id="forgotPasswordBtn" class="text-xs text-emerald-600 font-medium hover:underline">¿Olvidaste tu contraseña?</button>
-          </div>
-          <div class="relative">
-            <input type="password" id="authPassword" required class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-            <button type="button" onclick="togglePasswordVisibility('authPassword', 'authPasswordIcon')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1">
-              <i class="fa-solid fa-eye" id="authPasswordIcon"></i>
-            </button>
-          </div>
-        </div>
-
-        <button type="submit" id="authSubmitBtn" class="w-full bg-emerald-500 text-white font-semibold py-3.5 rounded-xl text-sm shadow-lg shadow-emerald-200 active:scale-95 transition mt-2">
-          Iniciar Sesión
-        </button>
-      </form>
-
-      <div class="mt-6 text-center">
-        <button onclick="toggleAuthMode()" id="toggleAuthBtn" class="text-xs text-slate-500 hover:text-emerald-600 font-medium">
-          ¿No tienes cuenta? <span class="text-emerald-600 font-semibold">Regístrate</span>
-        </button>
-      </div>
     </div>
 
-    <!-- FORGOT PASSWORD CONTAINER -->
-    <div id="forgotPasswordContainer" class="hidden p-6 flex-1 flex flex-col justify-center">
-      <div class="text-center mb-6">
-        <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl">
-          <i class="fa-solid fa-key"></i>
-        </div>
-        <h2 class="text-xl font-bold text-slate-800">Recuperar Contraseña</h2>
-        <p class="text-xs text-slate-500 mt-1">Te enviaremos un correo para restablecer tu contraseña</p>
-      </div>
+    <!-- Pantalla Principal de la App -->
+    <div id="app-screen" class="hidden flex-1 flex flex-col">
+        <!-- Barra superior -->
+        <header class="bg-white shadow-sm px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="bg-emerald-600 text-white w-9 h-9 rounded-lg flex items-center justify-center">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+                <span id="app-brand-name" class="font-bold text-lg">Mis Finanzas</span>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button onclick="exportJSON()" title="Exportar JSON" class="text-slate-600 hover:text-emerald-600"><i class="fa-solid fa-download"></i></button>
+                <label title="Importar JSON" class="text-slate-600 hover:text-emerald-600 cursor-pointer">
+                    <i class="fa-solid fa-upload"></i>
+                    <input type="file" id="import-file" accept=".json" class="hidden" onchange="importJSON(event)">
+                </label>
+                <button onclick="logout()" title="Cerrar Sesión" class="text-red-500 hover:text-red-700 ml-1"><i class="fa-solid fa-right-from-bracket"></i></button>
+            </div>
+        </header>
 
-      <div class="space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Correo Electrónico</label>
-          <input type="email" id="recoveryEmail" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-        </div>
-        <button onclick="sendPasswordReset()" class="w-full bg-emerald-500 text-white font-semibold py-3.5 rounded-xl text-sm shadow-md active:scale-95 transition">
-          Enviar Correo de Recuperación
-        </button>
-      </div>
+        <!-- Contenido Principal -->
+        <main class="flex-1 max-w-lg w-full mx-auto p-4 space-y-4 pb-20">
+            <!-- Saludo Personalizado -->
+            <div class="flex justify-between items-center px-1">
+                <div>
+                    <p class="text-xs text-slate-500">Bienvenido de nuevo,</p>
+                    <h2 id="user-display-name" class="font-bold text-slate-800 text-lg">Usuario</h2>
+                </div>
+            </div>
 
-      <button onclick="hideForgotPassword()" class="mt-6 text-xs text-slate-500 text-center font-medium hover:text-slate-700">
-        <i class="fa-solid fa-arrow-left mr-1"></i> Volver al Inicio de Sesión
-      </button>
+            <!-- Resumen de Balance -->
+            <div class="bg-emerald-600 text-white p-5 rounded-2xl shadow-md">
+                <p class="text-xs uppercase tracking-wider opacity-80">Balance Total</p>
+                <h2 id="total-balance" class="text-3xl font-extrabold mt-1">$0.00</h2>
+                <div class="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-emerald-500/50">
+                    <div>
+                        <p class="text-xs opacity-80">Ingresos</p>
+                        <p id="total-income" class="text-lg font-bold">$0.00</p>
+                    </div>
+                    <div>
+                        <p class="text-xs opacity-80">Gastos</p>
+                        <p id="total-expense" class="text-lg font-bold">$0.00</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel de Configuración Avanzada -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                <h3 class="text-sm font-bold text-slate-700 mb-2 flex items-center"><i class="fa-solid fa-gears mr-2 text-emerald-600"></i> Configuración Avanzada</h3>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Nombre personalizado de la App</label>
+                        <input type="text" id="setting-app-name" placeholder="Ej. Mis Finanzas Fénix" class="w-full px-3 py-1.5 border text-sm rounded-lg outline-none focus:ring-1 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Añadir Nueva Categoría</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="new-category-name" placeholder="Ej. Combustible, Mascotas..." class="flex-1 px-3 py-1.5 border text-sm rounded-lg outline-none focus:ring-1 focus:ring-emerald-500">
+                            <button onclick="addCategory()" class="bg-slate-800 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-slate-700">Crear</button>
+                        </div>
+                    </div>
+                    <button onclick="saveSettings()" class="w-full bg-slate-800 text-white py-2 rounded-lg text-sm font-semibold hover:bg-slate-700 transition">Guardar Configuración</button>
+                </div>
+            </div>
+
+            <!-- Formulario de Transacción -->
+            <form id="transaction-form" class="bg-white p-4 rounded-2xl shadow-sm space-y-3">
+                <h3 class="text-sm font-bold text-slate-700">Nueva Transacción</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" id="type-expense" onclick="setTxType('expense')" class="py-2 rounded-lg text-sm font-semibold border border-red-500 text-red-500 bg-red-50 transition">Gasto</button>
+                    <button type="button" id="type-income" onclick="setTxType('income')" class="py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-500 transition">Ingreso</button>
+                </div>
+                <div>
+                    <input type="text" id="tx-description" placeholder="Descripción (Ej. Comida, Repuesto)" required class="w-full px-3 py-2 border text-sm rounded-lg outline-none focus:ring-1 focus:ring-emerald-500">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" step="0.01" id="tx-amount" placeholder="Monto ($)" required class="w-full px-3 py-2 border text-sm rounded-lg outline-none focus:ring-1 focus:ring-emerald-500">
+                    <select id="tx-category" class="w-full px-3 py-2 border text-sm rounded-lg outline-none focus:ring-1 bg-white focus:ring-emerald-500">
+                        <!-- Categorías dinámicas -->
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition">Guardar Transacción</button>
+            </form>
+
+            <!-- Historial -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm">
+                <h3 class="text-sm font-bold text-slate-700 mb-3">Movimientos Recientes</h3>
+                <div id="transactions-list" class="space-y-2 max-h-60 overflow-y-auto">
+                    <!-- Elementos dinámicos -->
+                </div>
+            </div>
+        </main>
     </div>
 
-    <!-- MAIN APP SECTION -->
-    <div id="appContainer" class="hidden flex-1 flex flex-col justify-between">
-      
-      <!-- Top Bar -->
-      <div class="bg-slate-900 text-white p-4 pt-6 rounded-b-3xl shadow-lg relative">
-        <div class="flex justify-between items-center mb-4">
-          <div class="flex items-center gap-2">
-            <div class="w-9 h-9 bg-emerald-500 rounded-full flex items-center justify-center font-bold text-slate-900 text-sm" id="userInitial">
-              U
-            </div>
-            <div>
-              <p class="text-xs text-slate-400">Hola,</p>
-              <h2 class="text-sm font-bold text-white leading-none" id="userNameDisplay">Usuario</h2>
-            </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <button onclick="toggleVoiceManual()" title="Manual de Comandos de Voz" class="w-8 h-8 bg-slate-800 hover:bg-slate-700 rounded-full flex items-center justify-center text-amber-400 text-xs">
-              <i class="fa-solid fa-book-open"></i>
-            </button>
-            <button onclick="logout()" title="Cerrar Sesión" class="w-8 h-8 bg-slate-800 hover:bg-slate-700 rounded-full flex items-center justify-center text-slate-300 text-xs">
-              <i class="fa-solid fa-right-from-bracket"></i>
-            </button>
-          </div>
-        </div>
+    <!-- Scripts de Firebase y Lógica -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        <!-- Total Balance Card -->
-        <div class="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl p-4 shadow-md text-white">
-          <p class="text-xs opacity-80 uppercase tracking-wider font-semibold">Balance Total (Nube)</p>
-          <h1 class="text-3xl font-extrabold mt-1" id="totalBalance">S/ 0.00</h1>
-          
-          <div class="flex justify-between mt-4 pt-3 border-t border-emerald-500/40 text-xs">
-            <div class="flex items-center gap-2">
-              <div class="w-6 h-6 bg-emerald-400/20 rounded-full flex items-center justify-center text-emerald-300">
-                <i class="fa-solid fa-arrow-down text-xs"></i>
-              </div>
-              <div>
-                <span class="block text-[10px] opacity-75">Ingresos</span>
-                <span class="font-bold text-emerald-200" id="totalIncome">S/ 0.00</span>
-              </div>
-            </div>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCx... [Tus credenciales]",
+            authDomain: "misfinanzasapp-dc2d1.firebaseapp.com",
+            projectId: "misfinanzasapp-dc2d1",
+            storageBucket: "misfinanzasapp-dc2d1.appspot.com",
+            messagingSenderId: "...",
+            appId: "..."
+        };
 
-            <div class="flex items-center gap-2">
-              <div class="w-6 h-6 bg-rose-400/20 rounded-full flex items-center justify-center text-rose-300">
-                <i class="fa-solid fa-arrow-up text-xs"></i>
-              </div>
-              <div>
-                <span class="block text-[10px] opacity-75">Gastos</span>
-                <span class="font-bold text-rose-200" id="totalExpense">S/ 0.00</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-      <!-- Content Views -->
-      <div class="flex-1 overflow-y-auto p-4 space-y-4">
-        
-        <!-- VOICE FLOATING CONTROLLER BANNER -->
-        <div class="bg-slate-900 text-white rounded-2xl p-3 flex items-center justify-between shadow-md">
-          <div class="flex items-center gap-3">
-            <button id="voiceMicBtn" onclick="toggleVoiceRecognition()" class="w-11 h-11 bg-rose-500 text-white rounded-full flex items-center justify-center text-lg shadow-lg active:scale-90 transition">
-              <i class="fa-solid fa-microphone"></i>
-            </button>
-            <div>
-              <p class="text-xs font-bold text-slate-100" id="voiceStatusText">Asistente por Voz</p>
-              <p class="text-[11px] text-slate-400" id="voiceSubtext">Toca el micro y habla</p>
-            </div>
-          </div>
-          <button onclick="toggleVoiceManual()" class="text-xs text-amber-400 bg-slate-800 px-2.5 py-1.5 rounded-lg border border-slate-700 hover:bg-slate-700">
-            <i class="fa-solid fa-circle-question mr-1"></i> Ejemplos
-          </button>
-        </div>
+        let currentUser = null;
+        let currentType = 'expense';
+        let transactions = [];
+        let categories = ['General', 'Comida', 'Transporte', 'Servicios', 'Salario'];
 
-        <!-- VOICE MANUAL MODAL -->
-        <div id="voiceManualModal" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-4 text-xs space-y-3">
-          <div class="flex justify-between items-center text-amber-900 font-bold border-b border-amber-200 pb-2">
-            <span><i class="fa-solid fa-book-open mr-1"></i> Manual de Comandos de Voz</span>
-            <button onclick="toggleVoiceManual()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-sm"></i></button>
-          </div>
-          <p class="text-slate-600">Presiona el micrófono rojo y pronuncia frases como estas:</p>
-          
-          <div class="space-y-2">
-            <div class="bg-white p-2.5 rounded-xl border border-amber-100 shadow-sm">
-              <span class="font-bold text-rose-600 block mb-0.5"> Registrar Gastos:</span>
-              <ul class="list-disc list-inside text-slate-600 space-y-1">
-                <li class="cursor-pointer hover:text-emerald-600" onclick="demoVoiceText('Gasté 25 soles en almuerzo')">"Gasté 25 soles en almuerzo"</li>
-                <li class="cursor-pointer hover:text-emerald-600" onclick="demoVoiceText('Gasto de 15 en taxi')">"Gasto de 15 en taxi"</li>
-              </ul>
-            </div>
-            <div class="bg-white p-2.5 rounded-xl border border-amber-100 shadow-sm">
-              <span class="font-bold text-emerald-600 block mb-0.5"> Registrar Ingresos:</span>
-              <ul class="list-disc list-inside text-slate-600 space-y-1">
-                <li class="cursor-pointer hover:text-emerald-600" onclick="demoVoiceText('Cobré 150 soles de carrera')">"Cobré 150 soles de carrera"</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+        window.setTxType = (type) => {
+            currentType = type;
+            const expBtn = document.getElementById('type-expense');
+            const incBtn = document.getElementById('type-income');
+            if(type === 'expense') {
+                expBtn.className = "py-2 rounded-lg text-sm font-semibold border border-red-500 text-red-500 bg-red-50 transition";
+                incBtn.className = "py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-500 transition";
+            } else {
+                incBtn.className = "py-2 rounded-lg text-sm font-semibold border border-emerald-500 text-emerald-500 bg-emerald-50 transition";
+                expBtn.className = "py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-500 transition";
+            }
+        };
 
-        <!-- VIEW 1: RESUMEN (Chart) -->
-        <div id="viewSummary" class="space-y-4">
-          <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-            <h3 class="text-xs font-bold text-slate-700 mb-3 uppercase tracking-wider">Gastos por Categoría</h3>
-            <div class="relative h-48 w-full flex justify-center items-center">
-              <canvas id="categoryChart"></canvas>
-            </div>
-          </div>
-
-          <!-- BACKUP / UPLOADER PANEL -->
-          <div class="bg-slate-50 p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
-            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-cloud-arrow-up mr-1"></i> Respaldo y Actualización</h3>
-            <p class="text-[11px] text-slate-500">Exporta tus datos a un archivo o sube una copia para restaurar.</p>
-            <div class="flex gap-2">
-              <button onclick="exportJSONBackup()" class="flex-1 bg-slate-800 text-white py-2 rounded-xl text-xs font-semibold shadow hover:bg-slate-700">
-                <i class="fa-solid fa-download mr-1"></i> Descargar Copia
-              </button>
-              <label class="flex-1 bg-emerald-600 text-white py-2 rounded-xl text-xs font-semibold shadow hover:bg-emerald-500 text-center cursor-pointer">
-                <i class="fa-solid fa-upload mr-1"></i> Subir / Cargar
-                <input type="file" accept=".json" onchange="importJSONBackup(event)" class="hidden">
-              </label>
-            </div>
-          </div>
-
-          <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-            <div class="flex justify-between items-center mb-3">
-              <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Últimos Movimientos</h3>
-              <button onclick="switchTab('history')" class="text-xs text-emerald-600 font-semibold">Ver todos</button>
-            </div>
-            <div id="recentTransactionsList" class="space-y-2"></div>
-          </div>
-        </div>
-
-        <!-- VIEW 2: AGREGAR -->
-        <div id="viewAdd" class="hidden bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-          <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Nuevo Registro</h3>
-          
-          <form id="transactionForm" onsubmit="addTransaction(event)" class="space-y-3">
-            <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl text-xs font-semibold">
-              <button type="button" id="typeExpenseBtn" onclick="setType('expense')" class="py-2.5 rounded-lg text-white bg-rose-500 shadow-sm transition">Gasto</button>
-              <button type="button" id="typeIncomeBtn" onclick="setType('income')" class="py-2.5 rounded-lg text-slate-600 transition">Ingreso</button>
-            </div>
-
-            <div>
-              <label class="block text-[11px] font-semibold text-slate-500 mb-1">Monto (S/)</label>
-              <input type="number" step="0.01" id="amount" required placeholder="0.00" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-lg font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-            </div>
-
-            <div>
-              <label class="block text-[11px] font-semibold text-slate-500 mb-1">Categoría</label>
-              <select id="category" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                <option value="Comida">Comida / Alimentos</option>
-                <option value="Transporte">Transporte / Combustible</option>
-                <option value="Moto">Mantenimiento Moto</option>
-                <option value="Servicios">Servicios / Luz / Agua</option>
-                <option value="Trabajo">Trabajo / Entregas</option>
-                <option value="Entretenimiento">Entretenimiento</option>
-                <option value="Otros">Otros</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block text-[11px] font-semibold text-slate-500 mb-1">Fecha</label>
-              <input type="date" id="date" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-            </div>
-
-            <div>
-              <label class="block text-[11px] font-semibold text-slate-500 mb-1">Nota / Descripción (Opcional)</label>
-              <input type="text" id="note" placeholder="Ej. Repuesto de moto, pedido..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-            </div>
-
-            <button type="submit" class="w-full bg-emerald-500 text-white font-semibold py-3 rounded-xl text-xs shadow-md shadow-emerald-200 active:scale-95 transition mt-2">
-              Guardar Transacción en la Nube
-            </button>
-          </form>
-        </div>
-
-        <!-- VIEW 3: HISTORIAL -->
-        <div id="viewHistory" class="hidden space-y-3">
-          <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex gap-2">
-            <select id="filterCategory" onchange="renderHistory()" class="bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 text-xs text-slate-700 focus:outline-none flex-1">
-              <option value="ALL">Todas las categorías</option>
-              <option value="Comida">Comida</option>
-              <option value="Transporte">Transporte</option>
-              <option value="Moto">Moto</option>
-              <option value="Servicios">Servicios</option>
-              <option value="Trabajo">Trabajo</option>
-              <option value="Entretenimiento">Entretenimiento</option>
-              <option value="Otros">Otros</option>
-            </select>
-          </div>
-
-          <div id="fullHistoryList" class="space-y-2"></div>
-        </div>
-
-      </div>
-
-      <!-- Bottom Navigation Bar -->
-      <div class="bg-white border-t border-slate-100 p-2 flex justify-around items-center">
-        <button onclick="switchTab('summary')" id="tabSummary" class="flex flex-col items-center gap-1 text-emerald-600 py-1 px-4">
-          <i class="fa-solid fa-chart-pie text-base"></i>
-          <span class="text-[10px] font-semibold">Resumen</span>
-        </button>
-        <button onclick="switchTab('add')" id="tabAdd" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-600 py-1 px-4">
-          <div class="w-10 h-10 bg-emerald-500 text-white rounded-full flex items-center justify-center -mt-5 shadow-lg shadow-emerald-200">
-            <i class="fa-solid fa-plus text-lg"></i>
-          </div>
-          <span class="text-[10px] font-semibold">Agregar</span>
-        </button>
-        <button onclick="switchTab('history')" id="tabHistory" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-600 py-1 px-4">
-          <i class="fa-solid fa-list-ul text-base"></i>
-          <span class="text-[10px] font-semibold">Historial</span>
-        </button>
-      </div>
-
-    </div>
-
-  </div>
-
-  <!-- Firebase SDKs -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { 
-      getAuth, 
-      createUserWithEmailAndPassword, 
-      signInWithEmailAndPassword, 
-      signOut, 
-      onAuthStateChanged,
-      sendPasswordResetEmail,
-      updateProfile
-    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { 
-      getFirestore, 
-      collection, 
-      addDoc, 
-      getDocs, 
-      deleteDoc, 
-      doc, 
-      query, 
-      orderBy,
-      setDoc
-    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-    // Your web app's Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyCuwUQojfewTYO-A2iaO75HHp234r-Z0Tg",
-      authDomain: "misfinanzasapp-dc2d1.firebaseapp.com",
-      projectId: "misfinanzasapp-dc2d1",
-      storageBucket: "misfinanzasapp-dc2d1.firebasestorage.app",
-      messagingSenderId: "735407911555",
-      appId: "1:735407911555:web:2333eeb95dd41548ce21b6"
-    };
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    let currentUser = null;
-    let transactions = [];
-    let currentType = 'expense';
-    let chartInstance = null;
-    let isRegisterMode = false;
-    let recognition = null;
-    let isListening = false;
-
-    // Make functions globally available
-    window.togglePasswordVisibility = togglePasswordVisibility;
-    window.toggleAuthMode = toggleAuthMode;
-    window.handleAuth = handleAuth;
-    window.logout = logout;
-    window.showForgotPassword = showForgotPassword;
-    window.hideForgotPassword = hideForgotPassword;
-    window.sendPasswordReset = sendPasswordReset;
-    window.toggleVoiceRecognition = toggleVoiceRecognition;
-    window.toggleVoiceManual = toggleVoiceManual;
-    window.demoVoiceText = demoVoiceText;
-    window.switchTab = switchTab;
-    window.setType = setType;
-    window.addTransaction = addTransaction;
-    window.deleteTransaction = deleteTransaction;
-    window.renderHistory = renderHistory;
-    window.exportJSONBackup = exportJSONBackup;
-    window.importJSONBackup = importJSONBackup;
-
-    function showToast(msg) {
-      const toast = document.createElement('div');
-      toast.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs px-4 py-2 rounded-full shadow-xl z-50 transition opacity-0';
-      toast.innerText = msg;
-      document.body.appendChild(toast);
-      setTimeout(() => toast.classList.remove('opacity-0'), 10);
-      setTimeout(() => {
-        toast.classList.add('opacity-0');
-        setTimeout(() => toast.remove(), 300);
-      }, 2500);
-    }
-
-    function setDefaultDate() {
-      const today = new Date().toISOString().split('T')[0];
-      const dateEl = document.getElementById('date');
-      if (dateEl) dateEl.value = today;
-    }
-
-    function togglePasswordVisibility(inputId, iconId) {
-      const input = document.getElementById(inputId);
-      const icon = document.getElementById(iconId);
-      if (input.type === 'password') {
-        input.type = 'text';
-        icon.classList.remove('fa-eye');
-        icon.classList.add('fa-eye-slash');
-      } else {
-        input.type = 'password';
-        icon.classList.remove('fa-eye-slash');
-        icon.classList.add('fa-eye');
-      }
-    }
-
-    function toggleAuthMode() {
-      isRegisterMode = !isRegisterMode;
-      document.getElementById('nameFieldContainer').classList.toggle('hidden', !isRegisterMode);
-      document.getElementById('forgotPasswordBtn').classList.toggle('hidden', isRegisterMode);
-      document.getElementById('authTitle').innerText = isRegisterMode ? "Crear Cuenta" : "Iniciar Sesión";
-      document.getElementById('authSubtitle').innerText = isRegisterMode ? "Tus finanzas seguras en la nube" : "Gestiona tus finanzas en la nube";
-      document.getElementById('authSubmitBtn').innerText = isRegisterMode ? "Registrarse" : "Iniciar Sesión";
-      document.getElementById('toggleAuthBtn').innerHTML = isRegisterMode ? 
-        '¿Ya tienes cuenta? <span class="text-emerald-600 font-semibold">Inicia Sesión</span>' : 
-        '¿No tienes cuenta? <span class="text-emerald-600 font-semibold">Regístrate</span>';
-    }
-
-    async function handleAuth(e) {
-      e.preventDefault();
-      const email = document.getElementById('authEmail').value.trim();
-      const password = document.getElementById('authPassword').value;
-
-      try {
-        if (isRegisterMode) {
-          const name = document.getElementById('authName').value.trim() || "Usuario";
-          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-          await updateProfile(userCredential.user, { displayName: name });
-          showToast("¡Cuenta creada con éxito!");
-        } else {
-          await signInWithEmailAndPassword(auth, email, password);
-          showToast("¡Bienvenido de nuevo!");
-        }
-      } catch (error) {
-        let msg = "Ocurrió un error";
-        if (error.code === 'auth/invalid-credential') msg = "Correo o contraseña incorrectos";
-        if (error.code === 'auth/email-already-in-use') msg = "El correo ya está registrado";
-        if (error.code === 'auth/weak-password') msg = "La contraseña debe tener al menos 6 caracteres";
-        showToast(msg);
-      }
-    }
-
-    async function logout() {
-      await signOut(auth);
-      currentUser = null;
-      document.getElementById('appContainer').classList.add('hidden');
-      document.getElementById('authContainer').classList.remove('hidden');
-      showToast("Sesión cerrada");
-    }
-
-    function showForgotPassword() {
-      document.getElementById('authContainer').classList.add('hidden');
-      document.getElementById('forgotPasswordContainer').classList.remove('hidden');
-    }
-
-    function hideForgotPassword() {
-      document.getElementById('forgotPasswordContainer').classList.add('hidden');
-      document.getElementById('authContainer').classList.remove('hidden');
-    }
-
-    async function sendPasswordReset() {
-      const email = document.getElementById('recoveryEmail').value.trim();
-      if (!email) return showToast("Ingresa tu correo electrónico");
-      try {
-        await sendPasswordResetEmail(auth, email);
-        showToast("Correo de recuperación enviado");
-        hideForgotPassword();
-      } catch (error) {
-        showToast("No se pudo enviar el correo");
-      }
-    }
-
-    // Firestore Data Sync
-    async function loadTransactions() {
-      if (!currentUser) return;
-      try {
-        const q = query(collection(db, "users", currentUser.uid, "transactions"), orderBy("date", "desc"));
-        const querySnapshot = await getDocs(q);
-        transactions = [];
-        querySnapshot.forEach((docSnap) => {
-          transactions.push({ id: docSnap.id, ...docSnap.data() });
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('app-screen').classList.remove('hidden');
+                document.getElementById('user-display-name').textContent = user.displayName || user.email;
+                await loadUserData();
+            } else {
+                currentUser = null;
+                document.getElementById('app-screen').classList.add('hidden');
+                document.getElementById('auth-screen').classList.remove('hidden');
+            }
         });
-        renderApp();
-      } catch (error) {
-        console.error("Error cargando datos:", error);
-      }
-    }
 
-    async function addTransaction(e) {
-      e.preventDefault();
-      if (!currentUser) return;
-      const amount = parseFloat(document.getElementById('amount').value);
-      const category = document.getElementById('category').value;
-      const date = document.getElementById('date').value;
-      const note = document.getElementById('note').value;
+        let isRegister = false;
+        const switchBtn = document.getElementById('auth-switch');
+        const nameField = document.getElementById('name-field');
+        const authTitle = document.getElementById('auth-title');
+        const authBtn = document.getElementById('auth-btn');
 
-      const newTx = { type: currentType, amount, category, date, note, createdAt: Date.now() };
-      
-      try {
-        const docRef = await addDoc(collection(db, "users", currentUser.uid, "transactions"), newTx);
-        newTx.id = docRef.id;
-        transactions.unshift(newTx);
+        switchBtn.addEventListener('click', () => {
+            isRegister = !isRegister;
+            nameField.classList.toggle('hidden', !isRegister);
+            authTitle.textContent = isRegister ? 'Crear Cuenta' : 'Iniciar Sesión';
+            authBtn.textContent = isRegister ? 'Registrarse' : 'Entrar';
+            switchBtn.textContent = isRegister ? '¿Ya tienes cuenta? Inicia Sesión' : '¿No tienes cuenta? Regístrate';
+        });
 
-        document.getElementById('amount').value = '';
-        document.getElementById('note').value = '';
-        setDefaultDate();
-        renderApp();
-        switchTab('summary');
-        showToast("Guardado en la nube");
-      } catch (error) {
-        showToast("Error al guardar en la nube");
-      }
-    }
+        document.getElementById('auth-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const name = document.getElementById('auth-name').value;
+            const errDiv = document.getElementById('auth-error');
+            errDiv.classList.add('hidden');
 
-    async function deleteTransaction(id) {
-      if (!currentUser) return;
-      try {
-        await deleteDoc(doc(db, "users", currentUser.uid, "transactions", id));
-        transactions = transactions.filter(t => t.id !== id);
-        renderApp();
-        showToast("Transacción eliminada");
-      } catch (error) {
-        showToast("Error al eliminar");
-      }
-    }
+            try {
+                if (isRegister) {
+                    const res = await createUserWithEmailAndPassword(auth, email, password);
+                    await updateProfile(res.user, { displayName: name });
+                } else {
+                    await signInWithEmailAndPassword(auth, email, password);
+                }
+            } catch (err) {
+                errDiv.textContent = "Ocurrió un error: " + err.message;
+                errDiv.classList.remove('hidden');
+            }
+        });
 
-    // Export & Import JSON Backup
-    function exportJSONBackup() {
-      if (!transactions.length) return showToast("No hay datos para exportar");
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(transactions));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `finanzas_backup_${new Date().toISOString().split('T')[0]}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-      showToast("Copia de seguridad descargada");
-    }
+        window.logout = () => signOut(auth);
 
-    async function importJSONBackup(event) {
-      const file = event.target.files[0];
-      if (!file || !currentUser) return;
-      const reader = new FileReader();
-      reader.onload = async function(e) {
-        try {
-          const importedData = JSON.parse(e.target.result);
-          if (!Array.isArray(importedData)) return showToast("Archivo inválido");
-          
-          for (const item of importedData) {
-            delete item.id; // remove old local id
-            await addDoc(collection(db, "users", currentUser.uid, "transactions"), item);
-          }
-          await loadTransactions();
-          showToast("¡Datos restaurados con éxito!");
-        } catch (err) {
-          showToast("Error al leer el archivo JSON");
+        async function loadUserData() {
+            // Cargar Transacciones
+            const querySnapTx = await getDocs(collection(db, `users/${currentUser.uid}/transactions`));
+            transactions = [];
+            querySnapTx.forEach((doc) => {
+                transactions.push({ id: doc.id, ...doc.data() });
+            });
+
+            // Cargar Categorías
+            const catDoc = await getDoc(doc(db, `users_config/${currentUser.uid}`)));
+            if (catDoc.exists()) {
+                const data = catDoc.data();
+                if (data.categories && data.categories.length > 0) {
+                    categories = data.categories;
+                }
+                if (data.appName) {
+                    document.getElementById('app-brand-name').textContent = data.appName;
+                    document.getElementById('page-title').textContent = data.appName;
+                    document.getElementById('setting-app-name').value = data.appName;
+                }
+            }
+
+            renderCategories();
+            renderUI();
         }
-      };
-      reader.readAsText(file);
-    }
 
-    // Voice Assistant Setup
-    function initVoiceRecognition() {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) return;
+        window.saveSettings = async () => {
+            const appName = document.getElementById('setting-app-name').value.trim() || "Mis Finanzas";
+            try {
+                await setDoc(doc(db, `users_config/${currentUser.uid}`), {
+                    appName,
+                    categories
+                }, { merge: true });
+                document.getElementById('app-brand-name').textContent = appName;
+                document.getElementById('page-title').textContent = appName;
+                alert("¡Configuración guardada con éxito!");
+            } catch (err) {
+                alert("Error al guardar la configuración");
+            }
+        };
 
-      recognition = new SpeechRecognition();
-      recognition.lang = 'es-PE';
-      recognition.continuous = false;
-      recognition.interimResults = false;
-
-      recognition.onstart = () => {
-        isListening = true;
-        document.getElementById('voiceMicBtn').classList.add('pulse-ring', 'bg-emerald-500');
-        document.getElementById('voiceMicBtn').classList.remove('bg-rose-500');
-        document.getElementById('voiceStatusText').innerText = "Escuchando...";
-        document.getElementById('voiceSubtext').innerText = "Di tu gasto o ingreso...";
-      };
-
-      recognition.onend = () => {
-        isListening = false;
-        document.getElementById('voiceMicBtn').classList.remove('pulse-ring', 'bg-emerald-500');
-        document.getElementById('voiceMicBtn').classList.add('bg-rose-500');
-        document.getElementById('voiceStatusText').innerText = "Asistente por Voz";
-        document.getElementById('voiceSubtext').innerText = "Toca el micro y habla";
-      };
-
-      recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        processVoiceCommand(transcript);
-      };
-
-      recognition.onerror = () => showToast("No se pudo reconocer la voz");
-    }
-
-    function toggleVoiceRecognition() {
-      if (!recognition) {
-        initVoiceRecognition();
-        if (!recognition) return showToast("Reconocimiento de voz no soportado");
-      }
-      if (isListening) recognition.stop();
-      else recognition.start();
-    }
-
-    function speakText(text) {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'es-PE';
-        window.speechSynthesis.speak(utterance);
-      }
-    }
-
-    async function processVoiceCommand(text) {
-      const lower = text.toLowerCase();
-      if (lower.includes('ir a resumen')) return switchTab('summary');
-      if (lower.includes('ir a historial')) return switchTab('history');
-      if (lower.includes('ir a agregar')) return switchTab('add');
-      if (lower.includes('cerrar sesión')) return logout();
-
-      const numberMatch = lower.match(/\d+(\.\d+)?/);
-      if (!numberMatch) {
-        showToast("No detecté ningún monto");
-        speakText("No entendí el monto.");
-        return;
-      }
-      const amount = parseFloat(numberMatch[0]);
-
-      let type = 'expense';
-      if (lower.includes('ingreso') || lower.includes('cobré') || lower.includes('gané') || lower.includes('sueldo')) {
-        type = 'income';
-      }
-
-      let category = 'Otros';
-      if (lower.includes('comida') || lower.includes('almuerzo')) category = 'Comida';
-      else if (lower.includes('taxi') || lower.includes('pasaje')) category = 'Transporte';
-      else if (lower.includes('moto') || lower.includes('repuesto')) category = 'Moto';
-      else if (lower.includes('carrera') || lower.includes('pedido')) category = 'Trabajo';
-
-      const today = new Date().toISOString().split('T')[0];
-      const newTx = { type, amount, category, date: today, note: `Voz: "${text}"`, createdAt: Date.now() };
-
-      try {
-        const docRef = await addDoc(collection(db, "users", currentUser.uid, "transactions"), newTx);
-        newTx.id = docRef.id;
-        transactions.unshift(newTx);
-        renderApp();
-        const msg = `Registrado ${type === 'expense' ? 'gasto' : 'ingreso'} de ${amount} soles`;
-        showToast(msg);
-        speakText(msg);
-      } catch (err) {
-        showToast("Error al registrar por voz");
-      }
-    }
-
-    function toggleVoiceManual() {
-      document.getElementById('voiceManualModal').classList.toggle('hidden');
-    }
-
-    function demoVoiceText(text) {
-      processVoiceCommand(text);
-      toggleVoiceManual();
-    }
-
-    function setType(type) {
-      currentType = type;
-      const btnExpense = document.getElementById('typeExpenseBtn');
-      const btnIncome = document.getElementById('typeIncomeBtn');
-      if (type === 'expense') {
-        btnExpense.className = 'py-2.5 rounded-lg text-white bg-rose-500 shadow-sm transition';
-        btnIncome.className = 'py-2.5 rounded-lg text-slate-600 transition';
-      } else {
-        btnIncome.className = 'py-2.5 rounded-lg text-white bg-emerald-500 shadow-sm transition';
-        btnExpense.className = 'py-2.5 rounded-lg text-slate-600 transition';
-      }
-    }
-
-    function switchTab(tab) {
-      document.getElementById('viewSummary').classList.add('hidden');
-      document.getElementById('viewAdd').classList.add('hidden');
-      document.getElementById('viewHistory').classList.add('hidden');
-
-      document.getElementById('tabSummary').className = 'flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-600 py-1 px-4';
-      document.getElementById('tabHistory').className = 'flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-600 py-1 px-4';
-
-      if (tab === 'summary') {
-        document.getElementById('viewSummary').classList.remove('hidden');
-        document.getElementById('tabSummary').className = 'flex flex-col items-center gap-1 text-emerald-600 py-1 px-4';
-      } else if (tab === 'add') {
-        document.getElementById('viewAdd').classList.remove('hidden');
-        setDefaultDate();
-      } else if (tab === 'history') {
-        document.getElementById('viewHistory').classList.remove('hidden');
-        document.getElementById('tabHistory').className = 'flex flex-col items-center gap-1 text-emerald-600 py-1 px-4';
-        renderHistory();
-      }
-    }
-
-    function renderApp() {
-      let income = 0, expense = 0;
-      transactions.forEach(t => t.type === 'income' ? income += t.amount : expense += t.amount);
-      
-      document.getElementById('totalBalance').innerText = `S/ ${(income - expense).toFixed(2)}`;
-      document.getElementById('totalIncome').innerText = `S/ ${income.toFixed(2)}`;
-      document.getElementById('totalExpense').innerText = `S/ ${expense.toFixed(2)}`;
-
-      renderChart();
-      renderRecent();
-    }
-
-    function renderChart() {
-      const ctx = document.getElementById('categoryChart').getContext('2d');
-      const expenses = transactions.filter(t => t.type === 'expense');
-      const categoryTotals = {};
-
-      expenses.forEach(t => categoryTotals[t.category] = (categoryTotals[t.category] || 0) + t.amount);
-      const labels = Object.keys(categoryTotals);
-      const data = Object.values(categoryTotals);
-
-      if (chartInstance) chartInstance.destroy();
-
-      chartInstance = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: labels.length ? labels : ['Sin Gastos'],
-          datasets: [{
-            data: data.length ? data : [1],
-            backgroundColor: data.length ? ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#64748b'] : ['#e2e8f0']
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } }
+        function renderCategories() {
+            const select = document.getElementById('tx-category');
+            select.innerHTML = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
         }
-      });
-    }
 
-    function renderRecent() {
-      const list = document.getElementById('recentTransactionsList');
-      if (!list) return;
-      list.innerHTML = '';
-      transactions.slice(0, 4).forEach(t => list.appendChild(createTxElement(t)));
-    }
+        window.addCategory = async () => {
+            const nameInput = document.getElementById('new-category-name');
+            const name = nameInput.value.trim();
+            if (!name) return;
+            if (categories.includes(name)) {
+                alert('La categoría ya existe');
+                return;
+            }
 
-    function renderHistory() {
-      const list = document.getElementById('fullHistoryList');
-      const category = document.getElementById('filterCategory').value;
-      if (!list) return;
-      list.innerHTML = '';
-      
-      const filtered = category === 'ALL' ? transactions : transactions.filter(t => t.category === category);
-      filtered.forEach(t => list.appendChild(createTxElement(t)));
-    }
+            categories.push(name);
+            nameInput.value = '';
+            renderCategories();
+            await saveSettings();
+        };
 
-    function createTxElement(t) {
-      const div = document.createElement('div');
-      div.className = 'flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100';
-      const isInc = t.type === 'income';
-      div.innerHTML = `
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs ${isInc ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}">
-            <i class="fa-solid ${isInc ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
-          </div>
-          <div>
-            <p class="text-xs font-bold text-slate-800">${t.category}</p>
-            <p class="text-[10px] text-slate-400">${t.date} ${t.note ? '• ' + t.note : ''}</p>
-          </div>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="text-xs font-extrabold ${isInc ? 'text-emerald-600' : 'text-rose-600'}">
-            ${isInc ? '+' : '-'} S/ ${t.amount.toFixed(2)}
-          </span>
-          <button onclick="deleteTransaction('${t.id}')" class="text-slate-300 hover:text-rose-500 text-xs">
-            <i class="fa-solid fa-trash"></i>
-          </button>
-        </div>
-      `;
-      return div;
-    }
+        document.getElementById('transaction-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const description = document.getElementById('tx-description').value;
+            const amount = parseFloat(document.getElementById('tx-amount').value);
+            const category = document.getElementById('tx-category').value;
 
-    // Auth State Listener
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        currentUser = user;
-        document.getElementById('authContainer').classList.add('hidden');
-        document.getElementById('forgotPasswordContainer').classList.add('hidden');
-        document.getElementById('appContainer').classList.remove('hidden');
-        document.getElementById('userNameDisplay').innerText = user.displayName || user.email.split('@')[0];
-        document.getElementById('userInitial').innerText = (user.displayName || user.email)[0].toUpperCase();
-        loadTransactions();
-        setDefaultDate();
-        initVoiceRecognition();
-      } else {
-        currentUser = null;
-        document.getElementById('appContainer').classList.add('hidden');
-        document.getElementById('authContainer').classList.remove('hidden');
-      }
-    });
-  </script>
+            const newTx = {
+                description,
+                amount,
+                type: currentType,
+                category,
+                date: new Date().toISOString()
+            };
+
+            try {
+                const docRef = await addDoc(collection(db, `users/${currentUser.uid}/transactions`), newTx);
+                transactions.push({ id: docRef.id, ...newTx });
+                document.getElementById('transaction-form').reset();
+                setTxType('expense');
+                renderUI();
+            } catch (err) {
+                alert("Error al registrar transacción");
+            }
+        });
+
+        function renderUI() {
+            let income = 0;
+            let expense = 0;
+            const listEl = document.getElementById('transactions-list');
+            listEl.innerHTML = '';
+
+            transactions.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(tx => {
+                if (tx.type === 'income') income += tx.amount;
+                else expense += tx.amount;
+
+                const item = document.createElement('div');
+                item.className = "flex justify-between items-center p-2.5 bg-slate-50 rounded-xl text-sm border border-slate-100";
+                item.innerHTML = `
+                    <div>
+                        <p class="font-semibold text-slate-700">${tx.description}</p>
+                        <span class="text-xs text-slate-400 bg-slate-200 px-2 py-0.5 rounded-full">${tx.category || 'General'}</span>
+                    </div>
+                    <span class="font-bold ${tx.type === 'income' ? 'text-emerald-600' : 'text-red-500'}">
+                        ${tx.type === 'income' ? '+' : '-'}$${tx.amount.toFixed(2)}
+                    </span>
+                `;
+                listEl.appendChild(item);
+            });
+
+            const balance = income - expense;
+            document.getElementById('total-balance').textContent = `$${balance.toFixed(2)}`;
+            document.getElementById('total-income').textContent = `$${income.toFixed(2)}`;
+            document.getElementById('total-expense').textContent = `$${expense.toFixed(2)}`;
+        }
+
+        window.exportJSON = () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ transactions, categories }));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", "misfinanzas_respaldo.json");
+            dlAnchorElem.click();
+        };
+
+        window.importJSON = async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.transactions) {
+                        for (let t of data.transactions) {
+                            delete t.id;
+                            await addDoc(collection(db, `users/${currentUser.uid}/transactions`), t);
+                        }
+                    }
+                    alert("¡Datos importados con éxito!");
+                    loadUserData();
+                } catch (err) {
+                    alert("El archivo no es válido");
+                }
+            };
+            reader.readAsText(file);
+        };
+    </script>
 </body>
 </html>
