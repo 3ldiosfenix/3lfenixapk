@@ -20,8 +20,10 @@
         <!-- Screen Autenticación -->
         <div id="auth-screen" class="flex-1 flex flex-col justify-center p-6 bg-slate-900 text-white">
             <div class="text-center mb-8">
-                <div onclick="playIntroMusic()" class="bg-emerald-500 text-white w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/30 cursor-pointer transition transform hover:scale-105 active:scale-95" title="¡Toca para reproducir intro!">
-                    <i class="fa-solid fa-wallet text-3xl"></i>
+                <!-- Botón de Música con animación y cambio de icono -->
+                <div id="music-btn" onclick="toggleIntroMusic()" class="bg-emerald-500 text-white w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/30 cursor-pointer transition transform hover:scale-105 active:scale-95 relative" title="Toca para reproducir / pausar música">
+                    <i id="music-icon" class="fa-solid fa-play text-3xl ml-1"></i>
+                    <span id="music-badge" class="absolute -top-1 -right-1 bg-rose-500 text-[9px] font-bold px-2 py-0.5 rounded-full border-2 border-slate-900 hidden">PLAYING</span>
                 </div>
                 <h1 id="auth-title" class="text-2xl font-bold">Iniciar Sesión</h1>
                 <p class="text-xs text-slate-400 mt-1">Gestiona tus finanzas personales de forma fácil</p>
@@ -63,8 +65,8 @@
             <!-- Header -->
             <header class="bg-slate-900 text-white px-5 py-4 flex justify-between items-center rounded-b-2xl shadow-md">
                 <div class="flex items-center space-x-2">
-                    <div class="bg-emerald-500 text-white w-8 h-8 rounded-xl flex items-center justify-center">
-                        <i class="fa-solid fa-wallet text-sm"></i>
+                    <div onclick="toggleIntroMusic()" class="bg-emerald-500 text-white w-8 h-8 rounded-xl flex items-center justify-center cursor-pointer hover:bg-emerald-600 transition" title="Música de intro">
+                        <i id="header-music-icon" class="fa-solid fa-music text-xs"></i>
                     </div>
                     <div>
                         <span id="app-brand-name" class="font-bold text-base block leading-tight">Mis Finanzas</span>
@@ -102,7 +104,6 @@
                 <div class="bg-emerald-600 text-white p-5 rounded-3xl shadow-lg relative overflow-hidden">
                     <div class="flex justify-between items-center">
                         <p id="balance-label" class="text-[10px] font-bold uppercase tracking-widest opacity-80">BALANCE TOTAL</p>
-                        <!-- Botón para ocultar/mostrar saldo -->
                         <button onclick="toggleBalanceVisibility()" class="text-emerald-200 hover:text-white text-sm focus:outline-none" title="Ocultar/Mostrar saldo">
                             <i id="toggle-eye-icon" class="fa-solid fa-eye-slash"></i>
                         </button>
@@ -298,7 +299,8 @@
         let currentUser = null;
         let currentType = 'expense';
         let transactions = [];
-        let isBalanceVisible = false; // Control de visibilidad del balance
+        let isBalanceVisible = false;
+        let isAudioPlaying = false;
         
         let categories = [
             { name: 'Comida / Alimentos', color: '#EF4444' },
@@ -311,7 +313,40 @@
 
         document.getElementById('tx-date').valueAsDate = new Date();
 
-        // Función para ocultar o revelar montos
+        // Control de reproducción / pausa de música
+        window.toggleIntroMusic = () => {
+            const audio = document.getElementById('intro-audio');
+            const musicIcon = document.getElementById('music-icon');
+            const musicBadge = document.getElementById('music-badge');
+            const headerIcon = document.getElementById('header-music-icon');
+
+            if (isAudioPlaying) {
+                audio.pause();
+                isAudioPlaying = false;
+                if (musicIcon) musicIcon.className = "fa-solid fa-play text-3xl ml-1";
+                if (musicBadge) musicBadge.classList.add('hidden');
+                if (headerIcon) headerIcon.className = "fa-solid fa-music text-xs opacity-70";
+            } else {
+                audio.play().then(() => {
+                    isAudioPlaying = true;
+                    if (musicIcon) musicIcon.className = "fa-solid fa-pause text-3xl";
+                    if (musicBadge) musicBadge.classList.remove('hidden');
+                    if (headerIcon) headerIcon.className = "fa-solid fa-volume-high text-xs text-amber-300 animate-pulse";
+                }).catch(e => console.log("Permiso de reproduccion bloqueado por el navegador"));
+            }
+        };
+
+        // Si la música termina por sí sola, restablece los botones
+        document.getElementById('intro-audio').addEventListener('ended', () => {
+            isAudioPlaying = false;
+            const musicIcon = document.getElementById('music-icon');
+            const musicBadge = document.getElementById('music-badge');
+            const headerIcon = document.getElementById('header-music-icon');
+            if (musicIcon) musicIcon.className = "fa-solid fa-play text-3xl ml-1";
+            if (musicBadge) musicBadge.classList.add('hidden');
+            if (headerIcon) headerIcon.className = "fa-solid fa-music text-xs opacity-70";
+        });
+
         window.toggleBalanceVisibility = () => {
             isBalanceVisible = !isBalanceVisible;
             const eyeIcon = document.getElementById('toggle-eye-icon');
@@ -336,16 +371,6 @@
             const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
             return (yiq >= 150) ? '#1E293B' : '#FFFFFF';
         }
-
-        window.playIntroMusic = () => {
-            const audio = document.getElementById('intro-audio');
-            audio.currentTime = 0;
-            audio.play().catch(e => console.log("Audio bloqueado sin interacción previa"));
-        };
-
-        window.addEventListener('DOMContentLoaded', () => {
-            playIntroMusic();
-        });
 
         window.switchTab = (tab) => {
             document.getElementById('tab-dashboard').classList.add('hidden');
@@ -718,214 +743,4 @@
             document.getElementById('tx-edit-id').value = tx.id;
             document.getElementById('tx-amount').value = tx.amount;
             document.getElementById('tx-category').value = tx.category || categories[0].name;
-            document.getElementById('tx-date').value = tx.date ? tx.date.split('T')[0] : '';
-            document.getElementById('tx-description').value = tx.description;
-            setTxType(tx.type);
-
-            document.getElementById('form-title').textContent = "MODIFICAR REGISTRO";
-            document.getElementById('form-submit-btn').textContent = "Actualizar Transacción";
-            document.getElementById('form-cancel-btn').classList.remove('hidden');
-
-            switchTab('add');
-        };
-
-        window.cancelEdit = () => {
-            document.getElementById('transaction-form').reset();
-            document.getElementById('tx-edit-id').value = '';
-            document.getElementById('tx-date').valueAsDate = new Date();
-            setTxType('expense');
-
-            document.getElementById('form-title').textContent = "NUEVO REGISTRO";
-            document.getElementById('form-submit-btn').textContent = "Guardar Transacción";
-            document.getElementById('form-cancel-btn').classList.add('hidden');
-            switchTab('dashboard');
-        };
-
-        window.deleteTx = async (id) => {
-            if (!confirm("¿Deseas eliminar este movimiento?")) return;
-            try {
-                await deleteDoc(doc(db, `users/${currentUser.uid}/transactions/${id}`));
-                transactions = transactions.filter(t => t.id !== id);
-                renderUI();
-            } catch (err) {
-                alert("Error al eliminar");
-            }
-        };
-
-        function isSameWeek(d1, d2) {
-            const date1 = new Date(d1);
-            const date2 = new Date(d2);
-            const firstDayOfWeek1 = new Date(date1.setDate(date1.getDate() - date1.getDay()));
-            const firstDayOfWeek2 = new Date(date2.setDate(date2.getDate() - date2.getDay()));
-            return firstDayOfWeek1.toDateString() === firstDayOfWeek2.toDateString();
-        }
-
-        function isSameMonth(d1, d2) {
-            const date1 = new Date(d1);
-            const date2 = new Date(d2);
-            return date1.getFullYear() === date2.getFullYear() && date1.getMonth() === date2.getMonth();
-        }
-
-        window.renderUI = () => {
-            const timeFilter = document.getElementById('time-filter').value;
-            const categoryFilter = document.getElementById('category-filter').value;
-            const now = new Date();
-
-            let income = 0;
-            let expense = 0;
-            const recentEl = document.getElementById('dashboard-recent-list');
-            const fullHistoryEl = document.getElementById('full-history-list');
-            recentEl.innerHTML = '';
-            fullHistoryEl.innerHTML = '';
-
-            const categoryTotals = {};
-
-            const timeFilteredTransactions = transactions.filter(tx => {
-                if (!tx.date) return true;
-                if (timeFilter === 'week') return isSameWeek(tx.date, now);
-                if (timeFilter === 'month') return isSameMonth(tx.date, now);
-                return true;
-            });
-
-            timeFilteredTransactions.forEach(tx => {
-                if (tx.type === 'income') income += tx.amount;
-                else {
-                    expense += tx.amount;
-                    categoryTotals[tx.category || 'General'] = (categoryTotals[tx.category || 'General'] || 0) + tx.amount;
-                }
-            });
-
-            const categoryFilteredTransactions = timeFilteredTransactions.filter(tx => {
-                if (categoryFilter === 'all') return true;
-                return (tx.category || 'General') === categoryFilter;
-            });
-
-            categoryFilteredTransactions.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((tx, idx) => {
-                const catObj = categories.find(c => c.name === (tx.category || 'General'));
-                const catColor = catObj ? catObj.color : '#000000';
-                const textColor = getContrastTextColor(catColor);
-
-                const formattedDate = tx.date ? tx.date.split('T')[0] : '';
-                const itemHTML = `
-                    <div class="flex justify-between items-center p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-9 h-9 rounded-full ${tx.type === 'income' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-500'} flex items-center justify-center text-xs">
-                                <i class="fa-solid ${tx.type === 'income' ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
-                            </div>
-                            <div>
-                                <p class="font-bold text-slate-800 text-xs">${tx.description}</p>
-                                <p class="text-[10px] text-slate-400">${formattedDate} • <span class="px-2 py-0.5 rounded-full font-semibold text-[9px]" style="background-color: ${catColor}; color: ${textColor};">${tx.category || 'General'}</span></p>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="font-extrabold text-xs ${tx.type === 'income' ? 'text-emerald-600' : 'text-slate-800'}">
-                                ${tx.type === 'income' ? '+' : '-'} S/ ${tx.amount.toFixed(2)}
-                            </span>
-                            <button onclick="editTx('${tx.id}')" title="Modificar" class="text-blue-400 hover:text-blue-600 text-xs pl-1"><i class="fa-solid fa-pen-to-square"></i></button>
-                            <button onclick="deleteTx('${tx.id}')" title="Eliminar" class="text-slate-300 hover:text-red-500 text-xs pl-1"><i class="fa-solid fa-trash-can"></i></button>
-                        </div>
-                    </div>
-                `;
-
-                if (idx < 5) recentEl.innerHTML += itemHTML;
-                fullHistoryEl.innerHTML += itemHTML;
-            });
-
-            if (categoryFilteredTransactions.length === 0) {
-                recentEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">Sin movimientos encontrados</p>`;
-                fullHistoryEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Sin movimientos</p>`;
-            }
-
-            const balanceLabel = document.getElementById('balance-label');
-            if (timeFilter === 'week') balanceLabel.textContent = "BALANCE DE ESTA SEMANA";
-            else if (timeFilter === 'month') balanceLabel.textContent = "BALANCE DE ESTE MES";
-            else balanceLabel.textContent = "BALANCE TOTAL";
-
-            const balance = income - expense;
-
-            // Mostrar el balance real o con estrellas en función de isBalanceVisible
-            if (isBalanceVisible) {
-                document.getElementById('total-balance').textContent = `S/ ${balance.toFixed(2)}`;
-                document.getElementById('total-income').textContent = `S/ ${income.toFixed(2)}`;
-                document.getElementById('total-expense').textContent = `S/ ${expense.toFixed(2)}`;
-            } else {
-                document.getElementById('total-balance').textContent = `S/ *****`;
-                document.getElementById('total-income').textContent = `S/ *****`;
-                document.getElementById('total-expense').textContent = `S/ *****`;
-            }
-
-            renderChart(categoryTotals);
-        };
-
-        function renderChart(categoryTotals) {
-            const ctx = document.getElementById('categoryChart').getContext('2d');
-            const labels = Object.keys(categoryTotals);
-            const data = Object.values(categoryTotals);
-
-            const bgColors = labels.map(label => {
-                const found = categories.find(c => c.name === label);
-                return found ? found.color : '#3B82F6';
-            });
-
-            if (chartInstance) chartInstance.destroy();
-
-            if (labels.length === 0) {
-                chartInstance = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Sin Gastos'],
-                        datasets: [{ data: [1], backgroundColor: ['#E2E8F0'] }]
-                    },
-                    options: { plugins: { legend: { display: false } }, cutout: '75%' }
-                });
-                return;
-            }
-
-            chartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: bgColors
-                    }]
-                },
-                options: {
-                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
-                    cutout: '70%'
-                }
-            });
-        }
-
-        window.exportJSON = () => {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ transactions, categories }));
-            const dlAnchorElem = document.createElement('a');
-            dlAnchorElem.setAttribute("href", dataStr);
-            dlAnchorElem.setAttribute("download", "misfinanzas_respaldo.json");
-            dlAnchorElem.click();
-        };
-
-        window.importJSON = async (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (data.transactions) {
-                        for (let t of data.transactions) {
-                            delete t.id;
-                            await addDoc(collection(db, `users/${currentUser.uid}/transactions`), t);
-                        }
-                    }
-                    alert("¡Datos importados con éxito!");
-                    loadUserData();
-                } catch (err) {
-                    alert("Archivo no válido");
-                }
-            };
-            reader.readAsText(file);
-        };
-    </script>
-</body>
-</html>
+            document.getElementById('tx-date').value = tx.date ?
