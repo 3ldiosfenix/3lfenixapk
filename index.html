@@ -166,7 +166,6 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Tus credenciales correctas configuradas
         const firebaseConfig = {
             apiKey: "AIzaSyCuwUQojfewTYO-A2iaO75HHp234r-Z0Tg",
             authDomain: "misfinanzasapp-dc2d1.firebaseapp.com",
@@ -242,7 +241,6 @@
         };
 
         function processSmartVoiceText(text) {
-            // Crear categoría por voz
             if (text.includes('crear categoría') || text.includes('agregar categoría') || text.includes('nueva categoría')) {
                 let catName = text
                     .replace(/crear categoría|agregar categoría|nueva categoría|de|llamada|que se llame|por nombre/g, '')
@@ -261,21 +259,18 @@
                 }
             }
 
-            // Detectar tipo (Ingreso / Gasto)
             if (text.includes('ingreso') || text.includes('ganancia') || text.includes('cobro')) {
                 setTxType('income');
             } else {
                 setTxType('expense');
             }
 
-            // Extraer Monto
             const numbers = text.match(/\d+([.,]\d+)?/g);
             if (numbers && numbers.length > 0) {
                 const amount = parseFloat(numbers[0].replace(',', '.'));
                 document.getElementById('tx-amount').value = amount;
             }
 
-            // Extraer Descripción limpia
             let cleanDescription = text
                 .replace(/gasto|ingreso|de|en|por|soles|sol|\d+([.,]\d+)?/g, '')
                 .trim();
@@ -321,13 +316,18 @@
             switchBtn.textContent = isRegister ? '¿Ya tienes cuenta? Inicia Sesión' : '¿No tienes cuenta? Regístrate';
         });
 
+        // Manejador del formulario de autenticación con corrección de autocompletado
         document.getElementById('auth-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-password').value;
-            const name = document.getElementById('auth-name').value;
+            const emailInput = document.getElementById('auth-email');
+            const passwordInput = document.getElementById('auth-password');
+            const nameInput = document.getElementById('auth-name');
             const errDiv = document.getElementById('auth-error');
             errDiv.classList.add('hidden');
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+            const name = nameInput.value.trim();
 
             try {
                 if (isRegister) {
