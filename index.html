@@ -253,14 +253,12 @@
                         <div>
                             <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Foto / Comprobante (Opcional)</label>
                             <div class="flex items-center gap-3">
-                                <!-- Botón Cuadrado con símbolo + -->
                                 <label id="photo-upload-box" class="w-20 h-20 border-2 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center cursor-pointer bg-slate-50 hover:bg-slate-100 transition relative overflow-hidden">
                                     <i class="fa-solid fa-plus text-slate-400 text-lg"></i>
                                     <span class="text-[9px] text-slate-400 mt-1 font-semibold">Añadir</span>
                                     <input type="file" id="tx-photo-file" accept="image/*" class="hidden" onchange="previewTxPhoto(event)">
                                 </label>
 
-                                <!-- Contenedor de Vista Previa -->
                                 <div id="photo-preview-container" class="hidden relative w-20 h-20 rounded-2xl overflow-hidden border border-slate-300 shadow-sm">
                                     <img id="photo-preview-img" src="" alt="Comprobante" class="w-full h-full object-cover">
                                     <button type="button" onclick="removeTxPhoto()" class="absolute top-1 right-1 bg-rose-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] shadow" title="Eliminar foto">
@@ -677,12 +675,26 @@
                 return (tx.category || 'General') === categoryFilter;
             });
 
-            categoryFilteredTransactions.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((tx, idx) => {
+            // ORDENAMIENTO ESTRICTO POR FECHA Y HORA (DEL MÁS RECIENTE AL MÁS ANTIGUO)
+            categoryFilteredTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            categoryFilteredTransactions.forEach((tx, idx) => {
                 const catObj = categories.find(c => c.name === (tx.category || 'General'));
                 const catColor = catObj ? catObj.color : '#000000';
                 const textColor = getContrastTextColor(catColor);
 
-                const formattedDate = tx.date ? tx.date.split('T')[0] : '';
+                // Formato de fecha y hora legible (Ej: 2026-10-23 15:30)
+                let formattedDate = '';
+                if (tx.date) {
+                    const d = new Date(tx.date);
+                    const year = d.getFullYear();
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    const hours = String(d.getHours()).padStart(2, '0');
+                    const minutes = String(d.getMinutes()).padStart(2, '0');
+                    formattedDate = `${year}-${month}-${day} ${hours}:${minutes}`;
+                }
+
                 const photoBadge = tx.photo ? `<span class="ml-1 text-emerald-600" title="Tiene comprobante"><i class="fa-solid fa-image"></i></span>` : '';
 
                 const itemHTML = `
@@ -935,12 +947,24 @@
             const category = document.getElementById('tx-category').value;
             const dateVal = document.getElementById('tx-date').value;
 
+            // Mantener la hora actual exacta si es un nuevo registro, o respetar la fecha elegida con hora actual
+            let fullDateIso;
+            if (editId) {
+                const existingTx = transactions.find(t => t.id === editId);
+                fullDateIso = existingTx ? existingTx.date : new Date().toISOString();
+            } else {
+                const now = new Date();
+                const selectedDate = new Date(dateVal + 'T00:00:00');
+                selectedDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
+                fullDateIso = selectedDate.toISOString();
+            }
+
             const txData = {
                 description,
                 amount,
                 type: currentType,
                 category,
-                date: new Date(dateVal + 'T12:00:00').toISOString(),
+                date: fullDateIso,
                 photo: currentPhotoBase64 || null
             };
 
