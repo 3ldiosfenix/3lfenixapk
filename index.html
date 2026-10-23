@@ -11,7 +11,7 @@
 </head>
 <body class="bg-slate-900 text-slate-800 min-h-screen flex flex-col justify-between font-sans">
 
-    <!-- Aquí enlazamos tu archivo MP3 subido al hosting -->
+    <!-- Audio Intro MP3 -->
     <audio id="intro-audio" src="intro.mp3" preload="auto"></audio>
 
     <!-- Container Principal de la App Mobile -->
@@ -60,7 +60,7 @@
         <!-- Screen Principal (App Screen) -->
         <div id="app-screen" class="hidden flex-1 flex flex-col bg-slate-100">
             
-            <!-- Barra Superior / Header -->
+            <!-- Header -->
             <header class="bg-slate-900 text-white px-5 py-4 flex justify-between items-center rounded-b-2xl shadow-md">
                 <div class="flex items-center space-x-2">
                     <div class="bg-emerald-500 text-white w-8 h-8 rounded-xl flex items-center justify-center">
@@ -82,7 +82,7 @@
                 </div>
             </header>
 
-            <!-- Vista 1: Resumen Dashboard -->
+            <!-- Dashboard -->
             <main id="tab-dashboard" class="p-4 space-y-4">
                 <div class="flex justify-between items-center px-1">
                     <div>
@@ -118,7 +118,7 @@
                     </div>
                 </div>
 
-                <!-- Tarjeta de Asistente por Voz -->
+                <!-- Asistente por Voz -->
                 <div class="bg-slate-900 text-white p-4 rounded-2xl flex items-center justify-between shadow-md">
                     <div class="flex items-center space-x-3">
                         <button type="button" onclick="startMasterVoiceAssistant()" class="bg-rose-500 hover:bg-rose-600 w-12 h-12 rounded-2xl flex items-center justify-center text-white text-lg shadow-lg shadow-rose-500/30 transition transform active:scale-95">
@@ -134,7 +134,6 @@
                     </button>
                 </div>
 
-                <!-- Manual / Ejemplos desplegables -->
                 <div id="voice-help-box" class="hidden bg-slate-800 text-slate-300 p-3.5 rounded-2xl text-xs space-y-1.5 border border-slate-700">
                     <p class="font-bold text-emerald-400"><i class="fa-solid fa-lightbulb mr-1"></i> Comandos de voz:</p>
                     <p>• <i>"Crear categoría Repuestos"</i></p>
@@ -142,7 +141,7 @@
                     <p>• <i>"Ingreso de 50 soles por pedido"</i></p>
                 </div>
 
-                <!-- Gráfico de Gastos por Categoría -->
+                <!-- Gráfico con colores personalizados -->
                 <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/80">
                     <h3 class="text-xs font-bold text-slate-600 tracking-wider uppercase mb-3">GASTOS POR CATEGORÍA</h3>
                     <div class="w-48 h-48 mx-auto relative flex items-center justify-center">
@@ -160,7 +159,7 @@
                 </div>
             </main>
 
-            <!-- Vista 2: Formulario de Transacción (Crear o Modificar) -->
+            <!-- Formulario de Transacción -->
             <main id="tab-add" class="hidden p-4 space-y-4">
                 <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200/80 space-y-4">
                     <h2 id="form-title" class="text-base font-bold text-slate-800">NUEVO REGISTRO</h2>
@@ -197,7 +196,7 @@
                 </div>
             </main>
 
-            <!-- Vista 3: Historial Completo -->
+            <!-- Historial Completo -->
             <main id="tab-history" class="hidden p-4 space-y-4">
                 <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/80">
                     <h3 class="text-xs font-bold text-slate-600 tracking-wider uppercase mb-3">HISTORIAL COMPLETO</h3>
@@ -205,7 +204,7 @@
                 </div>
             </main>
 
-            <!-- Modal Configuración y Gestión de Categorías -->
+            <!-- Modal Configuración y Selección Manual de Colores -->
             <div id="settings-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                 <div class="bg-white w-full max-w-sm p-5 rounded-3xl shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
                     <div class="flex justify-between items-center">
@@ -218,14 +217,15 @@
                             <input type="text" id="setting-app-name" placeholder="Mis Finanzas" class="w-full px-3 py-2 border text-sm rounded-xl outline-none focus:ring-1 focus:ring-emerald-500">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-500 mb-1">Añadir Nueva Categoría</label>
-                            <div class="flex gap-2">
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Añadir Nueva Categoría con Color</label>
+                            <div class="flex items-center gap-2">
                                 <input type="text" id="new-category-name" placeholder="Ej. Combustible" class="flex-1 px-3 py-2 border text-sm rounded-xl outline-none focus:ring-1 focus:ring-emerald-500">
+                                <input type="color" id="new-category-color" value="#10B981" title="Elige un color para esta categoría" class="w-9 h-9 p-0.5 border rounded-xl cursor-pointer bg-slate-50">
                                 <button type="button" onclick="addCategory()" class="bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs font-bold hover:bg-slate-700">Crear</button>
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-500 mb-1">Listado de Categorías (Modificar o Eliminar)</label>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Listado (Define tu propio color y nombre)</label>
                             <div id="categories-management-list" class="space-y-2 max-h-48 overflow-y-auto border p-2 rounded-xl bg-slate-50"></div>
                         </div>
                         <button type="button" onclick="saveSettings()" class="w-full bg-emerald-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-emerald-700 transition">Cerrar y Guardar</button>
@@ -278,19 +278,25 @@
         let currentUser = null;
         let currentType = 'expense';
         let transactions = [];
-        let categories = ['Comida / Alimentos', 'Transporte', 'Servicios', 'Salario', 'General'];
+        
+        // Categorías iniciales con colores asignados explícitamente
+        let categories = [
+            { name: 'Comida / Alimentos', color: '#EF4444' },
+            { name: 'Transporte', color: '#3B82F6' },
+            { name: 'Servicios', color: '#F59E0B' },
+            { name: 'Salario', color: '#10B981' },
+            { name: 'General', color: '#8B5CF6' }
+        ];
         let chartInstance = null;
 
         document.getElementById('tx-date').valueAsDate = new Date();
 
-        // Función para reproducir tu MP3 al tocar el logo o iniciar
         window.playIntroMusic = () => {
             const audio = document.getElementById('intro-audio');
             audio.currentTime = 0;
-            audio.play().catch(e => console.log("Reproducción automática bloqueada por políticas del navegador"));
+            audio.play().catch(e => console.log("Audio no iniciado por interacción previa"));
         };
 
-        // Intenta reproducir el MP3 al cargar la página
         window.addEventListener('DOMContentLoaded', () => {
             playIntroMusic();
         });
@@ -411,8 +417,9 @@
 
                 if (cleanCatName.length > 0) {
                     cleanCatName = cleanCatName.charAt(0).toUpperCase() + cleanCatName.slice(1).toLowerCase();
-                    if (!categories.includes(cleanCatName)) {
-                        categories.push(cleanCatName);
+                    if (!categories.some(c => c.name.toLowerCase() === cleanCatName.toLowerCase())) {
+                        // Asigna un color azul base al crear por voz; el usuario lo puede cambiar luego
+                        categories.push({ name: cleanCatName, color: '#3B82F6' });
                         renderCategories();
                         renderCategoriesManagement();
                         await saveSettingsToCloud();
@@ -440,11 +447,11 @@
             if (description.length === 0) description = "Movimiento por voz";
             description = description.charAt(0).toUpperCase() + description.slice(1);
 
-            let matchedCategory = categories[0];
+            let matchedCategory = categories[0].name;
             for (let cat of categories) {
-                const normCat = cat.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                const normCat = cat.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
                 if (textNormalized.includes(normCat.split('/')[0].trim())) {
-                    matchedCategory = cat;
+                    matchedCategory = cat.name;
                     break;
                 }
             }
@@ -526,7 +533,10 @@
             const catDoc = await getDoc(doc(db, `users_config/${currentUser.uid}`));
             if (catDoc.exists()) {
                 const data = catDoc.data();
-                if (data.categories && data.categories.length > 0) categories = data.categories;
+                if (data.categories && data.categories.length > 0) {
+                    // Mantiene retrocompatibilidad en caso de cadenas simples guardadas previamente
+                    categories = data.categories.map(c => typeof c === 'string' ? { name: c, color: '#3B82F6' } : c);
+                }
                 if (data.appName) {
                     document.getElementById('app-brand-name').textContent = data.appName;
                     document.getElementById('setting-app-name').value = data.appName;
@@ -555,34 +565,48 @@
 
         function renderCategories() {
             const select = document.getElementById('tx-category');
-            select.innerHTML = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+            select.innerHTML = categories.map(cat => `<option value="${cat.name}">${cat.name}</option>`).join('');
         }
 
         function renderCategoriesManagement() {
             const listEl = document.getElementById('categories-management-list');
             listEl.innerHTML = categories.map((cat, index) => `
                 <div class="flex items-center justify-between gap-2 bg-white p-1.5 rounded-lg border text-xs">
-                    <input type="text" value="${cat}" id="cat-input-${index}" onchange="updateCategory(${index})" class="flex-1 px-2 py-1 bg-slate-50 border rounded-md outline-none focus:ring-1 focus:ring-emerald-500 font-medium">
+                    <input type="color" value="${cat.color || '#3B82F6'}" id="cat-color-${index}" onchange="updateCategoryColor(${index})" title="Cambiar color" class="w-8 h-8 p-0.5 border rounded-md cursor-pointer bg-slate-50">
+                    <input type="text" value="${cat.name}" id="cat-input-${index}" onchange="updateCategoryName(${index})" class="flex-1 px-2 py-1 bg-slate-50 border rounded-md outline-none focus:ring-1 focus:ring-emerald-500 font-medium">
                     <button type="button" onclick="deleteCategory(${index})" class="text-red-500 hover:text-red-700 px-2 py-1"><i class="fa-solid fa-trash-can"></i></button>
                 </div>
             `).join('');
         }
 
-        window.updateCategory = (index) => {
+        window.updateCategoryName = (index) => {
             const input = document.getElementById(`cat-input-${index}`);
             const newName = input.value.trim();
             if (!newName) return;
-            categories[index] = newName;
+            categories[index].name = newName;
             renderCategories();
+            saveSettingsToCloud();
+        };
+
+        // Permite al usuario definir manualmente el color de cada categoría
+        window.updateCategoryColor = (index) => {
+            const input = document.getElementById(`cat-color-${index}`);
+            categories[index].color = input.value;
+            renderUI();
             saveSettingsToCloud();
         };
 
         window.addCategory = async () => {
             const nameInput = document.getElementById('new-category-name');
+            const colorInput = document.getElementById('new-category-color');
             const name = nameInput.value.trim();
-            if (!name || categories.includes(name)) return;
-            categories.push(name);
+            const color = colorInput.value;
+            
+            if (!name || categories.some(c => c.name.toLowerCase() === name.toLowerCase())) return;
+            
+            categories.push({ name, color });
             nameInput.value = '';
+            colorInput.value = '#10B981';
             renderCategories();
             renderCategoriesManagement();
             await saveSettingsToCloud();
@@ -643,7 +667,7 @@
 
             document.getElementById('tx-edit-id').value = tx.id;
             document.getElementById('tx-amount').value = tx.amount;
-            document.getElementById('tx-category').value = tx.category || categories[0];
+            document.getElementById('tx-category').value = tx.category || categories[0].name;
             document.getElementById('tx-date').value = tx.date ? tx.date.split('T')[0] : '';
             document.getElementById('tx-description').value = tx.description;
             setTxType(tx.type);
@@ -692,8 +716,12 @@
                 if (tx.type === 'income') income += tx.amount;
                 else {
                     expense += tx.amount;
-                    categoryTotals[tx.category || 'Otros'] = (categoryTotals[tx.category || 'Otros'] || 0) + tx.amount;
+                    categoryTotals[tx.category || 'General'] = (categoryTotals[tx.category || 'General'] || 0) + tx.amount;
                 }
+
+                // Obtener el color que el usuario definió para la categoría
+                const catObj = categories.find(c => c.name === (tx.category || 'General'));
+                const catColor = catObj ? catObj.color : '#64748B';
 
                 const formattedDate = tx.date ? tx.date.split('T')[0] : '';
                 const itemHTML = `
@@ -704,7 +732,7 @@
                             </div>
                             <div>
                                 <p class="font-bold text-slate-800 text-xs">${tx.description}</p>
-                                <p class="text-[10px] text-slate-400">${formattedDate} • <span class="bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-full">${tx.category || 'General'}</span></p>
+                                <p class="text-[10px] text-slate-400">${formattedDate} • <span class="px-2 py-0.5 rounded-full text-white font-semibold text-[9px]" style="background-color: ${catColor};">${tx.category || 'General'}</span></p>
                             </div>
                         </div>
                         <div class="flex items-center space-x-2">
@@ -739,6 +767,12 @@
             const labels = Object.keys(categoryTotals);
             const data = Object.values(categoryTotals);
 
+            // Mapeo directo de los colores definidos manualmente por el usuario
+            const bgColors = labels.map(label => {
+                const found = categories.find(c => c.name === label);
+                return found ? found.color : '#3B82F6';
+            });
+
             if (chartInstance) chartInstance.destroy();
 
             if (labels.length === 0) {
@@ -759,7 +793,7 @@
                     labels: labels,
                     datasets: [{
                         data: data,
-                        backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#3B82F6', '#8B5CF6', '#EC4899']
+                        backgroundColor: bgColors
                     }]
                 },
                 options: {
