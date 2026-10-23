@@ -11,9 +11,6 @@
 </head>
 <body class="bg-slate-900 text-slate-800 min-h-screen flex flex-col justify-between font-sans">
 
-    <!-- Audio Intro MP3 -->
-    <audio id="intro-audio" src="intro.mp3" preload="auto"></audio>
-
     <!-- Container Principal Mobile -->
     <div class="max-w-md w-full mx-auto bg-slate-100 min-h-screen flex flex-col shadow-2xl relative pb-24">
 
@@ -54,16 +51,8 @@
                 <button type="submit" id="auth-btn" class="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/20 text-sm active:scale-95 cursor-pointer">Iniciar Sesión</button>
             </form>
 
-            <div class="text-center mt-4 space-y-4">
+            <div class="text-center mt-4">
                 <button type="button" id="auth-switch" onclick="toggleAuthMode(event)" class="text-xs text-emerald-400 hover:underline py-1 block mx-auto cursor-pointer">¿No tienes cuenta? Regístrate</button>
-
-                <!-- Botón de Música Solo Ícono -->
-                <div class="pt-2 flex justify-center">
-                    <button type="button" id="music-btn" onclick="toggleIntroMusic()" title="Música de intro" class="bg-slate-800 border border-slate-700 text-emerald-400 w-12 h-12 rounded-2xl flex items-center justify-center hover:bg-slate-700 transition active:scale-95 shadow-md relative cursor-pointer">
-                        <i id="music-icon" class="fa-solid fa-play text-base"></i>
-                        <span id="music-badge" class="absolute -top-1 -right-1 bg-rose-500 text-white text-[7px] font-bold px-1.5 py-0.5 rounded-full hidden">PLAYING</span>
-                    </button>
-                </div>
             </div>
         </div>
 
@@ -73,8 +62,8 @@
             <!-- Header -->
             <header class="bg-slate-900 text-white px-5 py-4 flex justify-between items-center rounded-b-2xl shadow-md">
                 <div class="flex items-center space-x-2">
-                    <div onclick="toggleIntroMusic()" class="bg-emerald-500 text-white w-8 h-8 rounded-xl flex items-center justify-center cursor-pointer hover:bg-emerald-600 transition" title="Música de intro">
-                        <i id="header-music-icon" class="fa-solid fa-music text-xs"></i>
+                    <div class="bg-emerald-500 text-white w-8 h-8 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-wallet text-xs"></i>
                     </div>
                     <div>
                         <span id="app-brand-name" class="font-bold text-base block leading-tight">Mis Finanzas</span>
@@ -387,7 +376,6 @@
         let currentType = 'expense';
         let transactions = [];
         let isBalanceVisible = false;
-        let isAudioPlaying = false;
         let isRegister = false;
         let currentPhotoBase64 = null;
 
@@ -479,30 +467,6 @@
             document.getElementById('photo-upload-box').classList.remove('hidden');
         };
 
-        window.toggleIntroMusic = () => {
-            const audio = document.getElementById('intro-audio');
-            const musicIcon = document.getElementById('music-icon');
-            const musicBadge = document.getElementById('music-badge');
-            const headerIcon = document.getElementById('header-music-icon');
-
-            if (!audio) return;
-
-            if (isAudioPlaying) {
-                audio.pause();
-                isAudioPlaying = false;
-                if (musicIcon) musicIcon.className = "fa-solid fa-play text-base";
-                if (musicBadge) musicBadge.classList.add('hidden');
-                if (headerIcon) headerIcon.className = "fa-solid fa-music text-xs opacity-70";
-            } else {
-                audio.play().then(() => {
-                    isAudioPlaying = true;
-                    if (musicIcon) musicIcon.className = "fa-solid fa-pause text-base";
-                    if (musicBadge) musicBadge.classList.remove('hidden');
-                    if (headerIcon) headerIcon.className = "fa-solid fa-volume-high text-xs text-amber-300 animate-pulse";
-                }).catch(e => console.log("Audio no iniciado:", e));
-            }
-        };
-
         window.toggleBalanceVisibility = () => {
             isBalanceVisible = !isBalanceVisible;
             const eyeIcon = document.getElementById('toggle-eye-icon');
@@ -592,11 +556,9 @@
             document.getElementById('auth-switch').textContent = isRegister ? '¿Ya tienes cuenta? Inicia Sesión' : '¿No tienes cuenta? Regístrate';
         };
 
-        // FUNCIÓN DE AUTENTICACIÓN DEFINITIVA
         window.handleAuthSubmit = async (e) => {
             if (e) e.preventDefault();
 
-            // Ocultar teclado
             document.getElementById('auth-email').blur();
             document.getElementById('auth-password').blur();
 
@@ -725,7 +687,7 @@
                 return true;
             });
 
-            // AGENDA DE DEUDAS - TOTALMENTE INDEPENDIENTE DEL BALANCE GENERAL
+            // AGENDA DE DEUDAS - TOTALMENTE INDEPENDIENTE
             let totalDebt = 0;
             const debtorsEl = document.getElementById('debtors-list');
             debtorsEl.innerHTML = '';
@@ -747,7 +709,6 @@
             }
             document.getElementById('total-debt-amount').textContent = `S/ ${totalDebt.toFixed(2)}`;
 
-            // FILTRAR LAS DEUDAS PARA QUE NO AFECTEN INGRESOS NI GASTOS DEL BALANCE TOTAL
             const financialTransactions = timeFilteredTransactions.filter(tx => !(tx.category || '').toLowerCase().includes('deuda'));
 
             financialTransactions.forEach(tx => {
@@ -777,7 +738,6 @@
                 return (tx.category || 'General') === categoryFilter;
             });
 
-            // ORDENAMIENTO ESTRICTO
             categoryFilteredTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
 
             categoryFilteredTransactions.forEach((tx, idx) => {
@@ -907,4 +867,379 @@
             const ctx = document.getElementById('financialBarChart').getContext('2d');
             
             const labels = Object.keys(monthlyDataMap);
-            const income
+            const incomeData = labels.map(l => monthlyDataMap[l].income);
+            const expenseData = labels.map(l => monthlyDataMap[l].expense);
+            const netData = labels.map(l => monthlyDataMap[l].net);
+            
+            const benefitData = netData.map(v => v > 0 ? v : 0);
+            const lossData = netData.map(v => v < 0 ? Math.abs(v) : 0);
+
+            if (barChartInstance) barChartInstance.destroy();
+
+            if (labels.length === 0) {
+                barChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['may', 'jun', 'jul', 'ago', 'sept', 'oct'],
+                        datasets: [{ data: [0,0,0,0,0,0], backgroundColor: '#10B981' }]
+                    },
+                    options: { plugins: { legend: { display: false } } }
+                });
+                return;
+            }
+
+            barChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Ingresos', data: incomeData, backgroundColor: '#10B981', borderRadius: 4 },
+                        { label: 'Gastos', data: expenseData, backgroundColor: '#F59E0B', borderRadius: 4 },
+                        { label: 'Beneficio', data: benefitData, backgroundColor: '#3B82F6', borderRadius: 4 },
+                        { label: 'Pérdida Neta', data: lossData, backgroundColor: '#FB7185', borderRadius: 4 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94A3B8', font: { size: 10 } }
+                        },
+                        y: {
+                            grid: { color: '#334155' },
+                            ticks: { color: '#94A3B8', font: { size: 9 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderCategories() {
+            const selectForm = document.getElementById('tx-category');
+            const selectFilter = document.getElementById('category-filter');
+
+            selectForm.innerHTML = categories.map(cat => `<option value="${cat.name}">${cat.name}</option>`).join('');
+            
+            const currentSelected = selectFilter.value || 'all';
+            selectFilter.innerHTML = `<option value="all">🔍 Todas las Categorías</option>` + 
+                categories.map(cat => `<option value="${cat.name}">${cat.name}</option>`).join('');
+            selectFilter.value = currentSelected;
+        }
+
+        function renderCategoriesManagement() {
+            const listEl = document.getElementById('categories-management-list');
+            listEl.innerHTML = categories.map((cat, index) => `
+                <div class="flex items-center justify-between gap-2 bg-white p-1.5 rounded-lg border text-xs">
+                    <input type="color" value="${cat.color || '#3B82F6'}" id="cat-color-${index}" onchange="updateCategoryColor(${index})" title="Cambiar color" class="w-8 h-8 p-0.5 border rounded-md cursor-pointer bg-slate-50">
+                    <input type="text" value="${cat.name}" id="cat-input-${index}" onchange="updateCategoryName(${index})" class="flex-1 px-2 py-1 bg-slate-50 border rounded-md outline-none focus:ring-1 focus:ring-emerald-500 font-medium">
+                    <button type="button" onclick="deleteCategory(${index})" class="text-red-500 hover:text-red-700 px-2 py-1"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+            `).join('');
+        }
+
+        window.updateCategoryName = (index) => {
+            const input = document.getElementById(`cat-input-${index}`);
+            const newName = input.value.trim();
+            if (!newName) return;
+            categories[index].name = newName;
+            renderCategories();
+            saveSettingsToCloud();
+        };
+
+        window.updateCategoryColor = (index) => {
+            const input = document.getElementById(`cat-color-${index}`);
+            categories[index].color = input.value;
+            renderUI();
+            saveSettingsToCloud();
+        };
+
+        window.addCategory = async () => {
+            const nameInput = document.getElementById('new-category-name');
+            const colorInput = document.getElementById('new-category-color');
+            const name = nameInput.value.trim();
+            const color = colorInput.value;
+            
+            if (!name || categories.some(c => c.name.toLowerCase() === name.toLowerCase())) return;
+            
+            categories.push({ name, color });
+            nameInput.value = '';
+            colorInput.value = '#10B981';
+            renderCategories();
+            renderCategoriesManagement();
+            await saveSettingsToCloud();
+            alert("¡Categoría creada!");
+        };
+
+        window.deleteCategory = async (index) => {
+            if (categories.length <= 1) {
+                alert("Debes tener al menos una categoría.");
+                return;
+            }
+            categories.splice(index, 1);
+            renderCategories();
+            renderCategoriesManagement();
+            await saveSettingsToCloud();
+        };
+
+        async function saveSettingsToCloud() {
+            const appName = document.getElementById('setting-app-name').value.trim() || "Mis Finanzas";
+            try {
+                await setDoc(doc(db, `users_config/${currentUser.uid}`), { appName, categories }, { merge: true });
+                document.getElementById('app-brand-name').textContent = appName;
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        window.saveSettings = async () => {
+            await saveSettingsToCloud();
+            toggleSettingsModal();
+            alert("¡Configuración guardada!");
+        };
+
+        document.getElementById('transaction-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const editId = document.getElementById('tx-edit-id').value;
+            const description = document.getElementById('tx-description').value.trim() || "Sin descripción";
+            const amount = parseFloat(document.getElementById('tx-amount').value);
+            const category = document.getElementById('tx-category').value;
+            const dateVal = document.getElementById('tx-date').value;
+
+            let fullDateIso;
+            if (editId) {
+                const existingTx = transactions.find(t => t.id === editId);
+                fullDateIso = existingTx ? existingTx.date : new Date().toISOString();
+            } else {
+                const now = new Date();
+                const selectedDate = new Date(dateVal + 'T00:00:00');
+                selectedDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
+                fullDateIso = selectedDate.toISOString();
+            }
+
+            const txData = {
+                description,
+                amount,
+                type: currentType,
+                category,
+                date: fullDateIso,
+                photo: currentPhotoBase64 || null
+            };
+
+            try {
+                if (editId) {
+                    await updateDoc(doc(db, `users/${currentUser.uid}/transactions/${editId}`), txData);
+                    const index = transactions.findIndex(t => t.id === editId);
+                    if (index !== -1) transactions[index] = { id: editId, ...txData };
+                    alert("¡Transacción modificada con éxito!");
+                    cancelEdit();
+                } else {
+                    const docRef = await addDoc(collection(db, `users/${currentUser.uid}/transactions`), txData);
+                    transactions.push({ id: docRef.id, ...txData });
+                    document.getElementById('transaction-form').reset();
+                    document.getElementById('tx-date').valueAsDate = new Date();
+                    removeTxPhoto();
+                    setTxType('expense');
+                }
+                renderUI();
+                switchTab('dashboard');
+            } catch (err) {
+                alert("Error al guardar o modificar la transacción.");
+            }
+        });
+
+        window.editTx = (id) => {
+            const tx = transactions.find(t => t.id === id);
+            if (!tx) return;
+
+            document.getElementById('tx-edit-id').value = tx.id;
+            document.getElementById('tx-amount').value = tx.amount;
+            document.getElementById('tx-category').value = tx.category || categories[0].name;
+            document.getElementById('tx-date').value = tx.date ? tx.date.split('T')[0] : '';
+            document.getElementById('tx-description').value = tx.description;
+            setTxType(tx.type);
+
+            if (tx.photo) {
+                currentPhotoBase64 = tx.photo;
+                document.getElementById('photo-preview-img').src = currentPhotoBase64;
+                document.getElementById('photo-upload-box').classList.add('hidden');
+                document.getElementById('photo-preview-container').classList.remove('hidden');
+            } else {
+                removeTxPhoto();
+            }
+
+            document.getElementById('form-title').textContent = "MODIFICAR REGISTRO";
+            document.getElementById('form-submit-btn').textContent = "Actualizar Transacción";
+            document.getElementById('form-cancel-btn').classList.remove('hidden');
+
+            switchTab('add');
+        };
+
+        window.cancelEdit = () => {
+            document.getElementById('transaction-form').reset();
+            document.getElementById('tx-edit-id').value = '';
+            document.getElementById('tx-date').valueAsDate = new Date();
+            removeTxPhoto();
+            setTxType('expense');
+
+            document.getElementById('form-title').textContent = "NUEVO REGISTRO";
+            document.getElementById('form-submit-btn').textContent = "Guardar Transacción";
+            document.getElementById('form-cancel-btn').classList.add('hidden');
+            switchTab('dashboard');
+        };
+
+        window.deleteTx = async (id) => {
+            if (!confirm("¿Deseas eliminar este movimiento?")) return;
+            try {
+                await deleteDoc(doc(db, `users/${currentUser.uid}/transactions/${id}`));
+                transactions = transactions.filter(t => t.id !== id);
+                renderUI();
+            } catch (err) {
+                alert("Error al eliminar");
+            }
+        };
+
+        window.startMasterVoiceAssistant = () => {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("Tu navegador no soporta el reconocimiento de voz.");
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'es-PE';
+            recognition.interimResults = false;
+
+            const micIcon = document.getElementById('voice-mic-icon');
+            const subtext = document.getElementById('voice-subtext');
+
+            recognition.onstart = () => {
+                micIcon.className = "fa-solid fa-spinner fa-spin";
+                subtext.textContent = "Escuchando orden...";
+            };
+
+            recognition.onresult = async (event) => {
+                const text = event.results[0][0].transcript;
+                await processVoiceCommand(text);
+            };
+
+            recognition.onerror = () => {
+                alert("No se pudo reconocer la voz.");
+            };
+
+            recognition.onend = () => {
+                micIcon.className = "fa-solid fa-microphone";
+                subtext.textContent = "Toca el micro y habla";
+            };
+
+            recognition.start();
+        };
+
+        async function processVoiceCommand(rawText) {
+            const textNormalized = rawText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+
+            const isCategoryIntent = textNormalized.includes('categoria') || 
+                                     textNormalized.includes('crear') || 
+                                     textNormalized.includes('anadir') || 
+                                     textNormalized.includes('agregar');
+
+            if (isCategoryIntent) {
+                let cleanCatName = rawText
+                    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                    .replace(/crear|anadir|añadir|agregar|nueva|nuevo|categoria|categoría|de|llamada|que se llame|para|el|la|los|las/gi, '')
+                    .trim();
+
+                if (cleanCatName.length > 0) {
+                    cleanCatName = cleanCatName.charAt(0).toUpperCase() + cleanCatName.slice(1).toLowerCase();
+                    if (!categories.some(c => c.name.toLowerCase() === cleanCatName.toLowerCase())) {
+                        categories.push({ name: cleanCatName, color: '#3B82F6' });
+                        renderCategories();
+                        renderCategoriesManagement();
+                        await saveSettingsToCloud();
+                        alert(`¡Categoría "${cleanCatName}" creada con éxito!`);
+                    } else {
+                        alert(`La categoría "${cleanCatName}" ya existe.`);
+                    }
+                    return;
+                }
+            }
+
+            let txType = 'expense';
+            if (textNormalized.includes('ingreso') || textNormalized.includes('ganancia') || textNormalized.includes('cobro') || textNormalized.includes('gane')) {
+                txType = 'income';
+            }
+
+            const numbers = rawText.match(/\d+([.,]\d+)?/g);
+            if (!numbers || numbers.length === 0) {
+                alert("No detecté el monto. Ejemplo: 'Gasto de 20 soles en comida'");
+                return;
+            }
+            const amount = parseFloat(numbers[0].replace(',', '.'));
+
+            let description = rawText.replace(/gasto|ingreso|de|en|por|soles|sol|ganancia|gané|cobro|\d+([.,]\d+)?/gi, '').trim();
+            if (description.length === 0) description = "Movimiento por voz";
+            description = description.charAt(0).toUpperCase() + description.slice(1);
+
+            let matchedCategory = categories[0].name;
+            for (let cat of categories) {
+                const normCat = cat.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                if (textNormalized.includes(normCat.split('/')[0].trim())) {
+                    matchedCategory = cat.name;
+                    break;
+                }
+            }
+
+            const newTx = {
+                description,
+                amount,
+                type: txType,
+                category: matchedCategory,
+                date: new Date().toISOString(),
+                photo: null
+            };
+
+            try {
+                const docRef = await addDoc(collection(db, `users/${currentUser.uid}/transactions`), newTx);
+                transactions.push({ id: docRef.id, ...newTx });
+                renderUI();
+                switchTab('dashboard');
+                alert(`¡Registrado con éxito!\n${txType === 'income' ? 'Ingreso' : 'Gasto'}: S/ ${amount.toFixed(2)} (${description})`);
+            } catch (err) {
+                alert("Error al guardar en la nube.");
+            }
+        }
+
+        window.exportJSON = () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ transactions, categories }));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", "misfinanzas_respaldo.json");
+            dlAnchorElem.click();
+        };
+
+        window.importJSON = async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.transactions) {
+                        for (let t of data.transactions) {
+                            delete t.id;
+                            await addDoc(collection(db, `users/${currentUser.uid}/transactions`), t);
+                        }
+                    }
+                    alert("¡Datos importados con éxito!");
+                    loadUserData();
+                } catch (err) {
+                    alert("Archivo no válido");
+                }
+            };
+            reader.readAsText(file);
+        };
+    </script>
+</body>
+</html>
