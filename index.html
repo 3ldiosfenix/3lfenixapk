@@ -195,7 +195,7 @@
             <div id="settings-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                 <div class="bg-white w-full max-w-sm p-5 rounded-3xl shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
                     <div class="flex justify-between items-center">
-                        <h3 class="text-sm font-bold text-slate-800"><i class="fa-solid fa-gears text-emerald-600 mr-2"></i> Configuración</h3>
+                        <h3 class="text-sm font-bold text-slate-800"><i class="fa-solid fa-gears text-emerald-600 mr-2"></i> Configuración y Categorías</h3>
                         <button onclick="toggleSettingsModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
                     </div>
                     <div class="space-y-4">
@@ -204,19 +204,19 @@
                             <input type="text" id="setting-app-name" placeholder="Mis Finanzas" class="w-full px-3 py-2 border text-sm rounded-xl outline-none focus:ring-1 focus:ring-emerald-500">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-500 mb-1">Añadir Categoría</label>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Añadir Nueva Categoría</label>
                             <div class="flex gap-2">
                                 <input type="text" id="new-category-name" placeholder="Ej. Combustible" class="flex-1 px-3 py-2 border text-sm rounded-xl outline-none focus:ring-1 focus:ring-emerald-500">
                                 <button type="button" onclick="addCategory()" class="bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs font-bold hover:bg-slate-700">Crear</button>
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-500 mb-1">Eliminar Categorías Existentes</label>
-                            <div id="categories-management-list" class="space-y-1.5 max-h-40 overflow-y-auto border p-2 rounded-xl bg-slate-50">
-                                <!-- Lista de eliminación de categorías -->
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Listado de Categorías (Modificar o Eliminar)</label>
+                            <div id="categories-management-list" class="space-y-2 max-h-48 overflow-y-auto border p-2 rounded-xl bg-slate-50">
+                                <!-- Listado dinámico para modificar/eliminar categorías -->
                             </div>
                         </div>
-                        <button type="button" onclick="saveSettings()" class="w-full bg-emerald-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-emerald-700 transition">Guardar Cambios</button>
+                        <button type="button" onclick="saveSettings()" class="w-full bg-emerald-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-emerald-700 transition">Cerrar y Guardar</button>
                     </div>
                 </div>
             </div>
@@ -312,7 +312,7 @@
             document.getElementById('settings-modal').classList.toggle('hidden');
         };
 
-        // Asistente de Voz Maestro (Crear categorías o registrar transacciones)
+        // Asistente de Voz Maestro
         window.startMasterVoiceAssistant = () => {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
@@ -498,15 +498,25 @@
             select.innerHTML = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
         }
 
+        // Renderizar lista interactiva para modificar o eliminar categorías en ajustes
         function renderCategoriesManagement() {
             const listEl = document.getElementById('categories-management-list');
-            listEl.innerHTML = categories.map(cat => `
-                <div class="flex justify-between items-center text-xs p-1.5 bg-white border rounded-lg">
-                    <span>${cat}</span>
-                    <button type="button" onclick="deleteCategory('${cat}')" class="text-red-500 hover:text-red-700 font-bold px-2 py-0.5"><i class="fa-solid fa-trash-can"></i></button>
+            listEl.innerHTML = categories.map((cat, index) => `
+                <div class="flex items-center justify-between gap-2 bg-white p-1.5 rounded-lg border text-xs">
+                    <input type="text" value="${cat}" id="cat-input-${index}" onchange="updateCategory(${index})" class="flex-1 px-2 py-1 bg-slate-50 border rounded-md outline-none focus:ring-1 focus:ring-emerald-500 font-medium">
+                    <button type="button" onclick="deleteCategory(${index})" class="text-red-500 hover:text-red-700 px-2 py-1"><i class="fa-solid fa-trash-can"></i></button>
                 </div>
             `).join('');
         }
+
+        window.updateCategory = (index) => {
+            const input = document.getElementById(`cat-input-${index}`);
+            const newName = input.value.trim();
+            if (!newName) return;
+            categories[index] = newName;
+            renderCategories();
+            saveSettingsToCloud();
+        };
 
         window.addCategory = async () => {
             const nameInput = document.getElementById('new-category-name');
@@ -520,12 +530,12 @@
             alert("¡Categoría creada!");
         };
 
-        window.deleteCategory = async (catName) => {
+        window.deleteCategory = async (index) => {
             if (categories.length <= 1) {
                 alert("Debes tener al menos una categoría.");
                 return;
             }
-            categories = categories.filter(c => c !== catName);
+            categories.splice(index, 1);
             renderCategories();
             renderCategoriesManagement();
             await saveSettingsToCloud();
@@ -550,14 +560,12 @@
 
             try {
                 if (editId) {
-                    // Modificar / Actualizar
                     await updateDoc(doc(db, `users/${currentUser.uid}/transactions/${editId}`), txData);
                     const index = transactions.findIndex(t => t.id === editId);
                     if (index !== -1) transactions[index] = { id: editId, ...txData };
                     alert("¡Transacción modificada con éxito!");
                     cancelEdit();
                 } else {
-                    // Crear nuevo
                     const docRef = await addDoc(collection(db, `users/${currentUser.uid}/transactions`), txData);
                     transactions.push({ id: docRef.id, ...txData });
                     document.getElementById('transaction-form').reset();
@@ -571,7 +579,6 @@
             }
         });
 
-        // Cargar datos en el formulario para Editar
         window.editTx = (id) => {
             const tx = transactions.find(t => t.id === id);
             if (!tx) return;
