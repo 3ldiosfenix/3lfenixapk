@@ -20,7 +20,7 @@
         <!-- Screen Autenticación -->
         <div id="auth-screen" class="flex-1 flex flex-col justify-center p-6 bg-slate-900 text-white z-10 relative">
             <div class="text-center mb-6">
-                <!-- Imagen Tipo Admin (mismo tamaño w-20 h-20) -->
+                <!-- Imagen Tipo Admin (w-20 h-20) -->
                 <div class="w-20 h-20 rounded-3xl mx-auto mb-4 overflow-hidden border-2 border-emerald-500/50 shadow-lg shadow-emerald-500/20 bg-slate-800 flex items-center justify-center">
                     <img id="admin-avatar" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Admin" class="w-full h-full object-cover">
                 </div>
@@ -54,11 +54,11 @@
             </form>
 
             <div class="text-center mt-4 space-y-4">
-                <button type="button" id="auth-switch" class="text-xs text-emerald-400 hover:underline py-1 block mx-auto">¿No tienes cuenta? Regístrate</button>
+                <button type="button" id="auth-switch" class="text-xs text-emerald-400 hover:underline py-1 block mx-auto cursor-pointer">¿No tienes cuenta? Regístrate</button>
 
                 <!-- Botón de Música Abajo y Centrado -->
                 <div class="pt-2 flex justify-center">
-                    <button type="button" id="music-btn" onclick="toggleIntroMusic()" class="bg-slate-800 border border-slate-700 text-emerald-400 px-4 py-2 rounded-2xl flex items-center space-x-2 text-xs font-semibold hover:bg-slate-700 transition active:scale-95 shadow-md relative">
+                    <button type="button" id="music-btn" onclick="toggleIntroMusic()" class="bg-slate-800 border border-slate-700 text-emerald-400 px-4 py-2 rounded-2xl flex items-center space-x-2 text-xs font-semibold hover:bg-slate-700 transition active:scale-95 shadow-md relative cursor-pointer">
                         <i id="music-icon" class="fa-solid fa-play text-sm"></i>
                         <span>Intro Música</span>
                         <span id="music-badge" class="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full hidden">PLAYING</span>
@@ -341,7 +341,8 @@
         let transactions = [];
         let isBalanceVisible = false;
         let isAudioPlaying = false;
-        
+        let isRegister = false;
+
         let categories = [
             { name: 'Comida / Alimentos', color: '#EF4444' },
             { name: 'Transporte', color: '#3B82F6' },
@@ -354,6 +355,7 @@
 
         document.getElementById('tx-date').valueAsDate = new Date();
 
+        // EXPOSICIÓN DE FUNCIONES A NIVELES GLOBALES (WINDOW)
         window.toggleIntroMusic = () => {
             const audio = document.getElementById('intro-audio');
             const musicIcon = document.getElementById('music-icon');
@@ -374,24 +376,9 @@
                     if (musicIcon) musicIcon.className = "fa-solid fa-pause text-sm";
                     if (musicBadge) musicBadge.classList.remove('hidden');
                     if (headerIcon) headerIcon.className = "fa-solid fa-volume-high text-xs text-amber-300 animate-pulse";
-                }).catch(e => console.log("Audio no iniciado por interacción de navegador"));
+                }).catch(e => console.log("Audio bloqueado por el navegador"));
             }
         };
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const audio = document.getElementById('intro-audio');
-            if (audio) {
-                audio.addEventListener('ended', () => {
-                    isAudioPlaying = false;
-                    const musicIcon = document.getElementById('music-icon');
-                    const musicBadge = document.getElementById('music-badge');
-                    const headerIcon = document.getElementById('header-music-icon');
-                    if (musicIcon) musicIcon.className = "fa-solid fa-play text-sm";
-                    if (musicBadge) musicBadge.classList.add('hidden');
-                    if (headerIcon) headerIcon.className = "fa-solid fa-music text-xs opacity-70";
-                });
-            }
-        });
 
         window.toggleBalanceVisibility = () => {
             isBalanceVisible = !isBalanceVisible;
@@ -403,20 +390,6 @@
             }
             renderUI();
         };
-
-        function getContrastTextColor(hexColor) {
-            if (!hexColor) return '#FFFFFF';
-            let hex = hexColor.replace('#', '');
-            if (hex.length === 3) {
-                hex = hex.split('').map(char => char + char).join('');
-            }
-            const r = parseInt(hex.substring(0, 2), 16) || 0;
-            const g = parseInt(hex.substring(2, 4), 16) || 0;
-            const b = parseInt(hex.substring(4, 6), 16) || 0;
-            
-            const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-            return (yiq >= 150) ? '#1E293B' : '#FFFFFF';
-        }
 
         window.switchTab = (tab) => {
             document.getElementById('tab-dashboard').classList.add('hidden');
@@ -477,8 +450,476 @@
                 successDiv.textContent = "¡Correo de recuperación enviado!";
                 successDiv.classList.remove('hidden');
             } catch (err) {
-                errDiv.textContent = "No se pudo enviar el correo.";
+                errDiv.textContent = "No se pudo enviar el correo de recuperación.";
                 errDiv.classList.remove('hidden');
+            }
+        };
+
+        window.logout = () => signOut(auth);
+
+        // MANEJO DE REGISTRO / INICIO DE SESIÓN
+        document.getElementById('auth-switch').addEventListener('click', (e) => {
+            e.preventDefault();
+            isRegister = !isRegister;
+            document.getElementById('name-field').classList.toggle('hidden', !isRegister);
+            document.getElementById('auth-title').textContent = isRegister ? 'Crear Cuenta' : 'Iniciar Sesión';
+            document.getElementById('auth-btn').textContent = isRegister ? 'Registrarse' : 'Iniciar Sesión';
+            document.getElementById('auth-switch').textContent = isRegister ? '¿Ya tienes cuenta? Inicia Sesión' : '¿No tienes cuenta? Regístrate';
+        });
+
+        document.getElementById('auth-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value.trim();
+            const name = document.getElementById('auth-name').value.trim();
+            const errDiv = document.getElementById('auth-error');
+            const successDiv = document.getElementById('auth-success');
+            errDiv.classList.add('hidden');
+            successDiv.classList.add('hidden');
+
+            try {
+                if (isRegister) {
+                    const res = await createUserWithEmailAndPassword(auth, email, password);
+                    await updateProfile(res.user, { displayName: name });
+                } else {
+                    await signInWithEmailAndPassword(auth, email, password);
+                }
+            } catch (err) {
+                console.error(err);
+                errDiv.textContent = "Correo o contraseña incorrectos.";
+                errDiv.classList.remove('hidden');
+            }
+        });
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('app-screen').classList.remove('hidden');
+                document.getElementById('user-display-name').textContent = user.displayName || user.email;
+                await loadUserData();
+            } else {
+                currentUser = null;
+                document.getElementById('app-screen').classList.add('hidden');
+                document.getElementById('auth-screen').classList.remove('hidden');
+            }
+        });
+
+        async function loadUserData() {
+            try {
+                const querySnapTx = await getDocs(collection(db, `users/${currentUser.uid}/transactions`));
+                transactions = [];
+                querySnapTx.forEach((doc) => {
+                    transactions.push({ id: doc.id, ...doc.data() });
+                });
+
+                const catDoc = await getDoc(doc(db, `users_config/${currentUser.uid}`));
+                if (catDoc.exists()) {
+                    const data = catDoc.data();
+                    if (data.categories && data.categories.length > 0) {
+                        categories = data.categories.map(c => typeof c === 'string' ? { name: c, color: '#3B82F6' } : c);
+                    }
+                    if (data.appName) {
+                        document.getElementById('app-brand-name').textContent = data.appName;
+                        document.getElementById('setting-app-name').value = data.appName;
+                    }
+                }
+            } catch (e) {
+                console.error("Error al cargar datos:", e);
+            }
+
+            renderCategories();
+            renderUI();
+        }
+
+        function getContrastTextColor(hexColor) {
+            if (!hexColor) return '#FFFFFF';
+            let hex = hexColor.replace('#', '');
+            if (hex.length === 3) {
+                hex = hex.split('').map(char => char + char).join('');
+            }
+            const r = parseInt(hex.substring(0, 2), 16) || 0;
+            const g = parseInt(hex.substring(2, 4), 16) || 0;
+            const b = parseInt(hex.substring(4, 6), 16) || 0;
+            
+            const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+            return (yiq >= 150) ? '#1E293B' : '#FFFFFF';
+        }
+
+        window.renderUI = () => {
+            const timeFilter = document.getElementById('time-filter').value;
+            const categoryFilter = document.getElementById('category-filter').value;
+            const now = new Date();
+
+            let income = 0;
+            let expense = 0;
+            const recentEl = document.getElementById('dashboard-recent-list');
+            const fullHistoryEl = document.getElementById('full-history-list');
+            recentEl.innerHTML = '';
+            fullHistoryEl.innerHTML = '';
+
+            const categoryTotals = {};
+            const monthlyDataMap = {};
+
+            const monthNames = ['may', 'jun', 'jul', 'ago', 'sept', 'oct', 'nov', 'dic', 'ene', 'feb', 'mar', 'abr'];
+
+            const timeFilteredTransactions = transactions.filter(tx => {
+                if (!tx.date) return true;
+                if (timeFilter === 'week') return isSameWeek(tx.date, now);
+                if (timeFilter === 'month') return isSameMonth(tx.date, now);
+                return true;
+            });
+
+            timeFilteredTransactions.forEach(tx => {
+                const txDate = new Date(tx.date || Date.now());
+                const monthKey = monthNames[txDate.getMonth()];
+                
+                if (!monthlyDataMap[monthKey]) {
+                    monthlyDataMap[monthKey] = { income: 0, expense: 0, net: 0 };
+                }
+
+                if (tx.type === 'income') {
+                    income += tx.amount;
+                    monthlyDataMap[monthKey].income += tx.amount;
+                } else {
+                    expense += tx.amount;
+                    monthlyDataMap[monthKey].expense += tx.amount;
+                    categoryTotals[tx.category || 'General'] = (categoryTotals[tx.category || 'General'] || 0) + tx.amount;
+                }
+            });
+
+            Object.keys(monthlyDataMap).forEach(m => {
+                monthlyDataMap[m].net = monthlyDataMap[m].income - monthlyDataMap[m].expense;
+            });
+
+            const categoryFilteredTransactions = timeFilteredTransactions.filter(tx => {
+                if (categoryFilter === 'all') return true;
+                return (tx.category || 'General') === categoryFilter;
+            });
+
+            categoryFilteredTransactions.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((tx, idx) => {
+                const catObj = categories.find(c => c.name === (tx.category || 'General'));
+                const catColor = catObj ? catObj.color : '#000000';
+                const textColor = getContrastTextColor(catColor);
+
+                const formattedDate = tx.date ? tx.date.split('T')[0] : '';
+                const itemHTML = `
+                    <div class="flex justify-between items-center p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-full ${tx.type === 'income' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-500'} flex items-center justify-center text-xs">
+                                <i class="fa-solid ${tx.type === 'income' ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-800 text-xs">${tx.description}</p>
+                                <p class="text-[10px] text-slate-400">${formattedDate} • <span class="px-2 py-0.5 rounded-full font-semibold text-[9px]" style="background-color: ${catColor}; color: ${textColor};">${tx.category || 'General'}</span></p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="font-extrabold text-xs ${tx.type === 'income' ? 'text-emerald-600' : 'text-slate-800'}">
+                                ${tx.type === 'income' ? '+' : '-'} S/ ${tx.amount.toFixed(2)}
+                            </span>
+                            <button onclick="editTx('${tx.id}')" title="Modificar" class="text-blue-400 hover:text-blue-600 text-xs pl-1"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteTx('${tx.id}')" title="Eliminar" class="text-slate-300 hover:text-red-500 text-xs pl-1"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>
+                `;
+
+                if (idx < 5) recentEl.innerHTML += itemHTML;
+                fullHistoryEl.innerHTML += itemHTML;
+            });
+
+            if (categoryFilteredTransactions.length === 0) {
+                recentEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">Sin movimientos encontrados</p>`;
+                fullHistoryEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Sin movimientos</p>`;
+            }
+
+            const balanceLabel = document.getElementById('balance-label');
+            if (timeFilter === 'week') balanceLabel.textContent = "BALANCE DE ESTA SEMANA";
+            else if (timeFilter === 'month') balanceLabel.textContent = "BALANCE DE ESTE MES";
+            else balanceLabel.textContent = "BALANCE TOTAL";
+
+            const balance = income - expense;
+
+            if (isBalanceVisible) {
+                document.getElementById('total-balance').textContent = `S/ ${balance.toFixed(2)}`;
+                document.getElementById('total-income').textContent = `S/ ${income.toFixed(2)}`;
+                document.getElementById('total-expense').textContent = `S/ ${expense.toFixed(2)}`;
+            } else {
+                document.getElementById('total-balance').textContent = `S/ *****`;
+                document.getElementById('total-income').textContent = `S/ *****`;
+                document.getElementById('total-expense').textContent = `S/ *****`;
+            }
+
+            renderChart(categoryTotals);
+            renderFinancialBarChart(monthlyDataMap);
+        };
+
+        function isSameWeek(d1, d2) {
+            const date1 = new Date(d1);
+            const date2 = new Date(d2);
+            const firstDayOfWeek1 = new Date(date1.setDate(date1.getDate() - date1.getDay()));
+            const firstDayOfWeek2 = new Date(date2.setDate(date2.getDate() - date2.getDay()));
+            return firstDayOfWeek1.toDateString() === firstDayOfWeek2.toDateString();
+        }
+
+        function isSameMonth(d1, d2) {
+            const date1 = new Date(d1);
+            const date2 = new Date(d2);
+            return date1.getFullYear() === date2.getFullYear() && date1.getMonth() === date2.getMonth();
+        }
+
+        function renderChart(categoryTotals) {
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            const labels = Object.keys(categoryTotals);
+            const data = Object.values(categoryTotals);
+
+            const bgColors = labels.map(label => {
+                const found = categories.find(c => c.name === label);
+                return found ? found.color : '#3B82F6';
+            });
+
+            if (chartInstance) chartInstance.destroy();
+
+            if (labels.length === 0) {
+                chartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Sin Gastos'],
+                        datasets: [{ data: [1], backgroundColor: ['#E2E8F0'] }]
+                    },
+                    options: { plugins: { legend: { display: false } }, cutout: '75%' }
+                });
+                return;
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: bgColors
+                    }]
+                },
+                options: {
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        function renderFinancialBarChart(monthlyDataMap) {
+            const ctx = document.getElementById('financialBarChart').getContext('2d');
+            
+            const labels = Object.keys(monthlyDataMap);
+            const incomeData = labels.map(l => monthlyDataMap[l].income);
+            const expenseData = labels.map(l => monthlyDataMap[l].expense);
+            const netData = labels.map(l => monthlyDataMap[l].net);
+            
+            const benefitData = netData.map(v => v > 0 ? v : 0);
+            const lossData = netData.map(v => v < 0 ? Math.abs(v) : 0);
+
+            if (barChartInstance) barChartInstance.destroy();
+
+            if (labels.length === 0) {
+                barChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['may', 'jun', 'jul', 'ago', 'sept', 'oct'],
+                        datasets: [{ data: [0,0,0,0,0,0], backgroundColor: '#10B981' }]
+                    },
+                    options: { plugins: { legend: { display: false } } }
+                });
+                return;
+            }
+
+            barChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Ingresos', data: incomeData, backgroundColor: '#10B981', borderRadius: 4 },
+                        { label: 'Gastos', data: expenseData, backgroundColor: '#F59E0B', borderRadius: 4 },
+                        { label: 'Beneficio', data: benefitData, backgroundColor: '#3B82F6', borderRadius: 4 },
+                        { label: 'Pérdida Neta', data: lossData, backgroundColor: '#FB7185', borderRadius: 4 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94A3B8', font: { size: 10 } }
+                        },
+                        y: {
+                            grid: { color: '#334155' },
+                            ticks: { color: '#94A3B8', font: { size: 9 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderCategories() {
+            const selectForm = document.getElementById('tx-category');
+            const selectFilter = document.getElementById('category-filter');
+
+            selectForm.innerHTML = categories.map(cat => `<option value="${cat.name}">${cat.name}</option>`).join('');
+            
+            const currentSelected = selectFilter.value || 'all';
+            selectFilter.innerHTML = `<option value="all">🔍 Todas las Categorías</option>` + 
+                categories.map(cat => `<option value="${cat.name}">${cat.name}</option>`).join('');
+            selectFilter.value = currentSelected;
+        }
+
+        function renderCategoriesManagement() {
+            const listEl = document.getElementById('categories-management-list');
+            listEl.innerHTML = categories.map((cat, index) => `
+                <div class="flex items-center justify-between gap-2 bg-white p-1.5 rounded-lg border text-xs">
+                    <input type="color" value="${cat.color || '#3B82F6'}" id="cat-color-${index}" onchange="updateCategoryColor(${index})" title="Cambiar color" class="w-8 h-8 p-0.5 border rounded-md cursor-pointer bg-slate-50">
+                    <input type="text" value="${cat.name}" id="cat-input-${index}" onchange="updateCategoryName(${index})" class="flex-1 px-2 py-1 bg-slate-50 border rounded-md outline-none focus:ring-1 focus:ring-emerald-500 font-medium">
+                    <button type="button" onclick="deleteCategory(${index})" class="text-red-500 hover:text-red-700 px-2 py-1"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+            `).join('');
+        }
+
+        window.updateCategoryName = (index) => {
+            const input = document.getElementById(`cat-input-${index}`);
+            const newName = input.value.trim();
+            if (!newName) return;
+            categories[index].name = newName;
+            renderCategories();
+            saveSettingsToCloud();
+        };
+
+        window.updateCategoryColor = (index) => {
+            const input = document.getElementById(`cat-color-${index}`);
+            categories[index].color = input.value;
+            renderUI();
+            saveSettingsToCloud();
+        };
+
+        window.addCategory = async () => {
+            const nameInput = document.getElementById('new-category-name');
+            const colorInput = document.getElementById('new-category-color');
+            const name = nameInput.value.trim();
+            const color = colorInput.value;
+            
+            if (!name || categories.some(c => c.name.toLowerCase() === name.toLowerCase())) return;
+            
+            categories.push({ name, color });
+            nameInput.value = '';
+            colorInput.value = '#10B981';
+            renderCategories();
+            renderCategoriesManagement();
+            await saveSettingsToCloud();
+            alert("¡Categoría creada!");
+        };
+
+        window.deleteCategory = async (index) => {
+            if (categories.length <= 1) {
+                alert("Debes tener al menos una categoría.");
+                return;
+            }
+            categories.splice(index, 1);
+            renderCategories();
+            renderCategoriesManagement();
+            await saveSettingsToCloud();
+        };
+
+        async function saveSettingsToCloud() {
+            const appName = document.getElementById('setting-app-name').value.trim() || "Mis Finanzas";
+            try {
+                await setDoc(doc(db, `users_config/${currentUser.uid}`), { appName, categories }, { merge: true });
+                document.getElementById('app-brand-name').textContent = appName;
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        window.saveSettings = async () => {
+            await saveSettingsToCloud();
+            toggleSettingsModal();
+            alert("¡Configuración guardada!");
+        };
+
+        document.getElementById('transaction-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const editId = document.getElementById('tx-edit-id').value;
+            const description = document.getElementById('tx-description').value.trim() || "Sin descripción";
+            const amount = parseFloat(document.getElementById('tx-amount').value);
+            const category = document.getElementById('tx-category').value;
+            const dateVal = document.getElementById('tx-date').value;
+
+            const txData = {
+                description,
+                amount,
+                type: currentType,
+                category,
+                date: new Date(dateVal + 'T12:00:00').toISOString()
+            };
+
+            try {
+                if (editId) {
+                    await updateDoc(doc(db, `users/${currentUser.uid}/transactions/${editId}`), txData);
+                    const index = transactions.findIndex(t => t.id === editId);
+                    if (index !== -1) transactions[index] = { id: editId, ...txData };
+                    alert("¡Transacción modificada con éxito!");
+                    cancelEdit();
+                } else {
+                    const docRef = await addDoc(collection(db, `users/${currentUser.uid}/transactions`), txData);
+                    transactions.push({ id: docRef.id, ...txData });
+                    document.getElementById('transaction-form').reset();
+                    document.getElementById('tx-date').valueAsDate = new Date();
+                    setTxType('expense');
+                }
+                renderUI();
+                switchTab('dashboard');
+            } catch (err) {
+                alert("Error al guardar o modificar la transacción.");
+            }
+        });
+
+        window.editTx = (id) => {
+            const tx = transactions.find(t => t.id === id);
+            if (!tx) return;
+
+            document.getElementById('tx-edit-id').value = tx.id;
+            document.getElementById('tx-amount').value = tx.amount;
+            document.getElementById('tx-category').value = tx.category || categories[0].name;
+            document.getElementById('tx-date').value = tx.date ? tx.date.split('T')[0] : '';
+            document.getElementById('tx-description').value = tx.description;
+            setTxType(tx.type);
+
+            document.getElementById('form-title').textContent = "MODIFICAR REGISTRO";
+            document.getElementById('form-submit-btn').textContent = "Actualizar Transacción";
+            document.getElementById('form-cancel-btn').classList.remove('hidden');
+
+            switchTab('add');
+        };
+
+        window.cancelEdit = () => {
+            document.getElementById('transaction-form').reset();
+            document.getElementById('tx-edit-id').value = '';
+            document.getElementById('tx-date').valueAsDate = new Date();
+            setTxType('expense');
+
+            document.getElementById('form-title').textContent = "NUEVO REGISTRO";
+            document.getElementById('form-submit-btn').textContent = "Guardar Transacción";
+            document.getElementById('form-cancel-btn').classList.add('hidden');
+            switchTab('dashboard');
+        };
+
+        window.deleteTx = async (id) => {
+            if (!confirm("¿Deseas eliminar este movimiento?")) return;
+            try {
+                await deleteDoc(doc(db, `users/${currentUser.uid}/transactions/${id}`));
+                transactions = transactions.filter(t => t.id !== id);
+                renderUI();
+            } catch (err) {
+                alert("Error al eliminar");
             }
         };
 
@@ -585,219 +1026,41 @@
                 transactions.push({ id: docRef.id, ...newTx });
                 renderUI();
                 switchTab('dashboard');
-                alert(`¡Registrado con éxito!\n${txType === 'income' ? 'Ingreso' : 'Gasto'}: S/ ${amount.toFixed(2)} (${description})`); } catch (err) { alert("Error al guardar en la nube."); } }  onAuthStateChanged(auth, async (user) => { if (user) { currentUser = user; document.getElementById('auth-screen').classList.add('hidden'); document.getElementById('app-screen').classList.remove('hidden'); document.getElementById('user-display-name').textContent = user.displayName \vert{}\vert{} user.email; await loadUserData(); } else { currentUser = null; document.getElementById('app-screen').classList.add('hidden'); document.getElementById('auth-screen').classList.remove('hidden'); } });  let isRegister = false; document.getElementById('auth-switch').addEventListener('click', (e) => { e.preventDefault(); isRegister = !isRegister; document.getElementById('name-field').classList.toggle('hidden', !isRegister); document.getElementById('auth-title').textContent = isRegister ? 'Crear Cuenta' : 'Iniciar Sesión'; document.getElementById('auth-btn').textContent = isRegister ? 'Registrarse' : 'Iniciar Sesión'; document.getElementById('auth-switch').textContent = isRegister ? '¿Ya tienes cuenta? Inicia Sesión' : '¿No tienes cuenta? Regístrate'; });  document.getElementById('auth-form').addEventListener('submit', async (e) => { e.preventDefault(); const email = document.getElementById('auth-email').value.trim(); const password = document.getElementById('auth-password').value.trim(); const name = document.getElementById('auth-name').value.trim(); const errDiv = document.getElementById('auth-error'); const successDiv = document.getElementById('auth-success'); errDiv.classList.add('hidden'); successDiv.classList.add('hidden');  try { if (isRegister) { const res = await createUserWithEmailAndPassword(auth, email, password); await updateProfile(res.user, { displayName: name }); } else { await signInWithEmailAndPassword(auth, email, password); } } catch (err) { errDiv.textContent = "Correo o contraseña incorrectos."; errDiv.classList.remove('hidden'); } });  window.logout = () => signOut(auth);  async function loadUserData() { const querySnapTx = await getDocs(collection(db, `users/${currentUser.uid}/transactions`));
-            transactions = [];
-            querySnapTx.forEach((doc) => {
-                transactions.push({ id: doc.id, ...doc.data() });
-            });
-
-            const catDoc = await getDoc(doc(db, `users_config/${currentUser.uid}`)); if (catDoc.exists()) { const data = catDoc.data(); if (data.categories && data.categories.length > 0) { categories = data.categories.map(c => typeof c === 'string' ? { name: c, color: '#3B82F6' } : c); } if (data.appName) { document.getElementById('app-brand-name').textContent = data.appName; document.getElementById('setting-app-name').value = data.appName; } }  renderCategories(); renderUI(); }  async function saveSettingsToCloud() { const appName = document.getElementById('setting-app-name').value.trim() \vert{}\vert{} "Mis Finanzas"; try { await setDoc(doc(db, `users_config/${currentUser.uid}`), { appName, categories }, { merge: true });
-                document.getElementById('app-brand-name').textContent = appName;
+                alert(`¡Registrado con éxito!\n${txType === 'income' ? 'Ingreso' : 'Gasto'}: S/ ${amount.toFixed(2)} (${description})`);
             } catch (err) {
-                console.error(err);
+                alert("Error al guardar en la nube.");
             }
         }
 
-        window.saveSettings = async () => {
-            await saveSettingsToCloud();
-            toggleSettingsModal();
-            alert("¡Configuración guardada!");
+        window.exportJSON = () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ transactions, categories }));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", "misfinanzas_respaldo.json");
+            dlAnchorElem.click();
         };
 
-        function renderCategories() {
-            const selectForm = document.getElementById('tx-category');
-            const selectFilter = document.getElementById('category-filter');
-
-            selectForm.innerHTML = categories.map(cat => `<option value="${cat.name}">${cat.name}</option>`).join('');
-            
-            const currentSelected = selectFilter.value || 'all';
-            selectFilter.innerHTML = `<option value="all">🔍 Todas las Categorías</option>` + 
-                categories.map(cat => `<option value="${cat.name}">${cat.name}</option>`).join('');
-            selectFilter.value = currentSelected;
-        }
-
-        function renderCategoriesManagement() {
-            const listEl = document.getElementById('categories-management-list');
-            listEl.innerHTML = categories.map((cat, index) => `
-                <div class="flex items-center justify-between gap-2 bg-white p-1.5 rounded-lg border text-xs">
-                    <input type="color" value="${cat.color || '#3B82F6'}" id="cat-color-${index}" onchange="updateCategoryColor(${index})" title="Cambiar color" class="w-8 h-8 p-0.5 border rounded-md cursor-pointer bg-slate-50">
-                    <input type="text" value="${cat.name}" id="cat-input-${index}" onchange="updateCategoryName(${index})" class="flex-1 px-2 py-1 bg-slate-50 border rounded-md outline-none focus:ring-1 focus:ring-emerald-500 font-medium">
-                    <button type="button" onclick="deleteCategory(${index})" class="text-red-500 hover:text-red-700 px-2 py-1"><i class="fa-solid fa-trash-can"></i></button>
-                </div>
-            `).join('');
-        }
-
-        window.updateCategoryName = (index) => {
-            const input = document.getElementById(`cat-input-${index}`);
-            const newName = input.value.trim();
-            if (!newName) return;
-            categories[index].name = newName;
-            renderCategories();
-            saveSettingsToCloud();
-        };
-
-        window.updateCategoryColor = (index) => {
-            const input = document.getElementById(`cat-color-${index}`); categories[index].color = input.value; renderUI(); saveSettingsToCloud(); };  window.addCategory = async () => { const nameInput = document.getElementById('new-category-name'); const colorInput = document.getElementById('new-category-color'); const name = nameInput.value.trim(); const color = colorInput.value;  if (!name \vert{}\vert{} categories.some(c => c.name.toLowerCase() === name.toLowerCase())) return;  categories.push({ name, color }); nameInput.value = ''; colorInput.value = '#10B981'; renderCategories(); renderCategoriesManagement(); await saveSettingsToCloud(); alert("¡Categoría creada!"); };  window.deleteCategory = async (index) => { if (categories.length <= 1) { alert("Debes tener al menos una categoría."); return; } categories.splice(index, 1); renderCategories(); renderCategoriesManagement(); await saveSettingsToCloud(); };  document.getElementById('transaction-form').addEventListener('submit', async (e) => { e.preventDefault(); const editId = document.getElementById('tx-edit-id').value; const description = document.getElementById('tx-description').value.trim() \vert{}\vert{} "Sin descripción"; const amount = parseFloat(document.getElementById('tx-amount').value); const category = document.getElementById('tx-category').value; const dateVal = document.getElementById('tx-date').value;  const txData = { description, amount, type: currentType, category, date: new Date(dateVal + 'T12:00:00').toISOString() };  try { if (editId) { await updateDoc(doc(db, `users/${currentUser.uid}/transactions/${editId}`), txData); const index = transactions.findIndex(t => t.id === editId); if (index !== -1) transactions[index] = { id: editId, ...txData }; alert("¡Transacción modificada con éxito!"); cancelEdit(); } else { const docRef = await addDoc(collection(db, `users/${currentUser.uid}/transactions`), txData);
-                    transactions.push({ id: docRef.id, ...txData });
-                    document.getElementById('transaction-form').reset();
-                    document.getElementById('tx-date').valueAsDate = new Date();
-                    setTxType('expense');
+        window.importJSON = async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.transactions) {
+                        for (let t of data.transactions) {
+                            delete t.id;
+                            await addDoc(collection(db, `users/${currentUser.uid}/transactions`), t);
+                        }
+                    }
+                    alert("¡Datos importados con éxito!");
+                    loadUserData();
+                } catch (err) {
+                    alert("Archivo no válido");
                 }
-                renderUI();
-                switchTab('dashboard');
-            } catch (err) {
-                alert("Error al guardar o modificar la transacción.");
-            }
-        });
-
-        window.editTx = (id) => {
-            const tx = transactions.find(t => t.id === id);
-            if (!tx) return;
-
-            document.getElementById('tx-edit-id').value = tx.id;
-            document.getElementById('tx-amount').value = tx.amount;
-            document.getElementById('tx-category').value = tx.category || categories[0].name;
-            document.getElementById('tx-date').value = tx.date ? tx.date.split('T')[0] : '';
-            document.getElementById('tx-description').value = tx.description;
-            setTxType(tx.type);
-
-            document.getElementById('form-title').textContent = "MODIFICAR REGISTRO";
-            document.getElementById('form-submit-btn').textContent = "Actualizar Transacción";
-            document.getElementById('form-cancel-btn').classList.remove('hidden');
-
-            switchTab('add');
+            };
+            reader.readAsText(file);
         };
-
-        window.cancelEdit = () => {
-            document.getElementById('transaction-form').reset();
-            document.getElementById('tx-edit-id').value = '';
-            document.getElementById('tx-date').valueAsDate = new Date();
-            setTxType('expense');
-
-            document.getElementById('form-title').textContent = "NUEVO REGISTRO";
-            document.getElementById('form-submit-btn').textContent = "Guardar Transacción";
-            document.getElementById('form-cancel-btn').classList.add('hidden');
-            switchTab('dashboard');
-        };
-
-        window.deleteTx = async (id) => {
-            if (!confirm("¿Deseas eliminar este movimiento?")) return;
-            try {
-                await deleteDoc(doc(db, `users/${currentUser.uid}/transactions/${id}`));
-                transactions = transactions.filter(t => t.id !== id);
-                renderUI();
-            } catch (err) {
-                alert("Error al eliminar");
-            }
-        };
-
-        function isSameWeek(d1, d2) {
-            const date1 = new Date(d1);
-            const date2 = new Date(d2);
-            const firstDayOfWeek1 = new Date(date1.setDate(date1.getDate() - date1.getDay()));
-            const firstDayOfWeek2 = new Date(date2.setDate(date2.getDate() - date2.getDay()));
-            return firstDayOfWeek1.toDateString() === firstDayOfWeek2.toDateString();
-        }
-
-        function isSameMonth(d1, d2) {
-            const date1 = new Date(d1);
-            const date2 = new Date(d2);
-            return date1.getFullYear() === date2.getFullYear() && date1.getMonth() === date2.getMonth();
-        }
-
-        window.renderUI = () => {
-            const timeFilter = document.getElementById('time-filter').value;
-            const categoryFilter = document.getElementById('category-filter').value;
-            const now = new Date();
-
-            let income = 0;
-            let expense = 0;
-            const recentEl = document.getElementById('dashboard-recent-list');
-            const fullHistoryEl = document.getElementById('full-history-list');
-            recentEl.innerHTML = '';
-            fullHistoryEl.innerHTML = '';
-
-            const categoryTotals = {};
-            const monthlyDataMap = {};
-
-            const monthNames = ['may', 'jun', 'jul', 'ago', 'sept', 'oct', 'nov', 'dic', 'ene', 'feb', 'mar', 'abr'];
-
-            const timeFilteredTransactions = transactions.filter(tx => {
-                if (!tx.date) return true;
-                if (timeFilter === 'week') return isSameWeek(tx.date, now);
-                if (timeFilter === 'month') return isSameMonth(tx.date, now);
-                return true;
-            });
-
-            timeFilteredTransactions.forEach(tx => {
-                const txDate = new Date(tx.date || Date.now());
-                const monthKey = monthNames[txDate.getMonth()];
-                
-                if (!monthlyDataMap[monthKey]) {
-                    monthlyDataMap[monthKey] = { income: 0, expense: 0, net: 0 };
-                }
-
-                if (tx.type === 'income') {
-                    income += tx.amount;
-                    monthlyDataMap[monthKey].income += tx.amount;
-                } else {
-                    expense += tx.amount;
-                    monthlyDataMap[monthKey].expense += tx.amount;
-                    categoryTotals[tx.category || 'General'] = (categoryTotals[tx.category || 'General'] || 0) + tx.amount;
-                }
-            });
-
-            Object.keys(monthlyDataMap).forEach(m => {
-                monthlyDataMap[m].net = monthlyDataMap[m].income - monthlyDataMap[m].expense;
-            });
-
-            const categoryFilteredTransactions = timeFilteredTransactions.filter(tx => {
-                if (categoryFilter === 'all') return true;
-                return (tx.category || 'General') === categoryFilter;
-            });
-
-            categoryFilteredTransactions.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((tx, idx) => {
-                const catObj = categories.find(c => c.name === (tx.category || 'General'));
-                const catColor = catObj ? catObj.color : '#000000';
-                const textColor = getContrastTextColor(catColor);
-
-                const formattedDate = tx.date ? tx.date.split('T')[0] : '';
-                const itemHTML = `
-                    <div class="flex justify-between items-center p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-9 h-9 rounded-full ${tx.type === 'income' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-500'} flex items-center justify-center text-xs">
-                                <i class="fa-solid ${tx.type === 'income' ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
-                            </div>
-                            <div>
-                                <p class="font-bold text-slate-800 text-xs">${tx.description}</p>
-                                <p class="text-[10px] text-slate-400">${formattedDate} • <span class="px-2 py-0.5 rounded-full font-semibold text-[9px]" style="background-color: ${catColor}; color: ${textColor};">${tx.category || 'General'}</span></p>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="font-extrabold text-xs ${tx.type === 'income' ? 'text-emerald-600' : 'text-slate-800'}">
-                                ${tx.type === 'income' ? '+' : '-'} S/ ${tx.amount.toFixed(2)}
-                            </span>
-                            <button onclick="editTx('${tx.id}')" title="Modificar" class="text-blue-400 hover:text-blue-600 text-xs pl-1"><i class="fa-solid fa-pen-to-square"></i></button>
-                            <button onclick="deleteTx('${tx.id}')" title="Eliminar" class="text-slate-300 hover:text-red-500 text-xs pl-1"><i class="fa-solid fa-trash-can"></i></button>
-                        </div>
-                    </div>
-                `;
-
-                if (idx < 5) recentEl.innerHTML += itemHTML;
-                fullHistoryEl.innerHTML += itemHTML;
-            });
-
-            if (categoryFilteredTransactions.length === 0) {
-                recentEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">Sin movimientos encontrados</p>`;
-                fullHistoryEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Sin movimientos</p>`;
-            }
-
-            const balanceLabel = document.getElementById('balance-label');
-            if (timeFilter === 'week') balanceLabel.textContent = "BALANCE DE ESTA SEMANA";
-            else if (timeFilter === 'month') balanceLabel.textContent = "BALANCE DE ESTE MES";
-            else balanceLabel.textContent = "BALANCE TOTAL";
-
-            const balance = income - expense;
-
-            if (isBalanceVisible) {
-                document.getElementById('total-balance').textContent = `S/ ${balance.toFixed(2)}`; document.getElementById('total-income').textContent = `S/ ${income.
+    </script>
+</body>
+</html>
