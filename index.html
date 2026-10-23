@@ -20,7 +20,6 @@
         <!-- Screen Autenticación -->
         <div id="auth-screen" class="flex-1 flex flex-col justify-center p-6 bg-slate-900 text-white z-10 relative">
             <div class="text-center mb-8">
-                <!-- Botón de Música con animación y cambio de icono -->
                 <div id="music-btn" onclick="toggleIntroMusic()" class="bg-emerald-500 text-white w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/30 cursor-pointer transition transform hover:scale-105 active:scale-95 relative" title="Toca para reproducir / pausar música">
                     <i id="music-icon" class="fa-solid fa-play text-3xl ml-1"></i>
                     <span id="music-badge" class="absolute -top-1 -right-1 bg-rose-500 text-[9px] font-bold px-2 py-0.5 rounded-full border-2 border-slate-900 hidden">PLAYING</span>
@@ -154,6 +153,17 @@
                     <p>• <i>"Crear categoría Repuestos"</i></p>
                     <p>• <i>"Gasto de 15 soles en gasolina"</i></p>
                     <p>• <i>"Ingreso de 50 soles por pedido"</i></p>
+                </div>
+
+                <!-- Gráfico de Tendencia (Estilo Trading / Líneas) -->
+                <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/80">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-xs font-bold text-slate-600 tracking-wider uppercase">TENDENCIA FINANCIERA</h3>
+                        <span class="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-md"><i class="fa-solid fa-chart-line mr-1"></i> Estilo Trading</span>
+                    </div>
+                    <div class="h-48 w-full relative">
+                        <canvas id="tradingTrendChart"></canvas>
+                    </div>
                 </div>
 
                 <!-- Gráfico de Gastos por Categoría -->
@@ -310,10 +320,10 @@
             { name: 'General', color: '#8B5CF6' }
         ];
         let chartInstance = null;
+        let trendChartInstance = null; // Instancia para el gráfico estilo trading
 
         document.getElementById('tx-date').valueAsDate = new Date();
 
-        // Control seguro de reproducción / pausa de música
         window.toggleIntroMusic = () => {
             const audio = document.getElementById('intro-audio');
             const musicIcon = document.getElementById('music-icon');
@@ -338,7 +348,6 @@
             }
         };
 
-        // Event listener seguro al cargar la ventana
         window.addEventListener('DOMContentLoaded', () => {
             const audio = document.getElementById('intro-audio');
             if (audio) {
@@ -812,6 +821,7 @@
             fullHistoryEl.innerHTML = '';
 
             const categoryTotals = {};
+            const dailyDataMap = {}; // Para el gráfico de tendencia tipo trading
 
             const timeFilteredTransactions = transactions.filter(tx => {
                 if (!tx.date) return true;
@@ -821,9 +831,15 @@
             });
 
             timeFilteredTransactions.forEach(tx => {
-                if (tx.type === 'income') income += tx.amount;
-                else {
+                const dayKey = tx.date ? tx.date.split('T')[0] : 'Desconocido';
+                if (!dailyDataMap[dayKey]) dailyDataMap[dayKey] = { income: 0, expense: 0 };
+
+                if (tx.type === 'income') {
+                    income += tx.amount;
+                    dailyDataMap[dayKey].income += tx.amount;
+                } else {
                     expense += tx.amount;
+                    dailyDataMap[dayKey].expense += tx.amount;
                     categoryTotals[tx.category || 'General'] = (categoryTotals[tx.category || 'General'] || 0) + tx.amount;
                 }
             });
@@ -887,6 +903,7 @@
             }
 
             renderChart(categoryTotals);
+            renderTradingTrendChart(dailyDataMap);
         };
 
         function renderChart(categoryTotals) {
@@ -925,6 +942,77 @@
                 options: {
                     plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
                     cutout: '70%'
+                }
+            });
+        }
+
+        function renderTradingTrendChart(dailyDataMap) {
+            const ctx = document.getElementById('tradingTrendChart').getContext('2d');
+            
+            // Ordenar fechas cronológicamente
+            const sortedDates = Object.keys(dailyDataMap).sort((a, b) => new Date(a) - new Date(b));
+            
+            const incomeData = sortedDates.map(date => dailyDataMap[date].income);
+            const expenseData = sortedDates.map(date => dailyDataMap[date].expense);
+
+            if (trendChartInstance) trendChartInstance.destroy();
+
+            if (sortedDates.length === 0) {
+                trendChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Sin datos'],
+                        datasets: [{ data: [0], borderColor: '#10B981' }]
+                    },
+                    options: { plugins: { legend: { display: false } } }
+                });
+                return;
+            }
+
+            trendChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: sortedDates,
+                    datasets: [
+                        {
+                            label: 'Ingresos',
+                            data: incomeData,
+                            borderColor: '#10B981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Gastos',
+                            data: expenseData,
+                            borderColor: '#EF4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { boxWidth: 10, font: { size: 10 } }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 9 } }
+                        },
+                        y: {
+                            grid: { color: '#F1F5F9' },
+                            ticks: { font: { size: 9 } }
+                        }
+                    }
                 }
             });
         }
