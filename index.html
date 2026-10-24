@@ -145,7 +145,7 @@
                     </div>
                 </div>
 
-                <!-- Agenda de Deudas (Excluida del balance) -->
+                <!-- Agenda de Deudas -->
                 <div class="bg-slate-900 text-white p-4 rounded-3xl shadow-md border border-slate-800 space-y-2">
                     <div class="flex justify-between items-center px-1">
                         <div class="flex items-center gap-2">
@@ -241,7 +241,7 @@
                     </div>
                 </div>
 
-                <!-- Movimientos -->
+                <!-- Movimientos Recientes -->
                 <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/80 space-y-3">
                     <div class="flex justify-between items-center">
                         <h3 class="text-xs font-bold text-slate-600 tracking-wider uppercase">MOVIMIENTOS RECIENTES</h3>
@@ -321,10 +321,10 @@
                         <span id="history-count" class="text-[10px] text-slate-400 font-semibold">0 registros</span>
                     </div>
 
-                    <!-- Buscador Rápido de Transacciones -->
+                    <!-- Buscador Rápido -->
                     <div class="relative">
                         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                        <input type="text" id="history-search-input" onkeyup="renderUI()" placeholder="Buscar por palabra clave (ej. McDonald's, Yape, Juan)..." class="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-1 focus:ring-emerald-500 font-medium">
+                        <input type="text" id="history-search-input" onkeyup="renderUI()" placeholder="Buscar por palabra clave (ej. McDonald's, Yape)..." class="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-1 focus:ring-emerald-500 font-medium">
                         <button onclick="clearHistorySearch()" id="clear-search-btn" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
                             <i class="fa-solid fa-circle-xmark"></i>
                         </button>
@@ -344,7 +344,7 @@
                     
                     <div class="space-y-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
                         <div class="flex justify-between items-center text-xs">
-                            <span class="font-bold text-slate-500">Tipo de cambio aproximado:</span>
+                            <span class="font-bold text-slate-500">Tipo de cambio aprox:</span>
                             <span class="font-bold text-emerald-600">1 USD = 3.75 PEN</span>
                         </div>
                         <div>
@@ -374,7 +374,7 @@
                 </div>
             </div>
 
-            <!-- Modal Configuración y Presupuestos -->
+            <!-- Modal Configuración -->
             <div id="settings-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                 <div class="bg-white w-full max-w-sm p-5 rounded-3xl shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto custom-scroll">
                     <div class="flex justify-between items-center">
@@ -403,7 +403,7 @@
                 </div>
             </div>
 
-            <!-- Cuadraditos de Temas (Themes) -->
+            <!-- Selector de Temas -->
             <div id="theme-selector-bar" class="fixed bottom-[60px] right-4 bg-white/90 backdrop-blur-md px-2.5 py-1.5 rounded-2xl shadow-lg border border-slate-200/80 flex items-center space-x-2 z-40">
                 <span class="text-[9px] font-bold text-slate-400 uppercase tracking-tight mr-0.5"><i class="fa-solid fa-palette text-slate-500 mr-1"></i>Tema:</span>
                 <button onclick="changeTheme('emerald')" title="Esmeralda" class="w-4 h-4 rounded-md bg-emerald-500 hover:scale-110 transition shadow-sm border border-emerald-600 focus:outline-none"></button>
@@ -436,7 +436,7 @@
         </div>
     </div>
 
-    <!-- Scripts de Firebase y Lógica -->
+    <!-- Scripts Firebase y Lógica -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -939,20 +939,25 @@
                 const catColor = catObj ? catObj.color : '#000000';
                 const textColor = getContrastTextColor(catColor);
                 let formattedDate = tx.date ? tx.date.split('T')[0] : '';
-                const photoBadge = tx.photo ? `<span onclick="openImageModal('${tx.photo}')" class="ml-1.5 text-emerald-600 cursor-pointer hover:text-emerald-700 inline-block bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200"><i class="fa-solid fa-image"></i> Ver</span>` : '';
+                
+                // Mantiene el botón de ver imagen alineado en una sola línea al lado del nombre
+                const photoBadge = tx.photo ? `<span onclick="openImageModal('${tx.photo}')" class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 px-2 py-0.5 rounded-md border border-emerald-300 transition cursor-pointer shrink-0 ml-1.5"><i class="fa-solid fa-image text-emerald-600"></i> Ver</span>` : '';
 
                 const itemHTML = `
                     <div class="flex justify-between items-center p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-9 h-9 rounded-full ${tx.type === 'income' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-500'} flex items-center justify-center text-xs">
+                        <div class="flex items-center space-x-3 overflow-hidden mr-2">
+                            <div class="w-9 h-9 rounded-full ${tx.type === 'income' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-500'} flex items-center justify-center text-xs shrink-0">
                                 <i class="fa-solid ${tx.type === 'income' ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
                             </div>
-                            <div>
-                                <p class="font-bold text-slate-800 text-xs flex items-center gap-1">${tx.description} ${photoBadge}</p>
-                                <p class="text-[10px] text-slate-400 mt-0.5">${formattedDate} • <span class="px-2 py-0.5 rounded-full font-semibold text-[9px]" style="background-color: ${catColor}; color: ${textColor};">${tx.category || 'General'}</span></p>
+                            <div class="min-w-0">
+                                <div class="flex items-center flex-wrap gap-1">
+                                    <span class="font-bold text-slate-800 text-xs truncate max-w-[140px]">${tx.description}</span>
+                                    ${photoBadge}
+                                </div>
+                                <p class="text-[10px] text-slate-400 mt-0.5 truncate">${formattedDate} • <span class="px-2 py-0.5 rounded-full font-semibold text-[9px] inline-block" style="background-color: ${catColor}; color: ${textColor};">${tx.category || 'General'}</span></p>
                             </div>
                         </div>
-                        <div class="flex items-center space-x-2">
+                        <div class="flex items-center space-x-2 shrink-0">
                             <span class="font-extrabold text-xs ${tx.type === 'income' ? 'text-emerald-600' : 'text-slate-800'}">${tx.type === 'income' ? '+' : '-'} S/ ${tx.amount.toFixed(2)}</span>
                             <button onclick="editTx('${tx.id}')" title="Modificar" class="text-blue-400 hover:text-blue-600 text-xs pl-1"><i class="fa-solid fa-pen-to-square"></i></button>
                             <button onclick="deleteTx('${tx.id}')" title="Eliminar" class="text-slate-300 hover:text-red-500 text-xs pl-1"><i class="fa-solid fa-trash-can"></i></button>
