@@ -143,7 +143,7 @@
                     </div>
                 </div>
 
-                <!-- TARJETA DE AGENDA DE DEUDAS (CON BOTONES +, -, EDITAR Y ELIMINAR) -->
+                <!-- Agenda de Deudas -->
                 <div class="bg-slate-900 text-white p-4 rounded-3xl shadow-md border border-slate-800 space-y-2">
                     <div class="flex justify-between items-center px-1">
                         <div class="flex items-center gap-2">
@@ -419,18 +419,16 @@
             switchTab('add');
         };
 
-        // FUNCIONES PARA SUMAR(+) Y RESTAR(-) MONTOS A LAS DEUDAS DE AMIGOS
         window.adjustDebtAmount = async (id, mode) => {
             const tx = transactions.find(t => t.id === id);
             if (!tx) return;
 
-            const actionText = mode === 'add' ? 'Aumentar (sumar)' : 'Disminuir (amortizar)';
             const promptMsg = mode === 'add' 
                 ? `¿Cuánto deseas SUMAR a la deuda de "${tx.description}"?` 
                 : `¿Cuánto deseas RESTAR/AMORTIZAR de la deuda de "${tx.description}"?`;
 
             const inputVal = prompt(promptMsg, "0.00");
-            if (inputVal === null) return; // Cancelado por el usuario
+            if (inputVal === null) return;
 
             const amountToAdjust = parseFloat(inputVal.replace(',', '.'));
             if (isNaN(amountToAdjust) || amountToAdjust <= 0) {
@@ -747,7 +745,7 @@
                 return true;
             });
 
-            // AGENDA DE DEUDAS - CON BOTONES +, -, EDITAR Y ELIMINAR
+            // AGENDA DE DEUDAS
             let totalDebt = 0;
             const debtorsEl = document.getElementById('debtors-list');
             debtorsEl.innerHTML = '';
@@ -791,9 +789,8 @@
             }
             document.getElementById('total-debt-amount').textContent = `S/ ${totalDebt.toFixed(2)}`;
 
-            const financialTransactions = timeFilteredTransactions.filter(tx => !(tx.category || '').toLowerCase().includes('deuda'));
-
-            financialTransactions.forEach(tx => {
+            // PROCESAMIENTO DE TODAS LAS TRANSACCIONES (INCLUYENDO DEUDAS PARA LOS TOTALES DE CATEGORÍA)
+            timeFilteredTransactions.forEach(tx => {
                 const txDate = new Date(tx.date || Date.now());
                 const monthKey = monthNames[txDate.getMonth()];
                 
@@ -807,6 +804,7 @@
                 } else {
                     expense += tx.amount;
                     monthlyDataMap[monthKey].expense += tx.amount;
+                    // Ahora se suma en su respectiva categoría, incluyendo 'Deudas'
                     categoryTotals[tx.category || 'General'] = (categoryTotals[tx.category || 'General'] || 0) + tx.amount;
                 }
             });
@@ -1196,7 +1194,7 @@
         };
 
         window.deleteTx = async (id, askConfirm = true) => {
-            if (askConfirm && !confirm("¿Deseas eliminar este registro de deuda?")) return;
+            if (askConfirm && !confirm("¿Deseas eliminar este registro?")) return;
             try {
                 await deleteDoc(doc(db, `users/${currentUser.uid}/transactions/${id}`));
                 transactions = transactions.filter(t => t.id !== id);
