@@ -144,7 +144,7 @@
                     </div>
                 </div>
 
-                <!-- Agenda de Deudas (Limpia sin fechas de vencimiento) -->
+                <!-- Agenda de Deudas (Excluida del balance) -->
                 <div class="bg-slate-900 text-white p-4 rounded-3xl shadow-md border border-slate-800 space-y-2">
                     <div class="flex justify-between items-center px-1">
                         <div class="flex items-center gap-2">
@@ -155,7 +155,7 @@
                         </div>
                         <span id="total-debt-amount" class="text-xs font-extrabold text-amber-400">S/ 0.00</span>
                     </div>
-                    <p class="text-[10px] text-slate-400 px-1">Dinero pendiente por devolver a amistades.</p>
+                    <p class="text-[10px] text-slate-400 px-1">Dinero pendiente por devolver a amistades (No afecta tu Balance Total).</p>
                     <div id="debtors-list" class="space-y-1.5 pt-1 max-h-36 overflow-y-auto custom-scroll pr-1"></div>
                 </div>
 
@@ -700,7 +700,7 @@
                 return true;
             });
 
-            // AGENDA DE DEUDAS (LIMPIA SIN FECHAS DE VENCIMIENTO)
+            // AGENDA DE DEUDAS
             let totalDebt = 0;
             const debtorsEl = document.getElementById('debtors-list');
             debtorsEl.innerHTML = '';
@@ -727,23 +727,29 @@
             }
             document.getElementById('total-debt-amount').textContent = `S/ ${totalDebt.toFixed(2)}`;
 
+            // CÁLCULO DE BALANCE (EXCLUYENDO DEUDAS DE GASTOS GENERALES)
             timeFilteredTransactions.forEach(tx => {
                 const txDate = new Date(tx.date || Date.now());
                 const monthKey = monthNames[txDate.getMonth()];
                 if (!monthlyDataMap[monthKey]) monthlyDataMap[monthKey] = { income: 0, expense: 0, net: 0 };
 
+                const isDebt = (tx.category || '').toLowerCase().includes('deuda');
+
                 if (tx.type === 'income') {
                     income += tx.amount;
                     monthlyDataMap[monthKey].income += tx.amount;
                 } else {
-                    expense += tx.amount;
-                    monthlyDataMap[monthKey].expense += tx.amount;
-                    categoryTotals[tx.category || 'General'] = (categoryTotals[tx.category || 'General'] || 0) + tx.amount;
+                    // Si NO es categoría Deudas, lo sumamos al gasto principal
+                    if (!isDebt) {
+                        expense += tx.amount;
+                        monthlyDataMap[monthKey].expense += tx.amount;
+                        categoryTotals[tx.category || 'General'] = (categoryTotals[tx.category || 'General'] || 0) + tx.amount;
+                    }
                 }
             });
 
             const currentSelected = categoryFilter || 'all';
-            let selectHTML = `<option value="all">🔍 Todas las Categorías (Total: S/ ${expense.toFixed(2)})</option>`;
+            let selectHTML = `<option value="all">🔍 Todas las Categorías (Total Gastos: S/ ${expense.toFixed(2)})</option>`;
             categories.forEach(cat => {
                 const totalCat = categoryTotals[cat.name] || 0;
                 selectHTML += `<option value="${cat.name}">${cat.name} (S/ ${totalCat.toFixed(2)})</option>`;
