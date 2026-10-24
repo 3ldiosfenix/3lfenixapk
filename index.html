@@ -74,14 +74,14 @@
         <div id="app-screen" class="hidden flex-1 flex flex-col bg-slate-100">
             
             <!-- Header -->
-            <header class="bg-slate-900 text-white px-5 py-4 flex justify-between items-center rounded-b-2xl shadow-md">
+            <header id="main-header" class="bg-slate-900 text-white px-5 py-4 flex justify-between items-center rounded-b-2xl shadow-md transition-colors duration-300">
                 <div class="flex items-center space-x-2">
-                    <div class="bg-emerald-500 text-white w-8 h-8 rounded-xl flex items-center justify-center">
+                    <div id="brand-badge" class="bg-emerald-500 text-white w-8 h-8 rounded-xl flex items-center justify-center transition-colors duration-300">
                         <i class="fa-solid fa-wallet text-xs"></i>
                     </div>
                     <div>
                         <span id="app-brand-name" class="font-bold text-base block leading-tight">Mis Finanzas</span>
-                        <span class="text-[9px] text-emerald-400 font-semibold tracking-wide">by 3ldiosfenix</span>
+                        <span id="app-brand-sub" class="text-[9px] text-emerald-400 font-semibold tracking-wide transition-colors duration-300">by 3ldiosfenix</span>
                     </div>
                 </div>
                 <div class="flex items-center space-x-3 text-slate-300">
@@ -111,20 +111,20 @@
                 </div>
 
                 <!-- Tarjeta de Balance -->
-                <div class="bg-emerald-600 text-white p-5 rounded-3xl shadow-lg relative overflow-hidden">
+                <div id="balance-card" class="bg-emerald-600 text-white p-5 rounded-3xl shadow-lg relative overflow-hidden transition-colors duration-300">
                     <div class="flex justify-between items-center">
                         <p id="balance-label" class="text-[10px] font-bold uppercase tracking-widest opacity-80">BALANCE TOTAL</p>
-                        <button onclick="toggleBalanceVisibility()" class="text-emerald-200 hover:text-white text-sm focus:outline-none" title="Ocultar/Mostrar saldo">
+                        <button onclick="toggleBalanceVisibility()" class="text-white/80 hover:text-white text-sm focus:outline-none" title="Ocultar/Mostrar saldo">
                             <i id="toggle-eye-icon" class="fa-solid fa-eye-slash"></i>
                         </button>
                     </div>
 
                     <h2 id="total-balance" class="text-3xl font-extrabold mt-1">S/ *****</h2>
                     
-                    <div class="grid grid-cols-2 gap-4 mt-5 pt-4 border-t border-emerald-500/60">
+                    <div class="grid grid-cols-2 gap-4 mt-5 pt-4 border-t border-white/20">
                         <div class="flex items-center space-x-2">
-                            <div class="w-7 h-7 rounded-full bg-emerald-500/80 flex items-center justify-center text-xs">
-                                <i class="fa-solid fa-arrow-down text-emerald-200"></i>
+                            <div class="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-arrow-down text-white"></i>
                             </div>
                             <div>
                                 <p class="text-[10px] opacity-80">Ingresos</p>
@@ -132,8 +132,8 @@
                             </div>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <div class="w-7 h-7 rounded-full bg-emerald-500/80 flex items-center justify-center text-xs">
-                                <i class="fa-solid fa-arrow-up text-emerald-200"></i>
+                            <div class="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-arrow-up text-white"></i>
                             </div>
                             <div>
                                 <p class="text-[10px] opacity-80">Gastos</p>
@@ -341,6 +341,16 @@
                 </div>
             </div>
 
+            <!-- CUADRADITOS SELECTORES DE TEMA ESTILO (THEMES) -->
+            <div id="theme-selector-bar" class="fixed bottom-[60px] right-4 bg-white/90 backdrop-blur-md px-2.5 py-1.5 rounded-2xl shadow-lg border border-slate-200/80 flex items-center space-x-2 z-40">
+                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-tight mr-0.5"><i class="fa-solid fa-palette text-slate-500 mr-1"></i>Tema:</span>
+                <button onclick="changeTheme('emerald')" title="Tema Esmeralda" class="w-4 h-4 rounded-md bg-emerald-500 hover:scale-110 transition shadow-sm border border-emerald-600 focus:outline-none"></button>
+                <button onclick="changeTheme('ocean')" title="Tema Océano" class="w-4 h-4 rounded-md bg-blue-600 hover:scale-110 transition shadow-sm border border-blue-700 focus:outline-none"></button>
+                <button onclick="changeTheme('violet')" title="Tema Violeta" class="w-4 h-4 rounded-md bg-violet-600 hover:scale-110 transition shadow-sm border border-violet-700 focus:outline-none"></button>
+                <button onclick="changeTheme('sunset')" title="Tema Sunset (Naranja)" class="w-4 h-4 rounded-md bg-amber-500 hover:scale-110 transition shadow-sm border border-amber-600 focus:outline-none"></button>
+                <button onclick="changeTheme('dark')" title="Tema Oscuro / Neón" class="w-4 h-4 rounded-md bg-slate-800 hover:scale-110 transition shadow-sm border border-slate-900 focus:outline-none"></button>
+            </div>
+
             <!-- Navegación Inferior -->
             <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-slate-200 px-6 py-2 flex justify-around items-center z-40">
                 <button onclick="switchTab('dashboard')" id="nav-btn-dashboard" class="flex flex-col items-center text-emerald-600 text-[11px] font-bold">
@@ -349,7 +359,7 @@
                 </button>
                 
                 <button onclick="switchTab('add')" id="nav-btn-add" class="flex flex-col items-center">
-                    <div class="w-12 h-12 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center text-xl shadow-lg shadow-emerald-500/40 -mt-6 border-4 border-slate-100 transition transform active:scale-95">
+                    <div id="add-fab-btn" class="w-12 h-12 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center text-xl shadow-lg shadow-emerald-500/40 -mt-6 border-4 border-slate-100 transition transform active:scale-95">
                         <i class="fa-solid fa-plus"></i>
                     </div>
                     <span class="text-[10px] text-slate-500 font-semibold mt-0.5">Agregar</span>
@@ -389,6 +399,7 @@
         let isBalanceVisible = false;
         let isRegister = false;
         let currentPhotoBase64 = null;
+        let currentTheme = localStorage.getItem('app_theme') || 'emerald';
 
         let categories = [
             { name: 'Comida / Alimentos', color: '#EF4444' },
@@ -402,6 +413,81 @@
         let barChartInstance = null;
 
         document.getElementById('tx-date').valueAsDate = new Date();
+
+        // GESTIÓN DE TEMAS DE COLOR (THEMES)
+        const themesConfig = {
+            emerald: {
+                headerBg: 'bg-slate-900',
+                badgeBg: 'bg-emerald-500',
+                subText: 'text-emerald-400',
+                cardBg: 'bg-emerald-600',
+                fabBg: 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/40',
+                activeNav: 'text-emerald-600'
+            },
+            ocean: {
+                headerBg: 'bg-slate-900',
+                badgeBg: 'bg-blue-600',
+                subText: 'text-blue-400',
+                cardBg: 'bg-blue-600',
+                fabBg: 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/40',
+                activeNav: 'text-blue-600'
+            },
+            violet: {
+                headerBg: 'bg-slate-900',
+                badgeBg: 'bg-violet-600',
+                subText: 'text-violet-400',
+                cardBg: 'bg-violet-600',
+                fabBg: 'bg-violet-600 hover:bg-violet-700 shadow-violet-600/40',
+                activeNav: 'text-violet-600'
+            },
+            sunset: {
+                headerBg: 'bg-slate-900',
+                badgeBg: 'bg-amber-500',
+                subText: 'text-amber-400',
+                cardBg: 'bg-amber-500',
+                fabBg: 'bg-amber-500 hover:bg-amber-600 shadow-amber-500/40',
+                activeNav: 'text-amber-600'
+            },
+            dark: {
+                headerBg: 'bg-black',
+                badgeBg: 'bg-indigo-600',
+                subText: 'text-indigo-400',
+                cardBg: 'bg-slate-800',
+                fabBg: 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/40',
+                activeNav: 'text-indigo-500'
+            }
+        };
+
+        window.changeTheme = (themeKey) => {
+            currentTheme = themeKey;
+            localStorage.setItem('app_theme', themeKey);
+            applyTheme(themeKey);
+        };
+
+        function applyTheme(themeKey) {
+            const config = themesConfig[themeKey] || themesConfig.emerald;
+
+            const header = document.getElementById('main-header');
+            const badge = document.getElementById('brand-badge');
+            const brandSub = document.getElementById('app-brand-sub');
+            const balanceCard = document.getElementById('balance-card');
+            const fabBtn = document.getElementById('add-fab-btn');
+
+            if (header) header.className = `${config.headerBg} text-white px-5 py-4 flex justify-between items-center rounded-b-2xl shadow-md transition-colors duration-300`;
+            if (badge) badge.className = `${config.badgeBg} text-white w-8 h-8 rounded-xl flex items-center justify-center transition-colors duration-300`;
+            if (brandSub) brandSub.className = `text-[9px] ${config.subText} font-semibold tracking-wide transition-colors duration-300`;
+            if (balanceCard) balanceCard.className = `${config.cardBg} text-white p-5 rounded-3xl shadow-lg relative overflow-hidden transition-colors duration-300`;
+            if (fabBtn) fabBtn.className = `w-12 h-12 ${config.fabBg} text-white rounded-full flex items-center justify-center text-xl shadow-lg -mt-6 border-4 border-slate-100 transition transform active:scale-95`;
+
+            const activeTab = document.getElementById('tab-dashboard').classList.contains('hidden') ? 
+                (document.getElementById('tab-history').classList.contains('hidden') ? 'add' : 'history') : 'dashboard';
+            
+            if (activeTab === 'dashboard') {
+                document.getElementById('nav-btn-dashboard').className = `flex flex-col items-center ${config.activeNav} text-[11px] font-bold`;
+            } else if (activeTab === 'history') {
+                document.getElementById('nav-btn-history').className = `flex flex-col items-center ${config.activeNav} text-[11px] font-bold`;
+            }
+        }
 
         window.addQuickDebt = () => {
             setTxType('expense');
@@ -541,14 +627,16 @@
             document.getElementById('nav-btn-dashboard').className = "flex flex-col items-center text-slate-400 text-[11px] font-semibold";
             document.getElementById('nav-btn-history').className = "flex flex-col items-center text-slate-400 text-[11px] font-semibold";
 
+            const config = themesConfig[currentTheme] || themesConfig.emerald;
+
             if (tab === 'dashboard') {
                 document.getElementById('tab-dashboard').classList.remove('hidden');
-                document.getElementById('nav-btn-dashboard').className = "flex flex-col items-center text-emerald-600 text-[11px] font-bold";
+                document.getElementById('nav-btn-dashboard').className = `flex flex-col items-center ${config.activeNav} text-[11px] font-bold`;
             } else if (tab === 'add') {
                 document.getElementById('tab-add').classList.remove('hidden');
             } else if (tab === 'history') {
                 document.getElementById('tab-history').classList.remove('hidden');
-                document.getElementById('nav-btn-history').className = "flex flex-col items-center text-emerald-600 text-[11px] font-bold";
+                document.getElementById('nav-btn-history').className = `flex flex-col items-center ${config.activeNav} text-[11px] font-bold`;
             }
         };
 
@@ -672,6 +760,7 @@
                 document.getElementById('auth-screen').classList.add('hidden');
                 document.getElementById('app-screen').classList.remove('hidden');
                 document.getElementById('user-display-name').textContent = user.displayName || user.email;
+                applyTheme(currentTheme);
                 await loadUserData();
             } else {
                 currentUser = null;
@@ -760,22 +849,18 @@
                         <div class="flex items-center gap-1.5">
                             <span class="font-bold text-amber-400 mr-1">S/ ${tx.amount.toFixed(2)}</span>
                             
-                            <!-- BOTÓN DISMINUIR (-) -->
                             <button onclick="adjustDebtAmount('${tx.id}', 'sub')" title="Restar / Amortizar monto" class="bg-slate-700 hover:bg-slate-600 text-amber-400 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition">
                                 <i class="fa-solid fa-minus"></i>
                             </button>
 
-                            <!-- BOTÓN AUMENTAR (+) -->
                             <button onclick="adjustDebtAmount('${tx.id}', 'add')" title="Sumar / Aumentar deuda" class="bg-slate-700 hover:bg-slate-600 text-amber-400 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition">
                                 <i class="fa-solid fa-plus"></i>
                             </button>
 
-                            <!-- EDITAR -->
                             <button onclick="editTx('${tx.id}')" title="Editar registro" class="text-blue-400 hover:text-blue-300 text-xs transition px-0.5 ml-1">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </button>
 
-                            <!-- ELIMINAR -->
                             <button onclick="deleteTx('${tx.id}')" title="Eliminar registro" class="text-slate-400 hover:text-red-400 text-xs transition px-0.5">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
@@ -789,7 +874,6 @@
             }
             document.getElementById('total-debt-amount').textContent = `S/ ${totalDebt.toFixed(2)}`;
 
-            // PROCESAMIENTO DE TODAS LAS TRANSACCIONES (INCLUYENDO DEUDAS PARA LOS TOTALES DE CATEGORÍA)
             timeFilteredTransactions.forEach(tx => {
                 const txDate = new Date(tx.date || Date.now());
                 const monthKey = monthNames[txDate.getMonth()];
@@ -804,12 +888,10 @@
                 } else {
                     expense += tx.amount;
                     monthlyDataMap[monthKey].expense += tx.amount;
-                    // Ahora se suma en su respectiva categoría, incluyendo 'Deudas'
                     categoryTotals[tx.category || 'General'] = (categoryTotals[tx.category || 'General'] || 0) + tx.amount;
                 }
             });
 
-            // ACTUALIZAR SELECTOR CON MONTOS TOTALES
             const currentSelected = categoryFilter || 'all';
             let selectHTML = `<option value="all">🔍 Todas las Categorías (Total: S/ ${expense.toFixed(2)})</option>`;
             categories.forEach(cat => {
