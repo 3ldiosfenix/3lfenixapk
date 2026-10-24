@@ -84,10 +84,11 @@
                         <span id="app-brand-sub" class="text-[9px] text-emerald-400 font-semibold tracking-wide transition-colors duration-300">by 3ldiosfenix</span>
                     </div>
                 </div>
-                <div class="flex items-center space-x-3 text-slate-300">
+                <div class="flex items-center space-x-2.5 text-slate-300">
                     <button onclick="toggleSettingsModal()" title="Configuración y Categorías" class="hover:text-emerald-400 text-sm"><i class="fa-solid fa-gear"></i></button>
-                    <button onclick="exportJSON()" title="Exportar JSON" class="hover:text-emerald-400 text-sm"><i class="fa-solid fa-download"></i></button>
-                    <label title="Importar JSON" class="hover:text-emerald-400 cursor-pointer text-sm">
+                    <button onclick="exportCSV()" title="Exportar a Excel (CSV)" class="hover:text-emerald-400 text-sm"><i class="fa-solid fa-file-excel"></i></button>
+                    <button onclick="exportJSON()" title="Exportar Respaldo JSON" class="hover:text-emerald-400 text-sm"><i class="fa-solid fa-download"></i></button>
+                    <label title="Importar Respaldo" class="hover:text-emerald-400 cursor-pointer text-sm">
                         <i class="fa-solid fa-upload"></i>
                         <input type="file" id="import-file" accept=".json" class="hidden" onchange="importJSON(event)">
                     </label>
@@ -143,7 +144,7 @@
                     </div>
                 </div>
 
-                <!-- Agenda de Deudas -->
+                <!-- Agenda de Deudas (Con Recordatorios y Fecha Límite) -->
                 <div class="bg-slate-900 text-white p-4 rounded-3xl shadow-md border border-slate-800 space-y-2">
                     <div class="flex justify-between items-center px-1">
                         <div class="flex items-center gap-2">
@@ -154,8 +155,8 @@
                         </div>
                         <span id="total-debt-amount" class="text-xs font-extrabold text-amber-400">S/ 0.00</span>
                     </div>
-                    <p class="text-[10px] text-slate-400 px-1">Dinero pendiente por devolver a amistades.</p>
-                    <div id="debtors-list" class="space-y-1.5 pt-1 max-h-36 overflow-y-auto custom-scroll pr-1"></div>
+                    <p class="text-[10px] text-slate-400 px-1">Dinero pendiente por devolver con fecha límite.</p>
+                    <div id="debtors-list" class="space-y-1.5 pt-1 max-h-40 overflow-y-auto custom-scroll pr-1"></div>
                 </div>
 
                 <!-- Asistente por Voz -->
@@ -257,7 +258,7 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Fecha</label>
+                            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Fecha de Registro / Límite</label>
                             <input type="date" id="tx-date" required class="w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500">
                         </div>
                         <div>
@@ -312,11 +313,11 @@
                 </div>
             </div>
 
-            <!-- Modal Configuración -->
+            <!-- Modal Configuración y Presupuestos -->
             <div id="settings-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                 <div class="bg-white w-full max-w-sm p-5 rounded-3xl shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto custom-scroll">
                     <div class="flex justify-between items-center">
-                        <h3 class="text-sm font-bold text-slate-800"><i class="fa-solid fa-gears text-emerald-600 mr-2"></i> Configuración y Categorías</h3>
+                        <h3 class="text-sm font-bold text-slate-800"><i class="fa-solid fa-gears text-emerald-600 mr-2"></i> Configuración y Presupuestos</h3>
                         <button onclick="toggleSettingsModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
                     </div>
                     <div class="space-y-4">
@@ -327,28 +328,28 @@
                         <div>
                             <label class="block text-xs font-semibold text-slate-500 mb-1">Añadir Nueva Categoría con Color</label>
                             <div class="flex items-center gap-2">
-                                <input type="text" id="new-category-name" placeholder="Ej. Deudas" class="flex-1 px-3 py-2 border text-sm rounded-xl outline-none focus:ring-1 focus:ring-emerald-500">
+                                <input type="text" id="new-category-name" placeholder="Ej. Ahorros" class="flex-1 px-3 py-2 border text-sm rounded-xl outline-none focus:ring-1 focus:ring-emerald-500">
                                 <input type="color" id="new-category-color" value="#8B5CF6" title="Elige un color" class="w-9 h-9 p-0.5 border rounded-xl cursor-pointer bg-slate-50">
                                 <button type="button" onclick="addCategory()" class="bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs font-bold hover:bg-slate-700">Crear</button>
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-500 mb-1">Listado de Categorías</label>
-                            <div id="categories-management-list" class="space-y-2 max-h-48 overflow-y-auto custom-scroll border p-2 rounded-xl bg-slate-50"></div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Gestión de Categorías y Presupuestos Mensuales (S/)</label>
+                            <div id="categories-management-list" class="space-y-2 max-h-56 overflow-y-auto custom-scroll border p-2 rounded-xl bg-slate-50"></div>
                         </div>
                         <button type="button" onclick="saveSettings()" class="w-full bg-emerald-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-emerald-700 transition">Cerrar y Guardar</button>
                     </div>
                 </div>
             </div>
 
-            <!-- CUADRADITOS SELECTORES DE TEMA ESTILO (THEMES) -->
+            <!-- Cuadraditos de Temas (Themes) -->
             <div id="theme-selector-bar" class="fixed bottom-[60px] right-4 bg-white/90 backdrop-blur-md px-2.5 py-1.5 rounded-2xl shadow-lg border border-slate-200/80 flex items-center space-x-2 z-40">
                 <span class="text-[9px] font-bold text-slate-400 uppercase tracking-tight mr-0.5"><i class="fa-solid fa-palette text-slate-500 mr-1"></i>Tema:</span>
-                <button onclick="changeTheme('emerald')" title="Tema Esmeralda" class="w-4 h-4 rounded-md bg-emerald-500 hover:scale-110 transition shadow-sm border border-emerald-600 focus:outline-none"></button>
-                <button onclick="changeTheme('ocean')" title="Tema Océano" class="w-4 h-4 rounded-md bg-blue-600 hover:scale-110 transition shadow-sm border border-blue-700 focus:outline-none"></button>
-                <button onclick="changeTheme('violet')" title="Tema Violeta" class="w-4 h-4 rounded-md bg-violet-600 hover:scale-110 transition shadow-sm border border-violet-700 focus:outline-none"></button>
-                <button onclick="changeTheme('sunset')" title="Tema Sunset (Naranja)" class="w-4 h-4 rounded-md bg-amber-500 hover:scale-110 transition shadow-sm border border-amber-600 focus:outline-none"></button>
-                <button onclick="changeTheme('dark')" title="Tema Oscuro / Neón" class="w-4 h-4 rounded-md bg-slate-800 hover:scale-110 transition shadow-sm border border-slate-900 focus:outline-none"></button>
+                <button onclick="changeTheme('emerald')" title="Esmeralda" class="w-4 h-4 rounded-md bg-emerald-500 hover:scale-110 transition shadow-sm border border-emerald-600 focus:outline-none"></button>
+                <button onclick="changeTheme('ocean')" title="Océano" class="w-4 h-4 rounded-md bg-blue-600 hover:scale-110 transition shadow-sm border border-blue-700 focus:outline-none"></button>
+                <button onclick="changeTheme('violet')" title="Violeta" class="w-4 h-4 rounded-md bg-violet-600 hover:scale-110 transition shadow-sm border border-violet-700 focus:outline-none"></button>
+                <button onclick="changeTheme('sunset')" title="Sunset" class="w-4 h-4 rounded-md bg-amber-500 hover:scale-110 transition shadow-sm border border-amber-600 focus:outline-none"></button>
+                <button onclick="changeTheme('dark')" title="Oscuro" class="w-4 h-4 rounded-md bg-slate-800 hover:scale-110 transition shadow-sm border border-slate-900 focus:outline-none"></button>
             </div>
 
             <!-- Navegación Inferior -->
@@ -402,60 +403,24 @@
         let currentTheme = localStorage.getItem('app_theme') || 'emerald';
 
         let categories = [
-            { name: 'Comida / Alimentos', color: '#EF4444' },
-            { name: 'Transporte', color: '#3B82F6' },
-            { name: 'Servicios', color: '#F59E0B' },
-            { name: 'Salario', color: '#10B981' },
-            { name: 'Deudas', color: '#8B5CF6' },
-            { name: 'General', color: '#64748B' }
+            { name: 'Comida / Alimentos', color: '#EF4444', budget: 300 },
+            { name: 'Transporte', color: '#3B82F6', budget: 200 },
+            { name: 'Servicios', color: '#F59E0B', budget: 150 },
+            { name: 'Salario', color: '#10B981', budget: 0 },
+            { name: 'Deudas', color: '#8B5CF6', budget: 0 },
+            { name: 'General', color: '#64748B', budget: 100 }
         ];
         let chartInstance = null;
         let barChartInstance = null;
 
         document.getElementById('tx-date').valueAsDate = new Date();
 
-        // GESTIÓN DE TEMAS DE COLOR (THEMES)
         const themesConfig = {
-            emerald: {
-                headerBg: 'bg-slate-900',
-                badgeBg: 'bg-emerald-500',
-                subText: 'text-emerald-400',
-                cardBg: 'bg-emerald-600',
-                fabBg: 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/40',
-                activeNav: 'text-emerald-600'
-            },
-            ocean: {
-                headerBg: 'bg-slate-900',
-                badgeBg: 'bg-blue-600',
-                subText: 'text-blue-400',
-                cardBg: 'bg-blue-600',
-                fabBg: 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/40',
-                activeNav: 'text-blue-600'
-            },
-            violet: {
-                headerBg: 'bg-slate-900',
-                badgeBg: 'bg-violet-600',
-                subText: 'text-violet-400',
-                cardBg: 'bg-violet-600',
-                fabBg: 'bg-violet-600 hover:bg-violet-700 shadow-violet-600/40',
-                activeNav: 'text-violet-600'
-            },
-            sunset: {
-                headerBg: 'bg-slate-900',
-                badgeBg: 'bg-amber-500',
-                subText: 'text-amber-400',
-                cardBg: 'bg-amber-500',
-                fabBg: 'bg-amber-500 hover:bg-amber-600 shadow-amber-500/40',
-                activeNav: 'text-amber-600'
-            },
-            dark: {
-                headerBg: 'bg-black',
-                badgeBg: 'bg-indigo-600',
-                subText: 'text-indigo-400',
-                cardBg: 'bg-slate-800',
-                fabBg: 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/40',
-                activeNav: 'text-indigo-500'
-            }
+            emerald: { headerBg: 'bg-slate-900', badgeBg: 'bg-emerald-500', subText: 'text-emerald-400', cardBg: 'bg-emerald-600', fabBg: 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/40', activeNav: 'text-emerald-600' },
+            ocean: { headerBg: 'bg-slate-900', badgeBg: 'bg-blue-600', subText: 'text-blue-400', cardBg: 'bg-blue-600', fabBg: 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/40', activeNav: 'text-blue-600' },
+            violet: { headerBg: 'bg-slate-900', badgeBg: 'bg-violet-600', subText: 'text-violet-400', cardBg: 'bg-violet-600', fabBg: 'bg-violet-600 hover:bg-violet-700 shadow-violet-600/40', activeNav: 'text-violet-600' },
+            sunset: { headerBg: 'bg-slate-900', badgeBg: 'bg-amber-500', subText: 'text-amber-400', cardBg: 'bg-amber-500', fabBg: 'bg-amber-500 hover:bg-amber-600 shadow-amber-500/40', activeNav: 'text-amber-600' },
+            dark: { headerBg: 'bg-black', badgeBg: 'bg-indigo-600', subText: 'text-indigo-400', cardBg: 'bg-slate-800', fabBg: 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/40', activeNav: 'text-indigo-500' }
         };
 
         window.changeTheme = (themeKey) => {
@@ -466,7 +431,6 @@
 
         function applyTheme(themeKey) {
             const config = themesConfig[themeKey] || themesConfig.emerald;
-
             const header = document.getElementById('main-header');
             const badge = document.getElementById('brand-badge');
             const brandSub = document.getElementById('app-brand-sub');
@@ -478,67 +442,59 @@
             if (brandSub) brandSub.className = `text-[9px] ${config.subText} font-semibold tracking-wide transition-colors duration-300`;
             if (balanceCard) balanceCard.className = `${config.cardBg} text-white p-5 rounded-3xl shadow-lg relative overflow-hidden transition-colors duration-300`;
             if (fabBtn) fabBtn.className = `w-12 h-12 ${config.fabBg} text-white rounded-full flex items-center justify-center text-xl shadow-lg -mt-6 border-4 border-slate-100 transition transform active:scale-95`;
-
-            const activeTab = document.getElementById('tab-dashboard').classList.contains('hidden') ? 
-                (document.getElementById('tab-history').classList.contains('hidden') ? 'add' : 'history') : 'dashboard';
-            
-            if (activeTab === 'dashboard') {
-                document.getElementById('nav-btn-dashboard').className = `flex flex-col items-center ${config.activeNav} text-[11px] font-bold`;
-            } else if (activeTab === 'history') {
-                document.getElementById('nav-btn-history').className = `flex flex-col items-center ${config.activeNav} text-[11px] font-bold`;
-            }
         }
+
+        // FUNCIONES DE EXPORTACIÓN A EXCEL (CSV)
+        window.exportCSV = () => {
+            if (transactions.length === 0) {
+                alert("No hay transacciones para exportar.");
+                return;
+            }
+            let csvContent = "data:text/csv;charset=utf-8,ID,Descripcion,Tipo,Categoria,Monto,Fecha\r\n";
+            transactions.forEach(t => {
+                const row = [t.id, `"${t.description}"`, t.type, `"${t.category}"`, t.amount, t.date];
+                csvContent += row.join(",") + "\r\n";
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "mis_finanzas_reporte.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
 
         window.addQuickDebt = () => {
             setTxType('expense');
             renderCategories();
-            
             const debtCat = categories.find(c => c.name.toLowerCase().includes('deuda'));
-            if (debtCat) {
-                document.getElementById('tx-category').value = debtCat.name;
-            }
-            
+            if (debtCat) document.getElementById('tx-category').value = debtCat.name;
             document.getElementById('tx-description').value = '';
             document.getElementById('tx-amount').value = '';
+            document.getElementById('tx-date').valueAsDate = new Date();
             document.getElementById('tx-description').focus();
-            
             switchTab('add');
         };
 
         window.adjustDebtAmount = async (id, mode) => {
             const tx = transactions.find(t => t.id === id);
             if (!tx) return;
-
-            const promptMsg = mode === 'add' 
-                ? `¿Cuánto deseas SUMAR a la deuda de "${tx.description}"?` 
-                : `¿Cuánto deseas RESTAR/AMORTIZAR de la deuda de "${tx.description}"?`;
-
+            const promptMsg = mode === 'add' ? `¿Cuánto deseas SUMAR a la deuda de "${tx.description}"?` : `¿Cuánto deseas RESTAR/AMORTIZAR de la deuda de "${tx.description}"?`;
             const inputVal = prompt(promptMsg, "0.00");
             if (inputVal === null) return;
-
             const amountToAdjust = parseFloat(inputVal.replace(',', '.'));
             if (isNaN(amountToAdjust) || amountToAdjust <= 0) {
                 alert("Por favor ingresa un monto válido mayor a 0.");
                 return;
             }
-
-            let newAmount = tx.amount;
-            if (mode === 'add') {
-                newAmount += amountToAdjust;
-            } else {
-                newAmount -= amountToAdjust;
-            }
-
+            let newAmount = mode === 'add' ? tx.amount + amountToAdjust : tx.amount - amountToAdjust;
             if (newAmount <= 0) {
-                const confirmDelete = confirm(`La deuda queda en S/ 0.00. ¿Deseas eliminar este registro de la lista?`);
-                if (confirmDelete) {
+                if (confirm(`La deuda queda en S/ 0.00. ¿Deseas eliminar este registro?`)) {
                     await deleteTx(id, false);
                     return;
-                } else {
-                    newAmount = 0;
                 }
+                newAmount = 0;
             }
-
             try {
                 await updateDoc(doc(db, `users/${currentUser.uid}/transactions/${id}`), { amount: newAmount });
                 const index = transactions.findIndex(t => t.id === id);
@@ -553,7 +509,6 @@
             document.getElementById('modal-image-view').src = photoUrl;
             document.getElementById('image-modal').classList.remove('hidden');
         };
-
         window.closeImageModal = () => {
             document.getElementById('image-modal').classList.add('hidden');
             document.getElementById('modal-image-view').src = '';
@@ -562,7 +517,6 @@
         window.previewTxPhoto = (event) => {
             const file = event.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = function(e) {
                 const img = new Image();
@@ -570,28 +524,13 @@
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
-                    const MAX_WIDTH = 1200;
-                    const MAX_HEIGHT = 1200;
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (width > height) {
-                        if (width > MAX_WIDTH) {
-                            height *= MAX_WIDTH / width;
-                            width = MAX_WIDTH;
-                        }
-                    } else {
-                        if (height > MAX_HEIGHT) {
-                            width *= MAX_HEIGHT / height;
-                            height = MAX_HEIGHT;
-                        }
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
+                    const MAX_WIDTH = 1200, MAX_HEIGHT = 1200;
+                    let width = img.width, height = img.height;
+                    if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } }
+                    else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
+                    canvas.width = width; canvas.height = height;
                     ctx.drawImage(img, 0, 0, width, height);
                     currentPhotoBase64 = canvas.toDataURL('image/jpeg', 0.9);
-                    
                     document.getElementById('photo-preview-img').src = currentPhotoBase64;
                     document.getElementById('photo-upload-box').classList.add('hidden');
                     document.getElementById('photo-preview-container').classList.remove('hidden');
@@ -610,12 +549,7 @@
 
         window.toggleBalanceVisibility = () => {
             isBalanceVisible = !isBalanceVisible;
-            const eyeIcon = document.getElementById('toggle-eye-icon');
-            if (isBalanceVisible) {
-                eyeIcon.className = "fa-solid fa-eye";
-            } else {
-                eyeIcon.className = "fa-solid fa-eye-slash";
-            }
+            document.getElementById('toggle-eye-icon').className = isBalanceVisible ? "fa-solid fa-eye" : "fa-solid fa-eye-slash";
             renderUI();
         };
 
@@ -623,10 +557,8 @@
             document.getElementById('tab-dashboard').classList.add('hidden');
             document.getElementById('tab-add').classList.add('hidden');
             document.getElementById('tab-history').classList.add('hidden');
-
             document.getElementById('nav-btn-dashboard').className = "flex flex-col items-center text-slate-400 text-[11px] font-semibold";
             document.getElementById('nav-btn-history').className = "flex flex-col items-center text-slate-400 text-[11px] font-semibold";
-
             const config = themesConfig[currentTheme] || themesConfig.emerald;
 
             if (tab === 'dashboard') {
@@ -653,45 +585,25 @@
             }
         };
 
-        window.toggleVoiceHelp = () => {
-            document.getElementById('voice-help-box').classList.toggle('hidden');
-        };
-
-        window.toggleSettingsModal = () => {
-            renderCategoriesManagement();
-            document.getElementById('settings-modal').classList.toggle('hidden');
-        };
+        window.toggleVoiceHelp = () => document.getElementById('voice-help-box').classList.toggle('hidden');
+        window.toggleSettingsModal = () => { renderCategoriesManagement(); document.getElementById('settings-modal').classList.toggle('hidden'); };
 
         window.handleForgotPassword = async () => {
             const email = document.getElementById('auth-email').value.trim();
-            const errDiv = document.getElementById('auth-error');
-            const successDiv = document.getElementById('auth-success');
-            errDiv.classList.add('hidden');
-            successDiv.classList.add('hidden');
-
-            if (!email) {
-                errDiv.textContent = "Por favor, escribe tu correo electrónico primero.";
-                errDiv.classList.remove('hidden');
-                return;
-            }
-
+            const errDiv = document.getElementById('auth-error'), successDiv = document.getElementById('auth-success');
+            errDiv.classList.add('hidden'); successDiv.classList.add('hidden');
+            if (!email) { errDiv.textContent = "Escribe tu correo primero."; errDiv.classList.remove('hidden'); return; }
             try {
                 await sendPasswordResetEmail(auth, email);
                 successDiv.textContent = "¡Correo de recuperación enviado!";
                 successDiv.classList.remove('hidden');
-            } catch (err) {
-                errDiv.textContent = "No se pudo enviar el correo de recuperación.";
-                errDiv.classList.remove('hidden');
-            }
+            } catch (err) { errDiv.textContent = "No se pudo enviar el correo."; errDiv.classList.remove('hidden'); }
         };
 
         window.logout = () => signOut(auth);
 
         window.toggleAuthMode = (e) => {
-            if (e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
+            if (e) { e.preventDefault(); e.stopPropagation(); }
             isRegister = !isRegister;
             document.getElementById('name-field').classList.toggle('hidden', !isRegister);
             document.getElementById('auth-title').textContent = isRegister ? 'Crear Cuenta' : 'Iniciar Sesión';
@@ -701,55 +613,21 @@
 
         window.handleAuthSubmit = async (e) => {
             if (e) e.preventDefault();
-
-            const emailInput = document.getElementById('auth-email');
-            const passwordInput = document.getElementById('auth-password');
-            const nameInput = document.getElementById('auth-name');
-
-            const email = (emailInput ? emailInput.value : '').trim();
-            const password = (passwordInput ? passwordInput.value : '').trim();
-            const name = (nameInput ? nameInput.value : '').trim();
-
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value.trim();
+            const name = document.getElementById('auth-name').value.trim();
             const errDiv = document.getElementById('auth-error');
-            const successDiv = document.getElementById('auth-success');
-            const btn = document.getElementById('auth-btn');
-            
             errDiv.classList.add('hidden');
-            successDiv.classList.add('hidden');
-
-            if (!email || !password) {
-                errDiv.textContent = "Por favor completa todos los campos.";
-                errDiv.classList.remove('hidden');
-                return;
-            }
-
+            if (!email || !password) { errDiv.textContent = "Completa todos los campos."; errDiv.classList.remove('hidden'); return; }
             try {
-                btn.disabled = true;
-                btn.textContent = "Conectando...";
-                
                 if (isRegister) {
                     const res = await createUserWithEmailAndPassword(auth, email, password);
-                    if (name) {
-                        await updateProfile(res.user, { displayName: name });
-                    }
+                    if (name) await updateProfile(res.user, { displayName: name });
                 } else {
                     await signInWithEmailAndPassword(auth, email, password);
                 }
             } catch (err) {
-                console.error("Error de Auth:", err);
-                btn.disabled = false;
-                btn.textContent = isRegister ? "Registrarse" : "Iniciar Sesión";
-                
-                let errorMsg = "Error al conectar. Verifica tu correo o contraseña.";
-                if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') {
-                    errorMsg = "Contraseña o correo incorrectos.";
-                } else if (err.code === 'auth/user-not-found') {
-                    errorMsg = "El correo no está registrado.";
-                } else if (err.code === 'auth/invalid-email') {
-                    errorMsg = "El correo electrónico no es válido.";
-                }
-                
-                errDiv.textContent = errorMsg;
+                errDiv.textContent = "Error al conectar. Verifica tus datos.";
                 errDiv.classList.remove('hidden');
             }
         };
@@ -773,25 +651,20 @@
             try {
                 const querySnapTx = await getDocs(collection(db, `users/${currentUser.uid}/transactions`));
                 transactions = [];
-                querySnapTx.forEach((doc) => {
-                    transactions.push({ id: doc.id, ...doc.data() });
-                });
+                querySnapTx.forEach((doc) => transactions.push({ id: doc.id, ...doc.data() }));
 
                 const catDoc = await getDoc(doc(db, `users_config/${currentUser.uid}`));
                 if (catDoc.exists()) {
                     const data = catDoc.data();
                     if (data.categories && data.categories.length > 0) {
-                        categories = data.categories.map(c => typeof c === 'string' ? { name: c, color: '#3B82F6' } : c);
+                        categories = data.categories.map(c => typeof c === 'string' ? { name: c, color: '#3B82F6', budget: 0 } : { budget: 0, ...c });
                     }
                     if (data.appName) {
                         document.getElementById('app-brand-name').textContent = data.appName;
                         document.getElementById('setting-app-name').value = data.appName;
                     }
                 }
-            } catch (e) {
-                console.error("Error al cargar datos:", e);
-            }
-
+            } catch (e) { console.error(e); }
             renderCategories();
             renderUI();
         }
@@ -799,15 +672,11 @@
         function getContrastTextColor(hexColor) {
             if (!hexColor) return '#FFFFFF';
             let hex = hexColor.replace('#', '');
-            if (hex.length === 3) {
-                hex = hex.split('').map(char => char + char).join('');
-            }
+            if (hex.length === 3) hex = hex.split('').map(char => char + char).join('');
             const r = parseInt(hex.substring(0, 2), 16) || 0;
             const g = parseInt(hex.substring(2, 4), 16) || 0;
             const b = parseInt(hex.substring(4, 6), 16) || 0;
-            
-            const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-            return (yiq >= 150) ? '#1E293B' : '#FFFFFF';
+            return (((r * 299) + (g * 587) + (b * 114)) / 1000 >= 150) ? '#1E293B' : '#FFFFFF';
         }
 
         window.renderUI = () => {
@@ -816,12 +685,10 @@
             const categoryFilter = categoryFilterSelect.value;
             const now = new Date();
 
-            let income = 0;
-            let expense = 0;
+            let income = 0, expense = 0;
             const recentEl = document.getElementById('dashboard-recent-list');
             const fullHistoryEl = document.getElementById('full-history-list');
-            recentEl.innerHTML = '';
-            fullHistoryEl.innerHTML = '';
+            recentEl.innerHTML = ''; fullHistoryEl.innerHTML = '';
 
             const categoryTotals = {};
             const monthlyDataMap = {};
@@ -834,36 +701,36 @@
                 return true;
             });
 
-            // AGENDA DE DEUDAS
+            // AGENDA DE DEUDAS (CON RECORDATORIOS DE FECHA LÍMITE)
             let totalDebt = 0;
             const debtorsEl = document.getElementById('debtors-list');
             debtorsEl.innerHTML = '';
-
             const debtTransactions = timeFilteredTransactions.filter(tx => (tx.category || '').toLowerCase().includes('deuda'));
 
             debtTransactions.forEach(tx => {
                 totalDebt += tx.amount;
+                let dateBadge = '';
+                if (tx.date) {
+                    const limitDate = new Date(tx.date);
+                    const diffDays = Math.ceil((limitDate - now) / (1000 * 60 * 60 * 24));
+                    let badgeColor = 'bg-slate-700 text-slate-300';
+                    if (diffDays < 0) badgeColor = 'bg-rose-500/30 text-rose-300 border border-rose-500/40';
+                    else if (diffDays <= 3) badgeColor = 'bg-amber-500/30 text-amber-300 border border-amber-500/40';
+                    dateBadge = `<span class="text-[9px] px-1.5 py-0.5 rounded-md ${badgeColor}">Vence: ${tx.date.split('T')[0]}</span>`;
+                }
+
                 debtorsEl.innerHTML += `
                     <div class="flex justify-between items-center bg-slate-800 px-3 py-2 rounded-xl text-xs">
-                        <span class="text-slate-200 font-medium">${tx.description}</span>
+                        <div>
+                            <span class="text-slate-200 font-medium block">${tx.description}</span>
+                            ${dateBadge}
+                        </div>
                         <div class="flex items-center gap-1.5">
                             <span class="font-bold text-amber-400 mr-1">S/ ${tx.amount.toFixed(2)}</span>
-                            
-                            <button onclick="adjustDebtAmount('${tx.id}', 'sub')" title="Restar / Amortizar monto" class="bg-slate-700 hover:bg-slate-600 text-amber-400 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition">
-                                <i class="fa-solid fa-minus"></i>
-                            </button>
-
-                            <button onclick="adjustDebtAmount('${tx.id}', 'add')" title="Sumar / Aumentar deuda" class="bg-slate-700 hover:bg-slate-600 text-amber-400 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition">
-                                <i class="fa-solid fa-plus"></i>
-                            </button>
-
-                            <button onclick="editTx('${tx.id}')" title="Editar registro" class="text-blue-400 hover:text-blue-300 text-xs transition px-0.5 ml-1">
-                                <i class="fa-solid fa-pen-to-square"></i>
-                            </button>
-
-                            <button onclick="deleteTx('${tx.id}')" title="Eliminar registro" class="text-slate-400 hover:text-red-400 text-xs transition px-0.5">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
+                            <button onclick="adjustDebtAmount('${tx.id}', 'sub')" title="Restar monto" class="bg-slate-700 hover:bg-slate-600 text-amber-400 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition"><i class="fa-solid fa-minus"></i></button>
+                            <button onclick="adjustDebtAmount('${tx.id}', 'add')" title="Sumar monto" class="bg-slate-700 hover:bg-slate-600 text-amber-400 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition"><i class="fa-solid fa-plus"></i></button>
+                            <button onclick="editTx('${tx.id}')" title="Editar" class="text-blue-400 hover:text-blue-300 text-xs transition px-0.5 ml-1"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteTx('${tx.id}')" title="Eliminar" class="text-slate-400 hover:text-red-400 text-xs transition px-0.5"><i class="fa-solid fa-trash-can"></i></button>
                         </div>
                     </div>
                 `;
@@ -877,10 +744,7 @@
             timeFilteredTransactions.forEach(tx => {
                 const txDate = new Date(tx.date || Date.now());
                 const monthKey = monthNames[txDate.getMonth()];
-                
-                if (!monthlyDataMap[monthKey]) {
-                    monthlyDataMap[monthKey] = { income: 0, expense: 0, net: 0 };
-                }
+                if (!monthlyDataMap[monthKey]) monthlyDataMap[monthKey] = { income: 0, expense: 0, net: 0 };
 
                 if (tx.type === 'income') {
                     income += tx.amount;
@@ -901,9 +765,7 @@
             categoryFilterSelect.innerHTML = selectHTML;
             categoryFilterSelect.value = currentSelected;
 
-            Object.keys(monthlyDataMap).forEach(m => {
-                monthlyDataMap[m].net = monthlyDataMap[m].income - monthlyDataMap[m].expense;
-            });
+            Object.keys(monthlyDataMap).forEach(m => monthlyDataMap[m].net = monthlyDataMap[m].income - monthlyDataMap[m].expense);
 
             const categoryFilteredTransactions = timeFilteredTransactions.filter(tx => {
                 if (categoryFilter === 'all') return true;
@@ -916,19 +778,8 @@
                 const catObj = categories.find(c => c.name === (tx.category || 'General'));
                 const catColor = catObj ? catObj.color : '#000000';
                 const textColor = getContrastTextColor(catColor);
-
-                let formattedDate = '';
-                if (tx.date) {
-                    const d = new Date(tx.date);
-                    const year = d.getFullYear();
-                    const month = String(d.getMonth() + 1).padStart(2, '0');
-                    const day = String(d.getDate()).padStart(2, '0');
-                    const hours = String(d.getHours()).padStart(2, '0');
-                    const minutes = String(d.getMinutes()).padStart(2, '0');
-                    formattedDate = `${year}-${month}-${day} ${hours}:${minutes}`;
-                }
-
-                const photoBadge = tx.photo ? `<span onclick="openImageModal('${tx.photo}')" class="ml-1.5 text-emerald-600 cursor-pointer hover:text-emerald-700 inline-block bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200" title="Ver comprobante"><i class="fa-solid fa-image"></i> Ver</span>` : '';
+                let formattedDate = tx.date ? tx.date.split('T')[0] : '';
+                const photoBadge = tx.photo ? `<span onclick="openImageModal('${tx.photo}')" class="ml-1.5 text-emerald-600 cursor-pointer hover:text-emerald-700 inline-block bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200"><i class="fa-solid fa-image"></i> Ver</span>` : '';
 
                 const itemHTML = `
                     <div class="flex justify-between items-center p-3 bg-slate-50 rounded-2xl border border-slate-100">
@@ -942,15 +793,12 @@
                             </div>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <span class="font-extrabold text-xs ${tx.type === 'income' ? 'text-emerald-600' : 'text-slate-800'}">
-                                ${tx.type === 'income' ? '+' : '-'} S/ ${tx.amount.toFixed(2)}
-                            </span>
+                            <span class="font-extrabold text-xs ${tx.type === 'income' ? 'text-emerald-600' : 'text-slate-800'}">${tx.type === 'income' ? '+' : '-'} S/ ${tx.amount.toFixed(2)}</span>
                             <button onclick="editTx('${tx.id}')" title="Modificar" class="text-blue-400 hover:text-blue-600 text-xs pl-1"><i class="fa-solid fa-pen-to-square"></i></button>
                             <button onclick="deleteTx('${tx.id}')" title="Eliminar" class="text-slate-300 hover:text-red-500 text-xs pl-1"><i class="fa-solid fa-trash-can"></i></button>
                         </div>
                     </div>
                 `;
-
                 recentEl.innerHTML += itemHTML;
                 fullHistoryEl.innerHTML += itemHTML;
             });
@@ -960,13 +808,8 @@
                 fullHistoryEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Sin movimientos</p>`;
             }
 
-            const balanceLabel = document.getElementById('balance-label');
-            if (timeFilter === 'week') balanceLabel.textContent = "BALANCE DE ESTA SEMANA";
-            else if (timeFilter === 'month') balanceLabel.textContent = "BALANCE DE ESTE MES";
-            else balanceLabel.textContent = "BALANCE TOTAL";
-
+            document.getElementById('balance-label').textContent = timeFilter === 'week' ? "BALANCE DE ESTA SEMANA" : (timeFilter === 'month' ? "BALANCE DE ESTE MES" : "BALANCE TOTAL");
             const balance = income - expense;
-
             if (isBalanceVisible) {
                 document.getElementById('total-balance').textContent = `S/ ${balance.toFixed(2)}`;
                 document.getElementById('total-income').textContent = `S/ ${income.toFixed(2)}`;
@@ -982,101 +825,50 @@
         };
 
         function isSameWeek(d1, d2) {
-            const date1 = new Date(d1);
-            const date2 = new Date(d2);
-            const firstDayOfWeek1 = new Date(date1.setDate(date1.getDate() - date1.getDay()));
-            const firstDayOfWeek2 = new Date(date2.setDate(date2.getDate() - date2.getDay()));
-            return firstDayOfWeek1.toDateString() === firstDayOfWeek2.toDateString();
+            const date1 = new Date(d1), date2 = new Date(d2);
+            return new Date(date1.setDate(date1.getDate() - date1.getDay())).toDateString() === new Date(date2.setDate(date2.getDate() - date2.getDay())).toDateString();
         }
-
         function isSameMonth(d1, d2) {
-            const date1 = new Date(d1);
-            const date2 = new Date(d2);
+            const date1 = new Date(d1), date2 = new Date(d2);
             return date1.getFullYear() === date2.getFullYear() && date1.getMonth() === date2.getMonth();
         }
 
         function renderChart(categoryTotals) {
             const ctx = document.getElementById('categoryChart').getContext('2d');
-            
-            const sortedCategories = Object.keys(categoryTotals).map(catName => ({
-                name: catName,
-                amount: categoryTotals[catName]
-            })).sort((a, b) => b.amount - a.amount);
-
+            const sortedCategories = Object.keys(categoryTotals).map(catName => ({ name: catName, amount: categoryTotals[catName] })).sort((a, b) => b.amount - a.amount);
             const labels = sortedCategories.map(item => `${item.name}: S/ ${item.amount.toFixed(2)}`);
             const data = sortedCategories.map(item => item.amount);
-
             const bgColors = sortedCategories.map(item => {
                 const found = categories.find(c => c.name === item.name);
                 return found ? found.color : '#3B82F6';
             });
 
             if (chartInstance) chartInstance.destroy();
-
             if (labels.length === 0) {
-                chartInstance = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Sin Gastos'],
-                        datasets: [{ data: [1], backgroundColor: ['#E2E8F0'] }]
-                    },
-                    options: { plugins: { legend: { display: false } }, cutout: '75%' }
-                });
+                chartInstance = new Chart(ctx, { type: 'doughnut', data: { labels: ['Sin Gastos'], datasets: [{ data: [1], backgroundColor: ['#E2E8F0'] }] }, options: { plugins: { legend: { display: false } }, cutout: '75%' } });
                 return;
             }
-
             chartInstance = new Chart(ctx, {
                 type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: bgColors
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { 
-                            position: 'right', 
-                            labels: { 
-                                boxWidth: 10, 
-                                font: { size: 10, weight: '600' },
-                                padding: 6
-                            } 
-                        } 
-                    },
-                    cutout: '65%'
-                }
+                data: { labels: labels, datasets: [{ data: data, backgroundColor: bgColors }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10, weight: '600' }, padding: 6 } } }, cutout: '65%' }
             });
         }
 
         function renderFinancialBarChart(monthlyDataMap) {
             const ctx = document.getElementById('financialBarChart').getContext('2d');
-            
             const labels = Object.keys(monthlyDataMap);
             const incomeData = labels.map(l => monthlyDataMap[l].income);
             const expenseData = labels.map(l => monthlyDataMap[l].expense);
             const netData = labels.map(l => monthlyDataMap[l].net);
-            
             const benefitData = netData.map(v => v > 0 ? v : 0);
             const lossData = netData.map(v => v < 0 ? Math.abs(v) : 0);
 
             if (barChartInstance) barChartInstance.destroy();
-
             if (labels.length === 0) {
-                barChartInstance = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['may', 'jun', 'jul', 'ago', 'sept', 'oct'],
-                        datasets: [{ data: [0,0,0,0,0,0], backgroundColor: '#10B981' }]
-                    },
-                    options: { plugins: { legend: { display: false } } }
-                });
+                barChartInstance = new Chart(ctx, { type: 'bar', data: { labels: ['may', 'jun', 'jul', 'ago', 'sept', 'oct'], datasets: [{ data: [0,0,0,0,0,0], backgroundColor: '#10B981' }] }, options: { plugins: { legend: { display: false } } } });
                 return;
             }
-
             barChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -1088,21 +880,7 @@
                         { label: 'Pérdida Neta', data: lossData, backgroundColor: '#FB7185', borderRadius: 4 }
                     ]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#94A3B8', font: { size: 10 } }
-                        },
-                        y: {
-                            grid: { color: '#334155' },
-                            ticks: { color: '#94A3B8', font: { size: 9 } }
-                        }
-                    }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: '#94A3B8', font: { size: 10 } } }, y: { grid: { color: '#334155' }, ticks: { color: '#94A3B8', font: { size: 9 } } } } }
             });
         }
 
@@ -1111,55 +889,55 @@
             selectForm.innerHTML = categories.map(cat => `<option value="${cat.name}">${cat.name}</option>`).join('');
         }
 
+        // GESTIÓN Y PRESUPUESTOS DE CATEGORÍAS
         function renderCategoriesManagement() {
             const listEl = document.getElementById('categories-management-list');
             listEl.innerHTML = categories.map((cat, index) => `
-                <div class="flex items-center justify-between gap-2 bg-white p-1.5 rounded-lg border text-xs">
-                    <input type="color" value="${cat.color || '#3B82F6'}" id="cat-color-${index}" onchange="updateCategoryColor(${index})" title="Cambiar color" class="w-8 h-8 p-0.5 border rounded-md cursor-pointer bg-slate-50">
-                    <input type="text" value="${cat.name}" id="cat-input-${index}" onchange="updateCategoryName(${index})" class="flex-1 px-2 py-1 bg-slate-50 border rounded-md outline-none focus:ring-1 focus:ring-emerald-500 font-medium">
-                    <button type="button" onclick="deleteCategory(${index})" class="text-red-500 hover:text-red-700 px-2 py-1"><i class="fa-solid fa-trash-can"></i></button>
+                <div class="bg-white p-2 rounded-xl border text-xs space-y-1.5 shadow-sm">
+                    <div class="flex items-center justify-between gap-2">
+                        <input type="color" value="${cat.color || '#3B82F6'}" id="cat-color-${index}" onchange="updateCategoryColor(${index})" class="w-7 h-7 p-0.5 border rounded-md cursor-pointer bg-slate-50">
+                        <input type="text" value="${cat.name}" id="cat-input-${index}" onchange="updateCategoryName(${index})" class="flex-1 px-2 py-1 bg-slate-50 border rounded-md outline-none font-medium text-xs">
+                        <button type="button" onclick="deleteCategory(${index})" class="text-red-500 hover:text-red-700 px-2"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                    <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-100">
+                        <span>Límite Presupuesto (S/):</span>
+                        <input type="number" step="10" value="${cat.budget || 0}" id="cat-budget-${index}" onchange="updateCategoryBudget(${index})" class="w-24 px-2 py-0.5 bg-slate-50 border rounded-md outline-none font-semibold text-right text-emerald-600">
+                    </div>
                 </div>
             `).join('');
         }
 
         window.updateCategoryName = (index) => {
-            const input = document.getElementById(`cat-input-${index}`);
-            const newName = input.value.trim();
+            const newName = document.getElementById(`cat-input-${index}`).value.trim();
             if (!newName) return;
             categories[index].name = newName;
             renderCategories();
             saveSettingsToCloud();
         };
-
         window.updateCategoryColor = (index) => {
-            const input = document.getElementById(`cat-color-${index}`);
-            categories[index].color = input.value;
+            categories[index].color = document.getElementById(`cat-color-${index}`).value;
             renderUI();
+            saveSettingsToCloud();
+        };
+        window.updateCategoryBudget = (index) => {
+            categories[index].budget = parseFloat(document.getElementById(`cat-budget-${index}`).value) || 0;
             saveSettingsToCloud();
         };
 
         window.addCategory = async () => {
-            const nameInput = document.getElementById('new-category-name');
-            const colorInput = document.getElementById('new-category-color');
-            const name = nameInput.value.trim();
-            const color = colorInput.value;
-            
+            const name = document.getElementById('new-category-name').value.trim();
+            const color = document.getElementById('new-category-color').value;
             if (!name || categories.some(c => c.name.toLowerCase() === name.toLowerCase())) return;
-            
-            categories.push({ name, color });
-            nameInput.value = '';
-            colorInput.value = '#10B981';
+            categories.push({ name, color, budget: 100 });
+            document.getElementById('new-category-name').value = '';
             renderCategories();
             renderCategoriesManagement();
             await saveSettingsToCloud();
-            alert("¡Categoría creada!");
+            alert("¡Categoría creada con presupuesto base!");
         };
 
         window.deleteCategory = async (index) => {
-            if (categories.length <= 1) {
-                alert("Debes tener al menos una categoría.");
-                return;
-            }
+            if (categories.length <= 1) { alert("Debes tener al menos una categoría."); return; }
             categories.splice(index, 1);
             renderCategories();
             renderCategoriesManagement();
@@ -1171,15 +949,13 @@
             try {
                 await setDoc(doc(db, `users_config/${currentUser.uid}`), { appName, categories }, { merge: true });
                 document.getElementById('app-brand-name').textContent = appName;
-            } catch (err) {
-                console.error(err);
-            }
+            } catch (err) { console.error(err); }
         }
 
         window.saveSettings = async () => {
             await saveSettingsToCloud();
             toggleSettingsModal();
-            alert("¡Configuración guardada!");
+            alert("¡Configuración y presupuestos guardados!");
         };
 
         document.getElementById('transaction-form').addEventListener('submit', async (e) => {
@@ -1201,15 +977,7 @@
                 fullDateIso = selectedDate.toISOString();
             }
 
-            const txData = {
-                description,
-                amount,
-                type: currentType,
-                category,
-                date: fullDateIso,
-                photo: currentPhotoBase64 || null
-            };
-
+            const txData = { description, amount, type: currentType, category, date: fullDateIso, photo: currentPhotoBase64 || null };
             try {
                 if (editId) {
                     await updateDoc(doc(db, `users/${currentUser.uid}/transactions/${editId}`), txData);
@@ -1227,38 +995,28 @@
                 }
                 renderUI();
                 switchTab('dashboard');
-            } catch (err) {
-                alert("Error al guardar o modificar la transacción.");
-            }
+            } catch (err) { alert("Error al guardar la transacción."); }
         });
 
         window.editTx = (id) => {
             const tx = transactions.find(t => t.id === id);
             if (!tx) return;
-
             document.getElementById('tx-edit-id').value = tx.id;
             document.getElementById('tx-amount').value = tx.amount;
-            
             renderCategories();
             document.getElementById('tx-category').value = tx.category || categories[0].name;
-            
             document.getElementById('tx-date').value = tx.date ? tx.date.split('T')[0] : '';
             document.getElementById('tx-description').value = tx.description;
             setTxType(tx.type);
-
             if (tx.photo) {
                 currentPhotoBase64 = tx.photo;
                 document.getElementById('photo-preview-img').src = currentPhotoBase64;
                 document.getElementById('photo-upload-box').classList.add('hidden');
                 document.getElementById('photo-preview-container').classList.remove('hidden');
-            } else {
-                removeTxPhoto();
-            }
-
+            } else { removeTxPhoto(); }
             document.getElementById('form-title').textContent = "MODIFICAR REGISTRO";
             document.getElementById('form-submit-btn').textContent = "Actualizar Transacción";
             document.getElementById('form-cancel-btn').classList.remove('hidden');
-
             switchTab('add');
         };
 
@@ -1268,7 +1026,6 @@
             document.getElementById('tx-date').valueAsDate = new Date();
             removeTxPhoto();
             setTxType('expense');
-
             document.getElementById('form-title').textContent = "NUEVO REGISTRO";
             document.getElementById('form-submit-btn').textContent = "Guardar Transacción";
             document.getElementById('form-cancel-btn').classList.add('hidden');
@@ -1281,119 +1038,56 @@
                 await deleteDoc(doc(db, `users/${currentUser.uid}/transactions/${id}`));
                 transactions = transactions.filter(t => t.id !== id);
                 renderUI();
-            } catch (err) {
-                alert("Error al eliminar el registro.");
-            }
+            } catch (err) { alert("Error al eliminar."); }
         };
 
         window.startMasterVoiceAssistant = () => {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                alert("Tu navegador no soporta el reconocimiento de voz.");
-                return;
-            }
-
+            if (!SpeechRecognition) { alert("Tu navegador no soporta voz."); return; }
             const recognition = new SpeechRecognition();
             recognition.lang = 'es-PE';
             recognition.interimResults = false;
-
-            const micIcon = document.getElementById('voice-mic-icon');
-            const subtext = document.getElementById('voice-subtext');
-
-            recognition.onstart = () => {
-                micIcon.className = "fa-solid fa-spinner fa-spin";
-                subtext.textContent = "Escuchando orden...";
-            };
-
-            recognition.onresult = async (event) => {
-                const text = event.results[0][0].transcript;
-                await processVoiceCommand(text);
-            };
-
-            recognition.onerror = () => {
-                alert("No se pudo reconocer la voz.");
-            };
-
-            recognition.onend = () => {
-                micIcon.className = "fa-solid fa-microphone";
-                subtext.textContent = "Toca el micro y habla";
-            };
-
+            const micIcon = document.getElementById('voice-mic-icon'), subtext = document.getElementById('voice-subtext');
+            recognition.onstart = () => { micIcon.className = "fa-solid fa-spinner fa-spin"; subtext.textContent = "Escuchando orden..."; };
+            recognition.onresult = async (event) => { await processVoiceCommand(event.results[0][0].transcript); };
+            recognition.onerror = () => { alert("No se reconoció la voz."); };
+            recognition.onend = () => { micIcon.className = "fa-solid fa-microphone"; subtext.textContent = "Toca el micro y habla"; };
             recognition.start();
         };
 
         async function processVoiceCommand(rawText) {
             const textNormalized = rawText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-
-            const isCategoryIntent = textNormalized.includes('categoria') || 
-                                     textNormalized.includes('crear') || 
-                                     textNormalized.includes('anadir') || 
-                                     textNormalized.includes('agregar');
-
-            if (isCategoryIntent) {
-                let cleanCatName = rawText
-                    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-                    .replace(/crear|anadir|añadir|agregar|nueva|nuevo|categoria|categoría|de|llamada|que se llame|para|el|la|los|las/gi, '')
-                    .trim();
-
+            if (textNormalized.includes('categoria') || textNormalized.includes('crear') || textNormalized.includes('anadir')) {
+                let cleanCatName = rawText.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/crear|anadir|añadir|agregar|nueva|nuevo|categoria|categoría|de|llamada|que se llame/gi, '').trim();
                 if (cleanCatName.length > 0) {
                     cleanCatName = cleanCatName.charAt(0).toUpperCase() + cleanCatName.slice(1).toLowerCase();
                     if (!categories.some(c => c.name.toLowerCase() === cleanCatName.toLowerCase())) {
-                        categories.push({ name: cleanCatName, color: '#3B82F6' });
-                        renderCategories();
-                        renderCategoriesManagement();
-                        await saveSettingsToCloud();
+                        categories.push({ name: cleanCatName, color: '#3B82F6', budget: 100 });
+                        renderCategories(); renderCategoriesManagement(); await saveSettingsToCloud();
                         alert(`¡Categoría "${cleanCatName}" creada con éxito!`);
-                    } else {
-                        alert(`La categoría "${cleanCatName}" ya existe.`);
                     }
                     return;
                 }
             }
-
-            let txType = 'expense';
-            if (textNormalized.includes('ingreso') || textNormalized.includes('ganancia') || textNormalized.includes('cobro') || textNormalized.includes('gane')) {
-                txType = 'income';
-            }
-
+            let txType = (textNormalized.includes('ingreso') || textNormalized.includes('ganancia') || textNormalized.includes('cobro')) ? 'income' : 'expense';
             const numbers = rawText.match(/\d+([.,]\d+)?/g);
-            if (!numbers || numbers.length === 0) {
-                alert("No detecté el monto. Ejemplo: 'Gasto de 20 soles en comida'");
-                return;
-            }
+            if (!numbers) { alert("No detecté el monto."); return; }
             const amount = parseFloat(numbers[0].replace(',', '.'));
-
-            let description = rawText.replace(/gasto|ingreso|de|en|por|soles|sol|ganancia|gané|cobro|\d+([.,]\d+)?/gi, '').trim();
-            if (description.length === 0) description = "Movimiento por voz";
+            let description = rawText.replace(/gasto|ingreso|de|en|por|soles|sol|ganancia|gané|cobro|\d+([.,]\d+)?/gi, '').trim() || "Movimiento por voz";
             description = description.charAt(0).toUpperCase() + description.slice(1);
-
             let matchedCategory = categories[0].name;
             for (let cat of categories) {
-                const normCat = cat.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                if (textNormalized.includes(normCat.split('/')[0].trim())) {
-                    matchedCategory = cat.name;
-                    break;
+                if (textNormalized.includes(cat.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").split('/')[0].trim())) {
+                    matchedCategory = cat.name; break;
                 }
             }
-
-            const newTx = {
-                description,
-                amount,
-                type: txType,
-                category: matchedCategory,
-                date: new Date().toISOString(),
-                photo: null
-            };
-
+            const newTx = { description, amount, type: txType, category: matchedCategory, date: new Date().toISOString(), photo: null };
             try {
                 const docRef = await addDoc(collection(db, `users/${currentUser.uid}/transactions`), newTx);
                 transactions.push({ id: docRef.id, ...newTx });
-                renderUI();
-                switchTab('dashboard');
+                renderUI(); switchTab('dashboard');
                 alert(`¡Registrado con éxito!\n${txType === 'income' ? 'Ingreso' : 'Gasto'}: S/ ${amount.toFixed(2)} (${description})`);
-            } catch (err) {
-                alert("Error al guardar en la nube.");
-            }
+            } catch (err) { alert("Error al guardar en la nube."); }
         }
 
         window.exportJSON = () => {
@@ -1412,16 +1106,10 @@
                 try {
                     const data = JSON.parse(e.target.result);
                     if (data.transactions) {
-                        for (let t of data.transactions) {
-                            delete t.id;
-                            await addDoc(collection(db, `users/${currentUser.uid}/transactions`), t);
-                        }
+                        for (let t of data.transactions) { delete t.id; await addDoc(collection(db, `users/${currentUser.uid}/transactions`), t); }
                     }
-                    alert("¡Datos importados con éxito!");
-                    loadUserData();
-                } catch (err) {
-                    alert("Archivo no válido");
-                }
+                    alert("¡Datos importados con éxito!"); loadUserData();
+                } catch (err) { alert("Archivo no válido"); }
             };
             reader.readAsText(file);
         };
