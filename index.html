@@ -143,7 +143,7 @@
                     </div>
                 </div>
 
-                <!-- Agenda de Deudas -->
+                <!-- TARJETA DE AGENDA DE DEUDAS (CON BOTONES +, -, EDITAR Y ELIMINAR) -->
                 <div class="bg-slate-900 text-white p-4 rounded-3xl shadow-md border border-slate-800 space-y-2">
                     <div class="flex justify-between items-center px-1">
                         <div class="flex items-center gap-2">
@@ -211,7 +211,7 @@
                     </div>
                 </div>
 
-                <!-- Gráfico Dona (LEYENDA ORDENADA A UN COSTADO) -->
+                <!-- Gráfico Dona -->
                 <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/80">
                     <h3 class="text-xs font-bold text-slate-600 tracking-wider uppercase mb-3">GASTOS POR CATEGORÍA</h3>
                     <div class="w-full h-48 relative flex items-center justify-center">
@@ -417,6 +417,52 @@
             document.getElementById('tx-description').focus();
             
             switchTab('add');
+        };
+
+        // FUNCIONES PARA SUMAR(+) Y RESTAR(-) MONTOS A LAS DEUDAS DE AMIGOS
+        window.adjustDebtAmount = async (id, mode) => {
+            const tx = transactions.find(t => t.id === id);
+            if (!tx) return;
+
+            const actionText = mode === 'add' ? 'Aumentar (sumar)' : 'Disminuir (amortizar)';
+            const promptMsg = mode === 'add' 
+                ? `¿Cuánto deseas SUMAR a la deuda de "${tx.description}"?` 
+                : `¿Cuánto deseas RESTAR/AMORTIZAR de la deuda de "${tx.description}"?`;
+
+            const inputVal = prompt(promptMsg, "0.00");
+            if (inputVal === null) return; // Cancelado por el usuario
+
+            const amountToAdjust = parseFloat(inputVal.replace(',', '.'));
+            if (isNaN(amountToAdjust) || amountToAdjust <= 0) {
+                alert("Por favor ingresa un monto válido mayor a 0.");
+                return;
+            }
+
+            let newAmount = tx.amount;
+            if (mode === 'add') {
+                newAmount += amountToAdjust;
+            } else {
+                newAmount -= amountToAdjust;
+            }
+
+            if (newAmount <= 0) {
+                const confirmDelete = confirm(`La deuda queda en S/ 0.00. ¿Deseas eliminar este registro de la lista?`);
+                if (confirmDelete) {
+                    await deleteTx(id, false);
+                    return;
+                } else {
+                    newAmount = 0;
+                }
+            }
+
+            try {
+                await updateDoc(doc(db, `users/${currentUser.uid}/transactions/${id}`), { amount: newAmount });
+                const index = transactions.findIndex(t => t.id === id);
+                if (index !== -1) transactions[index].amount = newAmount;
+                renderUI();
+            } catch (err) {
+                alert("Error al actualizar la deuda.");
+            }
         };
 
         window.openImageModal = (photoUrl) => {
@@ -701,7 +747,7 @@
                 return true;
             });
 
-            // AGENDA DE DEUDAS
+            // AGENDA DE DEUDAS - CON BOTONES +, -, EDITAR Y ELIMINAR
             let totalDebt = 0;
             const debtorsEl = document.getElementById('debtors-list');
             debtorsEl.innerHTML = '';
@@ -715,10 +761,24 @@
                         <span class="text-slate-200 font-medium">${tx.description}</span>
                         <div class="flex items-center gap-1.5">
                             <span class="font-bold text-amber-400 mr-1">S/ ${tx.amount.toFixed(2)}</span>
-                            <button onclick="editTx('${tx.id}')" title="Amortizar / Editar monto" class="text-blue-400 hover:text-blue-300 text-xs transition px-1">
+                            
+                            <!-- BOTÓN DISMINUIR (-) -->
+                            <button onclick="adjustDebtAmount('${tx.id}', 'sub')" title="Restar / Amortizar monto" class="bg-slate-700 hover:bg-slate-600 text-amber-400 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition">
+                                <i class="fa-solid fa-minus"></i>
+                            </button>
+
+                            <!-- BOTÓN AUMENTAR (+) -->
+                            <button onclick="adjustDebtAmount('${tx.id}', 'add')" title="Sumar / Aumentar deuda" class="bg-slate-700 hover:bg-slate-600 text-amber-400 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+
+                            <!-- EDITAR -->
+                            <button onclick="editTx('${tx.id}')" title="Editar registro" class="text-blue-400 hover:text-blue-300 text-xs transition px-0.5 ml-1">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </button>
-                            <button onclick="deleteTx('${tx.id}')" title="Marcar como pagada / eliminar" class="text-slate-400 hover:text-red-400 text-xs transition px-1">
+
+                            <!-- ELIMINAR -->
+                            <button onclick="deleteTx('${tx.id}')" title="Eliminar registro" class="text-slate-400 hover:text-red-400 text-xs transition px-0.5">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
                         </div>
@@ -855,7 +915,6 @@
             return date1.getFullYear() === date2.getFullYear() && date1.getMonth() === date2.getMonth();
         }
 
-        // DIBUJAR EL GRÁFICO DE DONA CON LEYENDA A LA DERECHA (UN COSTADO)
         function renderChart(categoryTotals) {
             const ctx = document.getElementById('categoryChart').getContext('2d');
             
@@ -1136,8 +1195,8 @@
             switchTab('dashboard');
         };
 
-        window.deleteTx = async (id) => {
-            if (!confirm("¿Deseas eliminar este registro o marcarlo como pagado?")) return;
+        window.deleteTx = async (id, askConfirm = true) => {
+            if (askConfirm && !confirm("¿Deseas eliminar este registro de deuda?")) return;
             try {
                 await deleteDoc(doc(db, `users/${currentUser.uid}/transactions/${id}`));
                 transactions = transactions.filter(t => t.id !== id);
