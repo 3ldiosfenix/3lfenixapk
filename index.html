@@ -1,11 +1,16 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" id="html-root" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="page-title">Mis Finanzas - 3ldiosfenix</title>
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3135/3135706.png">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -13,7 +18,7 @@
             width: 6px;
         }
         .custom-scroll::-webkit-scrollbar-track {
-            background: #f1f5f9;
+            background: rgba(148, 163, 184, 0.1);
             border-radius: 8px;
         }
         .custom-scroll::-webkit-scrollbar-thumb {
@@ -25,10 +30,10 @@
         }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-800 min-h-screen flex flex-col justify-between font-sans">
+<body class="bg-slate-950 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col justify-between font-sans transition-colors duration-300">
 
     <!-- Container Principal Mobile -->
-    <div class="max-w-md w-full mx-auto bg-slate-100 min-h-screen flex flex-col shadow-2xl relative pb-24">
+    <div class="max-w-md w-full mx-auto bg-slate-50 dark:bg-slate-900 min-h-screen flex flex-col shadow-2xl relative pb-24 transition-colors duration-300">
 
         <!-- Screen Autenticación -->
         <div id="auth-screen" class="flex-1 flex flex-col justify-center p-6 bg-slate-900 text-white z-10 relative">
@@ -71,7 +76,7 @@
         </div>
 
         <!-- Screen Principal (App Screen) -->
-        <div id="app-screen" class="hidden flex-1 flex flex-col bg-slate-100">
+        <div id="app-screen" class="hidden flex-1 flex flex-col bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
             
             <!-- Header -->
             <header id="main-header" class="bg-slate-900 text-white px-5 py-4 flex justify-between items-center rounded-b-2xl shadow-md transition-colors duration-300">
@@ -84,16 +89,17 @@
                         <span id="app-brand-sub" class="text-[9px] text-emerald-400 font-semibold tracking-wide transition-colors duration-300">by 3ldiosfenix</span>
                     </div>
                 </div>
-                <div class="flex items-center space-x-2 text-slate-300">
-                    <button onclick="toggleCalcModal()" title="Calculadora Científica e Interactiva" class="hover:text-emerald-400 text-sm p-1"><i class="fa-solid fa-calculator"></i></button>
-                    <button onclick="toggleSettingsModal()" title="Configuración y Categorías" class="hover:text-emerald-400 text-sm p-1"><i class="fa-solid fa-gear"></i></button>
-                    <button onclick="exportCSV()" title="Exportar a Excel (CSV)" class="hover:text-emerald-400 text-sm p-1"><i class="fa-solid fa-file-excel"></i></button>
-                    <button onclick="exportJSON()" title="Exportar Respaldo JSON" class="hover:text-emerald-400 text-sm p-1"><i class="fa-solid fa-download"></i></button>
-                    <label title="Importar Respaldo" class="hover:text-emerald-400 cursor-pointer text-sm p-1">
+                <div class="flex items-center space-x-1.5 text-slate-300">
+                    <button onclick="toggleDarkMode()" title="Cambiar Modo Claro / Oscuro" class="hover:text-emerald-400 text-sm p-1.5"><i id="theme-toggle-icon" class="fa-solid fa-moon"></i></button>
+                    <button onclick="toggleCalcModal()" title="Calculadora Científica e Interactiva" class="hover:text-emerald-400 text-sm p-1.5"><i class="fa-solid fa-calculator"></i></button>
+                    <button onclick="toggleSettingsModal()" title="Configuración y Categorías" class="hover:text-emerald-400 text-sm p-1.5"><i class="fa-solid fa-gear"></i></button>
+                    <button onclick="exportCSV()" title="Exportar a Excel (CSV)" class="hover:text-emerald-400 text-sm p-1.5"><i class="fa-solid fa-file-excel"></i></button>
+                    <button onclick="exportJSON()" title="Exportar Respaldo JSON" class="hover:text-emerald-400 text-sm p-1.5"><i class="fa-solid fa-download"></i></button>
+                    <label title="Importar Respaldo" class="hover:text-emerald-400 cursor-pointer text-sm p-1.5">
                         <i class="fa-solid fa-upload"></i>
                         <input type="file" id="import-file" accept=".json" class="hidden" onchange="importJSON(event)">
                     </label>
-                    <button onclick="logout()" title="Cerrar Sesión" class="text-red-400 hover:text-red-300 text-sm p-1 ml-0.5"><i class="fa-solid fa-right-from-bracket"></i></button>
+                    <button onclick="logout()" title="Cerrar Sesión" class="text-red-400 hover:text-red-300 text-sm p-1.5 ml-0.5"><i class="fa-solid fa-right-from-bracket"></i></button>
                 </div>
             </header>
 
@@ -101,11 +107,11 @@
             <main id="tab-dashboard" class="p-4 space-y-4">
                 <div class="flex justify-between items-center px-1">
                     <div>
-                        <p class="text-[11px] text-slate-500">Hola,</p>
-                        <h2 id="user-display-name" class="font-bold text-slate-800 text-sm">Usuario</h2>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400">Hola,</p>
+                        <h2 id="user-display-name" class="font-bold text-slate-800 dark:text-slate-100 text-sm">Usuario</h2>
                     </div>
 
-                    <select id="time-filter" onchange="renderUI()" class="bg-white border border-slate-200 text-slate-700 text-xs rounded-xl px-3 py-1.5 font-semibold outline-none shadow-sm focus:ring-1 focus:ring-emerald-500">
+                    <select id="time-filter" onchange="renderUI()" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs rounded-xl px-3 py-1.5 font-semibold outline-none shadow-sm focus:ring-1 focus:ring-emerald-500">
                         <option value="all">Todo el Historial</option>
                         <option value="month">Este Mes</option>
                         <option value="week">Esta Semana</option>
@@ -161,10 +167,10 @@
                 </div>
 
                 <!-- Metas de Ahorro / Alcancía -->
-                <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/80 space-y-3">
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-3 transition-colors duration-300">
                     <div class="flex justify-between items-center px-1">
-                        <h3 class="text-xs font-bold text-slate-600 tracking-wider uppercase flex items-center"><i class="fa-solid fa-piggy-bank text-emerald-500 mr-1.5"></i> METAS DE AHORRO</h3>
-                        <button onclick="addQuickGoal()" class="text-xs font-bold text-emerald-600 hover:underline"><i class="fa-solid fa-plus mr-1"></i>Nueva Meta</button>
+                        <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 tracking-wider uppercase flex items-center"><i class="fa-solid fa-piggy-bank text-emerald-500 mr-1.5"></i> METAS DE AHORRO</h3>
+                        <button onclick="addQuickGoal()" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline"><i class="fa-solid fa-plus mr-1"></i>Nueva Meta</button>
                     </div>
                     <div id="savings-goals-list" class="space-y-2.5"></div>
                 </div>
@@ -192,9 +198,9 @@
                 </div>
 
                 <!-- Gráfico de Tendencia Diaria -->
-                <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/80 space-y-3">
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-3 transition-colors duration-300">
                     <div class="flex justify-between items-center px-1">
-                        <h3 class="text-xs font-bold text-slate-600 tracking-wider uppercase"><i class="fa-solid fa-chart-line text-blue-500 mr-1.5"></i> TENDENCIA DE GASTOS DIARIOS</h3>
+                        <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 tracking-wider uppercase"><i class="fa-solid fa-chart-line text-blue-500 mr-1.5"></i> TENDENCIA DE GASTOS DIARIOS</h3>
                         <span class="text-[10px] text-slate-400 font-semibold">Este mes</span>
                     </div>
                     <div class="h-44 w-full relative">
@@ -234,22 +240,22 @@
                 </div>
 
                 <!-- Gráfico Dona -->
-                <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/80">
-                    <h3 class="text-xs font-bold text-slate-600 tracking-wider uppercase mb-3">GASTOS POR CATEGORÍA</h3>
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 transition-colors duration-300">
+                    <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 tracking-wider uppercase mb-3">GASTOS POR CATEGORÍA</h3>
                     <div class="w-full h-48 relative flex items-center justify-center">
                         <canvas id="categoryChart"></canvas>
                     </div>
                 </div>
 
                 <!-- Movimientos Recientes -->
-                <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/80 space-y-3">
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-3 transition-colors duration-300">
                     <div class="flex justify-between items-center">
-                        <h3 class="text-xs font-bold text-slate-600 tracking-wider uppercase">MOVIMIENTOS RECIENTES</h3>
-                        <button onclick="switchTab('history')" class="text-xs font-semibold text-emerald-600 hover:underline">Ver todos</button>
+                        <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 tracking-wider uppercase">MOVIMIENTOS RECIENTES</h3>
+                        <button onclick="switchTab('history')" class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">Ver todos</button>
                     </div>
                     
                     <div class="flex gap-2">
-                        <select id="category-filter" onchange="renderUI()" class="w-full bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl px-3 py-2 outline-none focus:ring-1 focus:ring-emerald-500 font-medium">
+                        <select id="category-filter" onchange="renderUI()" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs rounded-xl px-3 py-2 outline-none focus:ring-1 focus:ring-emerald-500 font-medium">
                             <option value="all">🔍 Todas las Categorías</option>
                         </select>
                     </div>
@@ -260,46 +266,46 @@
 
             <!-- Formulario Transacción -->
             <main id="tab-add" class="hidden p-4 space-y-4">
-                <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200/80 space-y-4">
-                    <h2 id="form-title" class="text-base font-bold text-slate-800">NUEVO REGISTRO</h2>
+                <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-4 transition-colors duration-300">
+                    <h2 id="form-title" class="text-base font-bold text-slate-800 dark:text-slate-100">NUEVO REGISTRO</h2>
                     
                     <form id="transaction-form" class="space-y-4">
                         <input type="hidden" id="tx-edit-id" value="">
                         <div class="grid grid-cols-2 gap-2">
-                            <button type="button" id="btn-type-expense" onclick="setTxType('expense')" class="py-2.5 rounded-xl text-xs font-bold border border-red-500 text-red-500 bg-red-50 transition">Gasto</button>
-                            <button type="button" id="btn-type-income" onclick="setTxType('income')" class="py-2.5 rounded-xl text-xs font-bold border border-slate-200 text-slate-400 transition">Ingreso</button>
+                            <button type="button" id="btn-type-expense" onclick="setTxType('expense')" class="py-2.5 rounded-xl text-xs font-bold border border-red-500 text-red-500 bg-red-50 dark:bg-red-950/40 transition">Gasto</button>
+                            <button type="button" id="btn-type-income" onclick="setTxType('income')" class="py-2.5 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 text-slate-400 transition">Ingreso</button>
                         </div>
                         <div>
                             <div class="flex justify-between items-center mb-1">
                                 <label class="block text-[10px] font-bold uppercase text-slate-400">Monto (S/)</label>
-                                <button type="button" onclick="toggleCalcModal()" class="text-[11px] text-emerald-600 font-bold hover:underline flex items-center"><i class="fa-solid fa-calculator mr-1"></i> Abrir Calculadora</button>
+                                <button type="button" onclick="toggleCalcModal()" class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold hover:underline flex items-center"><i class="fa-solid fa-calculator mr-1"></i> Abrir Calculadora</button>
                             </div>
-                            <input type="number" step="0.01" id="tx-amount" placeholder="0.00" required class="w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                            <input type="number" step="0.01" id="tx-amount" placeholder="0.00" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 dark:text-white rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500">
                         </div>
                         <div>
                             <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Categoría</label>
-                            <select id="tx-category" class="w-full px-3 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-1 focus:ring-emerald-500">
+                            <select id="tx-category" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 dark:text-white rounded-xl text-sm outline-none focus:ring-1 focus:ring-emerald-500">
                             </select>
                         </div>
                         <div>
                             <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Fecha</label>
-                            <input type="date" id="tx-date" required class="w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                            <input type="date" id="tx-date" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 dark:text-white rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500">
                         </div>
                         <div>
                             <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Nota / Descripción (Ej. Préstamo de Juan)</label>
-                            <input type="text" id="tx-description" placeholder="Ej. Juan Pérez - Préstamo" class="w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                            <input type="text" id="tx-description" placeholder="Ej. Juan Pérez - Préstamo" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 dark:text-white rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500">
                         </div>
 
                         <div>
                             <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Foto / Comprobante (Opcional)</label>
                             <div class="flex items-center gap-3">
-                                <label id="photo-upload-box" class="w-20 h-20 border-2 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center cursor-pointer bg-slate-50 hover:bg-slate-100 transition relative overflow-hidden">
+                                <label id="photo-upload-box" class="w-20 h-20 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl flex flex-col items-center justify-center cursor-pointer bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 transition relative overflow-hidden">
                                     <i class="fa-solid fa-plus text-slate-400 text-lg"></i>
                                     <span class="text-[9px] text-slate-400 mt-1 font-semibold">Añadir</span>
                                     <input type="file" id="tx-photo-file" accept="image/*" class="hidden" onchange="previewTxPhoto(event)">
                                 </label>
 
-                                <div id="photo-preview-container" class="hidden relative w-20 h-20 rounded-2xl overflow-hidden border border-slate-300 shadow-sm">
+                                <div id="photo-preview-container" class="hidden relative w-20 h-20 rounded-2xl overflow-hidden border border-slate-300 dark:border-slate-700 shadow-sm">
                                     <img id="photo-preview-img" src="" alt="Comprobante" class="w-full h-full object-cover">
                                     <button type="button" onclick="removeTxPhoto()" class="absolute top-1 right-1 bg-rose-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] shadow" title="Eliminar foto">
                                         <i class="fa-solid fa-xmark"></i>
@@ -310,7 +316,7 @@
 
                         <div class="flex gap-2 pt-2">
                             <button type="submit" id="form-submit-btn" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition shadow-md text-sm">Guardar Transacción</button>
-                            <button type="button" onclick="cancelEdit()" id="form-cancel-btn" class="hidden bg-slate-200 text-slate-600 px-4 py-3 rounded-xl font-bold hover:bg-slate-300 text-sm">Cancelar</button>
+                            <button type="button" onclick="cancelEdit()" id="form-cancel-btn" class="hidden bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-200 px-4 py-3 rounded-xl font-bold hover:bg-slate-300 text-sm">Cancelar</button>
                         </div>
                     </form>
                 </div>
@@ -318,16 +324,16 @@
 
             <!-- Historial Completo con Buscador Rápido -->
             <main id="tab-history" class="hidden p-4 space-y-4">
-                <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/80 space-y-3">
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-3 transition-colors duration-300">
                     <div class="flex justify-between items-center">
-                        <h3 class="text-xs font-bold text-slate-600 tracking-wider uppercase">HISTORIAL COMPLETO</h3>
+                        <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 tracking-wider uppercase">HISTORIAL COMPLETO</h3>
                         <span id="history-count" class="text-[10px] text-slate-400 font-semibold">0 registros</span>
                     </div>
 
                     <!-- Buscador Rápido -->
                     <div class="relative">
                         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                        <input type="text" id="history-search-input" onkeyup="renderUI()" placeholder="Buscar por palabra clave (ej. McDonald's, Yape)..." class="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-1 focus:ring-emerald-500 font-medium">
+                        <input type="text" id="history-search-input" onkeyup="renderUI()" placeholder="Buscar por palabra clave (ej. McDonald's, Yape)..." class="w-full pl-9 pr-8 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 dark:text-white rounded-xl text-xs outline-none focus:ring-1 focus:ring-emerald-500 font-medium">
                         <button onclick="clearHistorySearch()" id="clear-search-btn" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
                             <i class="fa-solid fa-circle-xmark"></i>
                         </button>
@@ -388,12 +394,12 @@
 
             <!-- Modal Foto -->
             <div id="image-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                <div class="bg-white w-full max-w-sm p-4 rounded-3xl shadow-2xl relative flex flex-col items-center">
-                    <button onclick="closeImageModal()" class="absolute top-3 right-3 text-slate-500 hover:text-slate-800 text-lg bg-slate-100 w-8 h-8 rounded-full flex items-center justify-center">
+                <div class="bg-white dark:bg-slate-900 w-full max-w-sm p-4 rounded-3xl shadow-2xl relative flex flex-col items-center">
+                    <button onclick="closeImageModal()" class="absolute top-3 right-3 text-slate-500 dark:text-slate-300 hover:text-slate-800 text-lg bg-slate-100 dark:bg-slate-800 w-8 h-8 rounded-full flex items-center justify-center">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
-                    <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Comprobante de Pago</h3>
-                    <div class="w-full max-h-[70vh] overflow-auto rounded-2xl border border-slate-200 flex items-center justify-center bg-slate-50 p-2">
+                    <h3 class="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-3">Comprobante de Pago</h3>
+                    <div class="w-full max-h-[70vh] overflow-auto rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-2">
                         <img id="modal-image-view" src="" alt="Comprobante en grande" class="w-full h-auto object-contain">
                     </div>
                 </div>
@@ -401,58 +407,48 @@
 
             <!-- Modal Configuración -->
             <div id="settings-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                <div class="bg-white w-full max-w-sm p-5 rounded-3xl shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto custom-scroll">
+                <div class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 w-full max-w-sm p-5 rounded-3xl shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto custom-scroll">
                     <div class="flex justify-between items-center">
-                        <h3 class="text-sm font-bold text-slate-800"><i class="fa-solid fa-gears text-emerald-600 mr-2"></i> Configuración y Presupuestos</h3>
+                        <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100"><i class="fa-solid fa-gears text-emerald-600 mr-2"></i> Configuración y Presupuestos</h3>
                         <button onclick="toggleSettingsModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
                     </div>
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-500 mb-1">Nombre de la App</label>
-                            <input type="text" id="setting-app-name" placeholder="Mis Finanzas" class="w-full px-3 py-2 border text-sm rounded-xl outline-none focus:ring-1 focus:ring-emerald-500">
+                            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Nombre de la App</label>
+                            <input type="text" id="setting-app-name" placeholder="Mis Finanzas" class="w-full px-3 py-2 border dark:border-slate-700 dark:bg-slate-800 dark:text-white text-sm rounded-xl outline-none focus:ring-1 focus:ring-emerald-500">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-500 mb-1">Añadir Nueva Categoría con Color</label>
+                            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Añadir Nueva Categoría con Color</label>
                             <div class="flex items-center gap-2">
-                                <input type="text" id="new-category-name" placeholder="Ej. Ahorros" class="flex-1 px-3 py-2 border text-sm rounded-xl outline-none focus:ring-1 focus:ring-emerald-500">
-                                <input type="color" id="new-category-color" value="#8B5CF6" title="Elige un color" class="w-9 h-9 p-0.5 border rounded-xl cursor-pointer bg-slate-50">
-                                <button type="button" onclick="addCategory()" class="bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs font-bold hover:bg-slate-700">Crear</button>
+                                <input type="text" id="new-category-name" placeholder="Ej. Ahorros" class="flex-1 px-3 py-2 border dark:border-slate-700 dark:bg-slate-800 dark:text-white text-sm rounded-xl outline-none focus:ring-1 focus:ring-emerald-500">
+                                <input type="color" id="new-category-color" value="#8B5CF6" title="Elige un color" class="w-9 h-9 p-0.5 border dark:border-slate-700 rounded-xl cursor-pointer bg-slate-50">
+                                <button type="button" onclick="addCategory()" class="bg-slate-800 dark:bg-slate-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold hover:bg-slate-700">Crear</button>
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-500 mb-1">Gestión de Categorías y Presupuestos Mensuales (S/)</label>
-                            <div id="categories-management-list" class="space-y-2 max-h-56 overflow-y-auto custom-scroll border p-2 rounded-xl bg-slate-50"></div>
+                            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Gestión de Categorías y Presupuestos Mensuales (S/)</label>
+                            <div id="categories-management-list" class="space-y-2 max-h-56 overflow-y-auto custom-scroll border dark:border-slate-700 p-2 rounded-xl bg-slate-50 dark:bg-slate-950"></div>
                         </div>
                         <button type="button" onclick="saveSettings()" class="w-full bg-emerald-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-emerald-700 transition">Cerrar y Guardar</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Selector de Temas -->
-            <div id="theme-selector-bar" class="fixed bottom-[60px] right-4 bg-white/90 backdrop-blur-md px-2.5 py-1.5 rounded-2xl shadow-lg border border-slate-200/80 flex items-center space-x-2 z-40">
-                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-tight mr-0.5"><i class="fa-solid fa-palette text-slate-500 mr-1"></i>Tema:</span>
-                <button onclick="changeTheme('emerald')" title="Esmeralda" class="w-4 h-4 rounded-md bg-emerald-500 hover:scale-110 transition shadow-sm border border-emerald-600 focus:outline-none"></button>
-                <button onclick="changeTheme('ocean')" title="Océano" class="w-4 h-4 rounded-md bg-blue-600 hover:scale-110 transition shadow-sm border border-blue-700 focus:outline-none"></button>
-                <button onclick="changeTheme('violet')" title="Violeta" class="w-4 h-4 rounded-md bg-violet-600 hover:scale-110 transition shadow-sm border border-violet-700 focus:outline-none"></button>
-                <button onclick="changeTheme('sunset')" title="Sunset" class="w-4 h-4 rounded-md bg-amber-500 hover:scale-110 transition shadow-sm border border-amber-600 focus:outline-none"></button>
-                <button onclick="changeTheme('dark')" title="Oscuro" class="w-4 h-4 rounded-md bg-slate-800 hover:scale-110 transition shadow-sm border border-slate-900 focus:outline-none"></button>
-            </div>
-
             <!-- Navegación Inferior -->
-            <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-slate-200 px-6 py-2 flex justify-around items-center z-40">
-                <button onclick="switchTab('dashboard')" id="nav-btn-dashboard" class="flex flex-col items-center text-emerald-600 text-[11px] font-bold">
+            <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-6 py-2 flex justify-around items-center z-40 transition-colors duration-300">
+                <button onclick="switchTab('dashboard')" id="nav-btn-dashboard" class="flex flex-col items-center text-emerald-600 dark:text-emerald-400 text-[11px] font-bold">
                     <i class="fa-solid fa-chart-pie text-lg mb-0.5"></i>
                     <span>Resumen</span>
                 </button>
                 
                 <button onclick="switchTab('add')" id="nav-btn-add" class="flex flex-col items-center">
-                    <div id="add-fab-btn" class="w-12 h-12 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center text-xl shadow-lg shadow-emerald-500/40 -mt-6 border-4 border-slate-100 transition transform active:scale-95">
+                    <div id="add-fab-btn" class="w-12 h-12 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center text-xl shadow-lg shadow-emerald-500/40 -mt-6 border-4 border-slate-50 dark:border-slate-900 transition transform active:scale-95">
                         <i class="fa-solid fa-plus"></i>
                     </div>
-                    <span class="text-[10px] text-slate-500 font-semibold mt-0.5">Agregar</span>
+                    <span class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-0.5">Agregar</span>
                 </button>
 
-                <button onclick="switchTab('history')" id="nav-btn-history" class="flex flex-col items-center text-slate-400 text-[11px] font-semibold hover:text-emerald-600">
+                <button onclick="switchTab('history')" id="nav-btn-history" class="flex flex-col items-center text-slate-400 text-[11px] font-semibold hover:text-emerald-600 dark:hover:text-emerald-400">
                     <i class="fa-solid fa-list-check text-lg mb-0.5"></i>
                     <span>Historial</span>
                 </button>
@@ -487,7 +483,29 @@
         let isBalanceVisible = false;
         let isRegister = false;
         let currentPhotoBase64 = null;
-        let currentTheme = localStorage.getItem('app_theme') || 'emerald';
+        
+        // MODO OSCURO / CLARO SETUP
+        let isDarkMode = localStorage.getItem('app_dark_mode') !== 'false'; // Por defecto oscuro
+        applyDarkMode(isDarkMode);
+
+        window.toggleDarkMode = () => {
+            isDarkMode = !isDarkMode;
+            localStorage.setItem('app_dark_mode', isDarkMode);
+            applyDarkMode(isDarkMode);
+            renderUI();
+        };
+
+        function applyDarkMode(dark) {
+            const htmlRoot = document.getElementById('html-root');
+            const icon = document.getElementById('theme-toggle-icon');
+            if (dark) {
+                htmlRoot.classList.add('dark');
+                if (icon) icon.className = "fa-solid fa-sun text-amber-400";
+            } else {
+                htmlRoot.classList.remove('dark');
+                if (icon) icon.className = "fa-solid fa-moon text-slate-300";
+            }
+        }
 
         let calcInput = "0";
         let calcHistoryStr = "";
@@ -505,35 +523,6 @@
         let dailyChartInstance = null;
 
         document.getElementById('tx-date').valueAsDate = new Date();
-
-        const themesConfig = {
-            emerald: { headerBg: 'bg-slate-900', badgeBg: 'bg-emerald-500', subText: 'text-emerald-400', cardBg: 'bg-emerald-600', fabBg: 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/40', activeNav: 'text-emerald-600' },
-            ocean: { headerBg: 'bg-slate-900', badgeBg: 'bg-blue-600', subText: 'text-blue-400', cardBg: 'bg-blue-600', fabBg: 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/40', activeNav: 'text-blue-600' },
-            violet: { headerBg: 'bg-slate-900', badgeBg: 'bg-violet-600', subText: 'text-violet-400', cardBg: 'bg-violet-600', fabBg: 'bg-violet-600 hover:bg-violet-700 shadow-violet-600/40', activeNav: 'text-violet-600' },
-            sunset: { headerBg: 'bg-slate-900', badgeBg: 'bg-amber-500', subText: 'text-amber-400', cardBg: 'bg-amber-500', fabBg: 'bg-amber-500 hover:bg-amber-600 shadow-amber-500/40', activeNav: 'text-amber-600' },
-            dark: { headerBg: 'bg-black', badgeBg: 'bg-indigo-600', subText: 'text-indigo-400', cardBg: 'bg-slate-800', fabBg: 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/40', activeNav: 'text-indigo-500' }
-        };
-
-        window.changeTheme = (themeKey) => {
-            currentTheme = themeKey;
-            localStorage.setItem('app_theme', themeKey);
-            applyTheme(themeKey);
-        };
-
-        function applyTheme(themeKey) {
-            const config = themesConfig[themeKey] || themesConfig.emerald;
-            const header = document.getElementById('main-header');
-            const badge = document.getElementById('brand-badge');
-            const brandSub = document.getElementById('app-brand-sub');
-            const balanceCard = document.getElementById('balance-card');
-            const fabBtn = document.getElementById('add-fab-btn');
-
-            if (header) header.className = `${config.headerBg} text-white px-5 py-4 flex justify-between items-center rounded-b-2xl shadow-md transition-colors duration-300`;
-            if (badge) badge.className = `${config.badgeBg} text-white w-8 h-8 rounded-xl flex items-center justify-center transition-colors duration-300`;
-            if (brandSub) brandSub.className = `text-[9px] ${config.subText} font-semibold tracking-wide transition-colors duration-300`;
-            if (balanceCard) balanceCard.className = `${config.cardBg} text-white p-5 rounded-3xl shadow-lg relative overflow-hidden transition-colors duration-300`;
-            if (fabBtn) fabBtn.className = `w-12 h-12 ${config.fabBg} text-white rounded-full flex items-center justify-center text-xl shadow-lg -mt-6 border-4 border-slate-100 transition transform active:scale-95`;
-        }
 
         window.toggleCalcModal = () => document.getElementById('calc-modal').classList.toggle('hidden');
         window.calcClear = () => { calcInput = "0"; calcHistoryStr = ""; updateCalcDisplay(); };
@@ -659,18 +648,18 @@
             savingsGoals.forEach(g => {
                 const percent = Math.min(100, Math.round((g.current / g.target) * 100));
                 listEl.innerHTML += `
-                    <div class="bg-slate-50 border border-slate-100 p-2.5 rounded-2xl space-y-1.5">
+                    <div class="bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 p-2.5 rounded-2xl space-y-1.5">
                         <div class="flex justify-between items-center text-xs">
-                            <span class="font-bold text-slate-800">${g.title}</span>
-                            <span class="text-[11px] font-extrabold text-emerald-600">S/ ${g.current.toFixed(2)} / S/ ${g.target.toFixed(2)}</span>
+                            <span class="font-bold text-slate-800 dark:text-slate-200">${g.title}</span>
+                            <span class="text-[11px] font-extrabold text-emerald-600 dark:text-emerald-400">S/ ${g.current.toFixed(2)} / S/ ${g.target.toFixed(2)}</span>
                         </div>
-                        <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                        <div class="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
                             <div class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: ${percent}%;"></div>
                         </div>
                         <div class="flex justify-between items-center text-[10px]">
                             <span class="font-semibold text-slate-400">${percent}% completado</span>
                             <div class="flex gap-2">
-                                <button onclick="adjustGoalAmount('${g.id}')" class="text-emerald-600 font-bold hover:underline">+ Abonar</button>
+                                <button onclick="adjustGoalAmount('${g.id}')" class="text-emerald-600 dark:text-emerald-400 font-bold hover:underline">+ Abonar</button>
                                 <button onclick="deleteGoal('${g.id}')" class="text-slate-300 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button>
                             </div>
                         </div>
@@ -739,16 +728,15 @@
             document.getElementById('tab-history').classList.add('hidden');
             document.getElementById('nav-btn-dashboard').className = "flex flex-col items-center text-slate-400 text-[11px] font-semibold";
             document.getElementById('nav-btn-history').className = "flex flex-col items-center text-slate-400 text-[11px] font-semibold";
-            const config = themesConfig[currentTheme] || themesConfig.emerald;
 
             if (tab === 'dashboard') {
                 document.getElementById('tab-dashboard').classList.remove('hidden');
-                document.getElementById('nav-btn-dashboard').className = `flex flex-col items-center ${config.activeNav} text-[11px] font-bold`;
+                document.getElementById('nav-btn-dashboard').className = "flex flex-col items-center text-emerald-600 dark:text-emerald-400 text-[11px] font-bold";
             } else if (tab === 'add') {
                 document.getElementById('tab-add').classList.remove('hidden');
             } else if (tab === 'history') {
                 document.getElementById('tab-history').classList.remove('hidden');
-                document.getElementById('nav-btn-history').className = `flex flex-col items-center ${config.activeNav} text-[11px] font-bold`;
+                document.getElementById('nav-btn-history').className = "flex flex-col items-center text-emerald-600 dark:text-emerald-400 text-[11px] font-bold";
             }
         };
 
@@ -757,11 +745,11 @@
             const expBtn = document.getElementById('btn-type-expense');
             const incBtn = document.getElementById('btn-type-income');
             if (type === 'expense') {
-                expBtn.className = "py-2.5 rounded-xl text-xs font-bold border border-red-500 text-red-500 bg-red-50 transition";
-                incBtn.className = "py-2.5 rounded-xl text-xs font-bold border border-slate-200 text-slate-400 transition";
+                expBtn.className = "py-2.5 rounded-xl text-xs font-bold border border-red-500 text-red-500 bg-red-50 dark:bg-red-950/40 transition";
+                incBtn.className = "py-2.5 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 text-slate-400 transition";
             } else {
-                incBtn.className = "py-2.5 rounded-xl text-xs font-bold border border-emerald-500 text-emerald-600 bg-emerald-50 transition";
-                expBtn.className = "py-2.5 rounded-xl text-xs font-bold border border-slate-200 text-slate-400 transition";
+                incBtn.className = "py-2.5 rounded-xl text-xs font-bold border border-emerald-500 text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 transition";
+                expBtn.className = "py-2.5 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 text-slate-400 transition";
             }
         };
 
@@ -818,7 +806,6 @@
                 document.getElementById('auth-screen').classList.add('hidden');
                 document.getElementById('app-screen').classList.remove('hidden');
                 document.getElementById('user-display-name').textContent = user.displayName || user.email;
-                applyTheme(currentTheme);
                 await loadUserData();
             } else {
                 currentUser = null;
@@ -974,23 +961,23 @@
                 const photoBadge = tx.photo ? `<span onclick="openImageModal('${tx.photo}')" class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 px-2 py-0.5 rounded-md border border-emerald-300 transition cursor-pointer shrink-0 ml-1.5"><i class="fa-solid fa-image text-emerald-600"></i> Ver</span>` : '';
 
                 const itemHTML = `
-                    <div class="flex justify-between items-center p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 transition-colors duration-300">
                         <div class="flex items-center space-x-3 overflow-hidden mr-2">
-                            <div class="w-9 h-9 rounded-full ${tx.type === 'income' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-500'} flex items-center justify-center text-xs shrink-0">
+                            <div class="w-9 h-9 rounded-full ${tx.type === 'income' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400' : 'bg-red-100 text-red-500 dark:bg-red-950 dark:text-red-400'} flex items-center justify-center text-xs shrink-0">
                                 <i class="fa-solid ${tx.type === 'income' ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
                             </div>
                             <div class="min-w-0">
                                 <div class="flex items-center flex-wrap gap-1">
-                                    <span class="font-bold text-slate-800 text-xs truncate max-w-[140px]">${tx.description}</span>
+                                    <span class="font-bold text-slate-800 dark:text-slate-200 text-xs truncate max-w-[140px]">${tx.description}</span>
                                     ${photoBadge}
                                 </div>
                                 <p class="text-[10px] text-slate-400 mt-0.5 truncate">${formattedDate} • <span class="px-2 py-0.5 rounded-full font-semibold text-[9px] inline-block" style="background-color: ${catColor}; color: ${textColor};">${tx.category || 'General'}</span></p>
                             </div>
                         </div>
                         <div class="flex items-center space-x-2 shrink-0">
-                            <span class="font-extrabold text-xs ${tx.type === 'income' ? 'text-emerald-600' : 'text-slate-800'}">${tx.type === 'income' ? '+' : '-'} S/ ${tx.amount.toFixed(2)}</span>
+                            <span class="font-extrabold text-xs ${tx.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-800 dark:text-slate-200'}">${tx.type === 'income' ? '+' : '-'} S/ ${tx.amount.toFixed(2)}</span>
                             <button onclick="editTx('${tx.id}')" title="Modificar" class="text-blue-400 hover:text-blue-600 text-xs pl-1"><i class="fa-solid fa-pen-to-square"></i></button>
-                            <button onclick="deleteTx('${tx.id}')" title="Eliminar" class="text-slate-300 hover:text-red-500 text-xs pl-1"><i class="fa-solid fa-trash-can"></i></button>
+                            <button onclick="deleteTx('${tx.id}')" title="Eliminar" class="text-slate-300 dark:text-slate-600 hover:text-red-500 text-xs pl-1"><i class="fa-solid fa-trash-can"></i></button>
                         </div>
                     </div>
                 `;
@@ -1063,8 +1050,8 @@
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        x: { grid: { display: false }, ticks: { font: { size: 9 } } },
-                        y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 9 } } }
+                        x: { grid: { display: false }, ticks: { color: isDarkMode ? '#94A3B8' : '#64748B', font: { size: 9 } } },
+                        y: { grid: { color: isDarkMode ? '#334155' : '#f1f5f9' }, ticks: { color: isDarkMode ? '#94A3B8' : '#64748B', font: { size: 9 } } }
                     }
                 }
             });
@@ -1088,7 +1075,22 @@
             chartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: { labels: labels, datasets: [{ data: data, backgroundColor: bgColors }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10, weight: '600' }, padding: 6 } } }, cutout: '65%' }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { 
+                            position: 'right', 
+                            labels: { 
+                                boxWidth: 10, 
+                                font: { size: 10, weight: '600' }, 
+                                padding: 6,
+                                color: isDarkMode ? '#E2E8F0' : '#334155'
+                            } 
+                        } 
+                    }, 
+                    cutout: '65%' 
+                }
             });
         }
 
@@ -1129,15 +1131,15 @@
         function renderCategoriesManagement() {
             const listEl = document.getElementById('categories-management-list');
             listEl.innerHTML = categories.map((cat, index) => `
-                <div class="bg-white p-2 rounded-xl border text-xs space-y-1.5 shadow-sm">
+                <div class="bg-white dark:bg-slate-900 p-2 rounded-xl border dark:border-slate-800 text-xs space-y-1.5 shadow-sm">
                     <div class="flex items-center justify-between gap-2">
-                        <input type="color" value="${cat.color || '#3B82F6'}" id="cat-color-${index}" onchange="updateCategoryColor(${index})" class="w-7 h-7 p-0.5 border rounded-md cursor-pointer bg-slate-50">
-                        <input type="text" value="${cat.name}" id="cat-input-${index}" onchange="updateCategoryName(${index})" class="flex-1 px-2 py-1 bg-slate-50 border rounded-md outline-none font-medium text-xs">
+                        <input type="color" value="${cat.color || '#3B82F6'}" id="cat-color-${index}" onchange="updateCategoryColor(${index})" class="w-7 h-7 p-0.5 border dark:border-slate-700 rounded-md cursor-pointer bg-slate-50">
+                        <input type="text" value="${cat.name}" id="cat-input-${index}" onchange="updateCategoryName(${index})" class="flex-1 px-2 py-1 bg-slate-50 dark:bg-slate-800 border dark:border-slate-700 dark:text-white rounded-md outline-none font-medium text-xs">
                         <button type="button" onclick="deleteCategory(${index})" class="text-red-500 hover:text-red-700 px-2"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
-                    <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-100">
+                    <div class="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800">
                         <span>Límite Presupuesto (S/):</span>
-                        <input type="number" step="10" value="${cat.budget || 0}" id="cat-budget-${index}" onchange="updateCategoryBudget(${index})" class="w-24 px-2 py-0.5 bg-slate-50 border rounded-md outline-none font-semibold text-right text-emerald-600">
+                        <input type="number" step="10" value="${cat.budget || 0}" id="cat-budget-${index}" onchange="updateCategoryBudget(${index})" class="w-24 px-2 py-0.5 bg-slate-50 dark:bg-slate-800 border dark:border-slate-700 dark:text-white rounded-md outline-none font-semibold text-right text-emerald-600 dark:text-emerald-400">
                     </div>
                 </div>
             `).join('');
@@ -1194,21 +1196,18 @@
             alert("¡Configuración guardada!");
         };
 
-        // CORRECCIÓN EXACTA DE LA FECHA AL EDITAR O CREAR TRANSACCIONES
         document.getElementById('transaction-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const editId = document.getElementById('tx-edit-id').value;
             const description = document.getElementById('tx-description').value.trim() || "Sin descripción";
             const amount = parseFloat(document.getElementById('tx-amount').value);
             const category = document.getElementById('tx-category').value;
-            const dateVal = document.getElementById('tx-date').value; // Toma el valor YYYY-MM-DD del input de fecha
+            const dateVal = document.getElementById('tx-date').value;
 
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const seconds = String(now.getSeconds()).padStart(2, '0');
-            
-            // Asignamos formalmente la fecha elegida en el calendario junto con la hora actual local
             const fullDateIso = `${dateVal}T${hours}:${minutes}:${seconds}`;
 
             const txData = { description, amount, type: currentType, category, date: fullDateIso, photo: currentPhotoBase64 || null };
