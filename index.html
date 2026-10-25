@@ -3,22 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="page-title">Mis Finanzas Pro - 3ldiosfenix</title>
+    <title id="page-title">Mis Finanzas - 3ldiosfenix</title>
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3135/3135706.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .custom-scroll::-webkit-scrollbar { width: 6px; }
-        .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 8px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 8px; }
-        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #64748b; }
-        .glow-card { box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.3); }
-        .btn-press { transition: transform 0.1s ease; }
-        .btn-press:active { transform: scale(0.92); }
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 8px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-800 min-h-screen flex flex-col justify-between font-sans selection:bg-emerald-500 selection:text-white">
+<body class="bg-slate-900 text-slate-800 min-h-screen flex flex-col justify-between font-sans">
 
     <!-- Container Principal Mobile -->
     <div class="max-w-md w-full mx-auto bg-slate-100 min-h-screen flex flex-col shadow-2xl relative pb-24">
@@ -55,7 +62,7 @@
                     </div>
                     <input type="password" id="auth-password" name="password" autocomplete="current-password" required class="w-full px-4 py-3 bg-slate-800 border border-slate-700 text-white rounded-xl focus:border-emerald-500 outline-none text-sm">
                 </div>
-                <button type="submit" id="auth-btn" class="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/20 text-sm btn-press cursor-pointer">Iniciar Sesión</button>
+                <button type="submit" id="auth-btn" class="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/20 text-sm active:scale-95 cursor-pointer">Iniciar Sesión</button>
             </form>
 
             <div class="text-center mt-4">
@@ -78,15 +85,15 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-2 text-slate-300">
-                    <button onclick="toggleCalcModal()" title="Calculadora flotante" class="hover:text-emerald-400 text-sm p-1 btn-press"><i class="fa-solid fa-calculator"></i></button>
-                    <button onclick="toggleSettingsModal()" title="Configuración" class="hover:text-emerald-400 text-sm p-1 btn-press"><i class="fa-solid fa-gear"></i></button>
-                    <button onclick="exportCSV()" title="Exportar a Excel" class="hover:text-emerald-400 text-sm p-1 btn-press"><i class="fa-solid fa-file-excel"></i></button>
-                    <button onclick="exportJSON()" title="Respaldo JSON" class="hover:text-emerald-400 text-sm p-1 btn-press"><i class="fa-solid fa-download"></i></button>
-                    <label title="Importar Respaldo" class="hover:text-emerald-400 cursor-pointer text-sm p-1 btn-press">
+                    <button onclick="toggleCalcModal()" title="Calculadora y Conversor USD" class="hover:text-emerald-400 text-sm p-1"><i class="fa-solid fa-calculator"></i></button>
+                    <button onclick="toggleSettingsModal()" title="Configuración y Categorías" class="hover:text-emerald-400 text-sm p-1"><i class="fa-solid fa-gear"></i></button>
+                    <button onclick="exportCSV()" title="Exportar a Excel (CSV)" class="hover:text-emerald-400 text-sm p-1"><i class="fa-solid fa-file-excel"></i></button>
+                    <button onclick="exportJSON()" title="Exportar Respaldo JSON" class="hover:text-emerald-400 text-sm p-1"><i class="fa-solid fa-download"></i></button>
+                    <label title="Importar Respaldo" class="hover:text-emerald-400 cursor-pointer text-sm p-1">
                         <i class="fa-solid fa-upload"></i>
                         <input type="file" id="import-file" accept=".json" class="hidden" onchange="importJSON(event)">
                     </label>
-                    <button onclick="logout()" title="Cerrar Sesión" class="text-red-400 hover:text-red-300 text-sm p-1 ml-0.5 btn-press"><i class="fa-solid fa-right-from-bracket"></i></button>
+                    <button onclick="logout()" title="Cerrar Sesión" class="text-red-400 hover:text-red-300 text-sm p-1 ml-0.5"><i class="fa-solid fa-right-from-bracket"></i></button>
                 </div>
             </header>
 
@@ -105,11 +112,11 @@
                     </select>
                 </div>
 
-                <!-- Tarjeta de Balance con Efecto Glow -->
-                <div id="balance-card" class="bg-emerald-600 text-white p-5 rounded-3xl shadow-lg glow-card relative overflow-hidden transition-all duration-300">
+                <!-- Tarjeta de Balance -->
+                <div id="balance-card" class="bg-emerald-600 text-white p-5 rounded-3xl shadow-lg relative overflow-hidden transition-colors duration-300">
                     <div class="flex justify-between items-center">
                         <p id="balance-label" class="text-[10px] font-bold uppercase tracking-widest opacity-80">BALANCE TOTAL</p>
-                        <button onclick="toggleBalanceVisibility()" class="text-white/80 hover:text-white text-sm focus:outline-none btn-press" title="Ocultar/Mostrar saldo">
+                        <button onclick="toggleBalanceVisibility()" class="text-white/80 hover:text-white text-sm focus:outline-none" title="Ocultar/Mostrar saldo">
                             <i id="toggle-eye-icon" class="fa-solid fa-eye-slash"></i>
                         </button>
                     </div>
@@ -138,34 +145,12 @@
                     </div>
                 </div>
 
-                <!-- Accesos Rápidos Express (Un toque) -->
-                <div class="bg-white p-3.5 rounded-3xl shadow-sm border border-slate-200/80 space-y-2">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block px-1"><i class="fa-solid fa-bolt text-amber-500 mr-1"></i> REGISTRO RÁPIDO (EXPRESS)</span>
-                    <div class="grid grid-cols-3 gap-2">
-                        <button onclick="quickAddTransaction('Gasolina', 10, 'Transporte')" class="bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 p-2 rounded-2xl text-center btn-press">
-                            <i class="fa-solid fa-gas-pump text-blue-500 block text-sm mb-1"></i>
-                            <span class="text-[10px] font-bold text-slate-700 block leading-tight">Gasolina</span>
-                            <span class="text-[9px] font-extrabold text-emerald-600">S/ 10.00</span>
-                        </button>
-                        <button onclick="quickAddTransaction('Cochera', 3, 'Cochera')" class="bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 p-2 rounded-2xl text-center btn-press">
-                            <i class="fa-solid fa-warehouse text-amber-500 block text-sm mb-1"></i>
-                            <span class="text-[10px] font-bold text-slate-700 block leading-tight">Cochera</span>
-                            <span class="text-[9px] font-extrabold text-emerald-600">S/ 3.00</span>
-                        </button>
-                        <button onclick="quickAddTransaction('Lavada Moto', 10, 'Lavadero')" class="bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 p-2 rounded-2xl text-center btn-press">
-                            <i class="fa-solid fa-motorcycle text-purple-500 block text-sm mb-1"></i>
-                            <span class="text-[10px] font-bold text-slate-700 block leading-tight">Lavada Moto</span>
-                            <span class="text-[9px] font-extrabold text-emerald-600">S/ 10.00</span>
-                        </button>
-                    </div>
-                </div>
-
                 <!-- Agenda de Deudas -->
                 <div class="bg-slate-900 text-white p-4 rounded-3xl shadow-md border border-slate-800 space-y-2">
                     <div class="flex justify-between items-center px-1">
                         <div class="flex items-center gap-2">
                             <h3 class="text-xs font-bold text-amber-400 tracking-wider uppercase flex items-center"><i class="fa-solid fa-address-book mr-1.5"></i> AGENDA DE DEUDAS (AMISTADES)</h3>
-                            <button onclick="addQuickDebt()" title="Registrar nueva deuda" class="bg-amber-400 hover:bg-amber-500 text-slate-900 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black shadow btn-press">
+                            <button onclick="addQuickDebt()" title="Registrar nueva deuda" class="bg-amber-400 hover:bg-amber-500 text-slate-900 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black shadow transition transform active:scale-90">
                                 <i class="fa-solid fa-plus"></i>
                             </button>
                         </div>
@@ -179,37 +164,15 @@
                 <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/80 space-y-3">
                     <div class="flex justify-between items-center px-1">
                         <h3 class="text-xs font-bold text-slate-600 tracking-wider uppercase flex items-center"><i class="fa-solid fa-piggy-bank text-emerald-500 mr-1.5"></i> METAS DE AHORRO</h3>
-                        <button onclick="addQuickGoal()" class="text-xs font-bold text-emerald-600 hover:underline btn-press"><i class="fa-solid fa-plus mr-1"></i>Nueva Meta</button>
+                        <button onclick="addQuickGoal()" class="text-xs font-bold text-emerald-600 hover:underline"><i class="fa-solid fa-plus mr-1"></i>Nueva Meta</button>
                     </div>
                     <div id="savings-goals-list" class="space-y-2.5"></div>
-                </div>
-
-                <!-- Medallas y Logros Motivacionales -->
-                <div class="bg-slate-900 text-white p-3.5 rounded-3xl shadow-md border border-slate-800 space-y-2">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block px-1"><i class="fa-solid fa-trophy text-amber-400 mr-1"></i> LOGROS Y RECOMPENSAS</span>
-                    <div class="grid grid-cols-3 gap-2 text-center text-[10px]">
-                        <div class="bg-slate-800 border border-slate-700 p-2 rounded-2xl flex flex-col items-center">
-                            <i class="fa-solid fa-award text-amber-400 text-lg mb-1"></i>
-                            <span class="font-bold text-slate-200">Constante</span>
-                            <span class="text-[8px] text-slate-400">Activo diariamente</span>
-                        </div>
-                        <div class="bg-slate-800 border border-slate-700 p-2 rounded-2xl flex flex-col items-center">
-                            <i class="fa-solid fa-shield-halved text-blue-400 text-lg mb-1"></i>
-                            <span class="font-bold text-slate-200">Organizado</span>
-                            <span class="text-[8px] text-slate-400">Control de gastos</span>
-                        </div>
-                        <div class="bg-slate-800 border border-slate-700 p-2 rounded-2xl flex flex-col items-center">
-                            <i class="fa-solid fa-star text-emerald-400 text-lg mb-1"></i>
-                            <span class="font-bold text-slate-200">Finanzas OK</span>
-                            <span class="text-[8px] text-slate-400">Balances al día</span>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Asistente por Voz -->
                 <div class="bg-slate-900 text-white p-4 rounded-2xl flex items-center justify-between shadow-md">
                     <div class="flex items-center space-x-3">
-                        <button type="button" onclick="startMasterVoiceAssistant()" class="bg-rose-500 hover:bg-rose-600 w-12 h-12 rounded-2xl flex items-center justify-center text-white text-lg shadow-lg shadow-rose-500/30 btn-press">
+                        <button type="button" onclick="startMasterVoiceAssistant()" class="bg-rose-500 hover:bg-rose-600 w-12 h-12 rounded-2xl flex items-center justify-center text-white text-lg shadow-lg shadow-rose-500/30 transition transform active:scale-95">
                             <i id="voice-mic-icon" class="fa-solid fa-microphone"></i>
                         </button>
                         <div>
@@ -217,7 +180,7 @@
                             <p id="voice-subtext" class="text-[11px] text-slate-400">Toca el micro y habla</p>
                         </div>
                     </div>
-                    <button type="button" onclick="toggleVoiceHelp()" class="bg-slate-800 text-amber-400 border border-slate-700 text-[11px] font-semibold px-3 py-1.5 rounded-xl hover:bg-slate-700 flex items-center btn-press">
+                    <button type="button" onclick="toggleVoiceHelp()" class="bg-slate-800 text-amber-400 border border-slate-700 text-[11px] font-semibold px-3 py-1.5 rounded-xl hover:bg-slate-700 flex items-center">
                         <i class="fa-solid fa-circle-question mr-1 text-amber-400"></i> Ejemplos
                     </button>
                 </div>
@@ -303,8 +266,8 @@
                     <form id="transaction-form" class="space-y-4">
                         <input type="hidden" id="tx-edit-id" value="">
                         <div class="grid grid-cols-2 gap-2">
-                            <button type="button" id="btn-type-expense" onclick="setTxType('expense')" class="py-2.5 rounded-xl text-xs font-bold border border-red-500 text-red-500 bg-red-50 transition btn-press">Gasto</button>
-                            <button type="button" id="btn-type-income" onclick="setTxType('income')" class="py-2.5 rounded-xl text-xs font-bold border border-slate-200 text-slate-400 transition btn-press">Ingreso</button>
+                            <button type="button" id="btn-type-expense" onclick="setTxType('expense')" class="py-2.5 rounded-xl text-xs font-bold border border-red-500 text-red-500 bg-red-50 transition">Gasto</button>
+                            <button type="button" id="btn-type-income" onclick="setTxType('income')" class="py-2.5 rounded-xl text-xs font-bold border border-slate-200 text-slate-400 transition">Ingreso</button>
                         </div>
                         <div>
                             <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Monto (S/)</label>
@@ -343,8 +306,8 @@
                         </div>
 
                         <div class="flex gap-2 pt-2">
-                            <button type="submit" id="form-submit-btn" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition shadow-md text-sm btn-press">Guardar Transacción</button>
-                            <button type="button" onclick="cancelEdit()" id="form-cancel-btn" class="hidden bg-slate-200 text-slate-600 px-4 py-3 rounded-xl font-bold hover:bg-slate-300 text-sm btn-press">Cancelar</button>
+                            <button type="submit" id="form-submit-btn" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition shadow-md text-sm">Guardar Transacción</button>
+                            <button type="button" onclick="cancelEdit()" id="form-cancel-btn" class="hidden bg-slate-200 text-slate-600 px-4 py-3 rounded-xl font-bold hover:bg-slate-300 text-sm">Cancelar</button>
                         </div>
                     </form>
                 </div>
@@ -371,46 +334,30 @@
                 </div>
             </main>
 
-            <!-- Modal Calculadora Flotante Interactiva -->
+            <!-- Modal Calculadora y Conversor USD -->
             <div id="calc-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                <div class="bg-slate-900 text-white w-full max-w-sm p-5 rounded-3xl shadow-2xl space-y-4 border border-slate-800">
+                <div class="bg-white w-full max-w-sm p-5 rounded-3xl shadow-2xl space-y-4">
                     <div class="flex justify-between items-center">
-                        <h3 class="text-xs font-bold text-slate-300 tracking-wider uppercase"><i class="fa-solid fa-calculator text-emerald-400 mr-1.5"></i> CALCULADORA RÁPIDA</h3>
-                        <button onclick="toggleCalcModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                        <h3 class="text-sm font-bold text-slate-800"><i class="fa-solid fa-calculator text-emerald-600 mr-1.5"></i> Conversor USD / PEN</h3>
+                        <button onclick="toggleCalcModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
                     </div>
                     
-                    <div class="bg-slate-800 p-3 rounded-2xl text-right border border-slate-700">
-                        <div id="calc-screen-expr" class="text-[10px] text-slate-400 h-4"></div>
-                        <div id="calc-screen-val" class="text-2xl font-bold text-emerald-400 truncate">0</div>
+                    <div class="space-y-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="font-bold text-slate-500">Tipo de cambio aprox:</span>
+                            <span class="font-bold text-emerald-600">1 USD = 3.75 PEN</span>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Dólares (USD)</label>
+                            <input type="number" id="calc-usd" oninput="convertUsdToPen()" placeholder="0.00" class="w-full px-3 py-2 bg-white border text-sm rounded-xl outline-none font-bold text-slate-700">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Soles (PEN)</label>
+                            <input type="number" id="calc-pen" oninput="convertPenToUsd()" placeholder="0.00" class="w-full px-3 py-2 bg-white border text-sm rounded-xl outline-none font-bold text-emerald-600">
+                        </div>
                     </div>
 
-                    <div class="grid grid-cols-4 gap-2 text-sm font-bold">
-                        <button onclick="calcKey('C')" class="p-3 bg-rose-500/20 text-rose-300 rounded-xl hover:bg-rose-500/30 btn-press">C</button>
-                        <button onclick="calcKey('(')" class="p-3 bg-slate-800 text-slate-300 rounded-xl hover:bg-slate-700 btn-press">(</button>
-                        <button onclick="calcKey(')')" class="p-3 bg-slate-800 text-slate-300 rounded-xl hover:bg-slate-700 btn-press">)</button>
-                        <button onclick="calcKey('/')" class="p-3 bg-amber-500/20 text-amber-300 rounded-xl hover:bg-amber-500/30 btn-press">÷</button>
-
-                        <button onclick="calcKey('7')" class="p-3 bg-slate-800 rounded-xl hover:bg-slate-700 btn-press">7</button>
-                        <button onclick="calcKey('8')" class="p-3 bg-slate-800 rounded-xl hover:bg-slate-700 btn-press">8</button>
-                        <button onclick="calcKey('9')" class="p-3 bg-slate-800 rounded-xl hover:bg-slate-700 btn-press">9</button>
-                        <button onclick="calcKey('*')" class="p-3 bg-amber-500/20 text-amber-300 rounded-xl hover:bg-amber-500/30 btn-press">×</button>
-
-                        <button onclick="calcKey('4')" class="p-3 bg-slate-800 rounded-xl hover:bg-slate-700 btn-press">4</button>
-                        <button onclick="calcKey('5')" class="p-3 bg-slate-800 rounded-xl hover:bg-slate-700 btn-press">5</button>
-                        <button onclick="calcKey('6')" class="p-3 bg-slate-800 rounded-xl hover:bg-slate-700 btn-press">6</button>
-                        <button onclick="calcKey('-')" class="p-3 bg-amber-500/20 text-amber-300 rounded-xl hover:bg-amber-500/30 btn-press">-</button>
-
-                        <button onclick="calcKey('1')" class="p-3 bg-slate-800 rounded-xl hover:bg-slate-700 btn-press">1</button>
-                        <button onclick="calcKey('2')" class="p-3 bg-slate-800 rounded-xl hover:bg-slate-700 btn-press">2</button>
-                        <button onclick="calcKey('3')" class="p-3 bg-slate-800 rounded-xl hover:bg-slate-700 btn-press">3</button>
-                        <button onclick="calcKey('+')" class="p-3 bg-amber-500/20 text-amber-300 rounded-xl hover:bg-amber-500/30 btn-press">+</button>
-
-                        <button onclick="calcKey('0')" class="col-span-2 p-3 bg-slate-800 rounded-xl hover:bg-slate-700 btn-press">0</button>
-                        <button onclick="calcKey('.')" class="p-3 bg-slate-800 rounded-xl hover:bg-slate-700 btn-press">.</button>
-                        <button onclick="calcKey('=')" class="p-3 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 btn-press">=</button>
-                    </div>
-
-                    <button type="button" onclick="useCalcResult()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl text-xs font-bold transition btn-press"><i class="fa-solid fa-arrow-right-to-bracket mr-1"></i> Usar resultado en formulario</button>
+                    <button type="button" onclick="toggleCalcModal()" class="w-full bg-slate-800 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-slate-700 transition">Cerrar</button>
                 </div>
             </div>
 
@@ -444,14 +391,14 @@
                             <div class="flex items-center gap-2">
                                 <input type="text" id="new-category-name" placeholder="Ej. Ahorros" class="flex-1 px-3 py-2 border text-sm rounded-xl outline-none focus:ring-1 focus:ring-emerald-500">
                                 <input type="color" id="new-category-color" value="#8B5CF6" title="Elige un color" class="w-9 h-9 p-0.5 border rounded-xl cursor-pointer bg-slate-50">
-                                <button type="button" onclick="addCategory()" class="bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs font-bold hover:bg-slate-700 btn-press">Crear</button>
+                                <button type="button" onclick="addCategory()" class="bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs font-bold hover:bg-slate-700">Crear</button>
                             </div>
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-500 mb-1">Gestión de Categorías y Presupuestos Mensuales (S/)</label>
                             <div id="categories-management-list" class="space-y-2 max-h-56 overflow-y-auto custom-scroll border p-2 rounded-xl bg-slate-50"></div>
                         </div>
-                        <button type="button" onclick="saveSettings()" class="w-full bg-emerald-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-emerald-700 transition btn-press">Cerrar y Guardar</button>
+                        <button type="button" onclick="saveSettings()" class="w-full bg-emerald-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-emerald-700 transition">Cerrar y Guardar</button>
                     </div>
                 </div>
             </div>
@@ -474,7 +421,7 @@
                 </button>
                 
                 <button onclick="switchTab('add')" id="nav-btn-add" class="flex flex-col items-center">
-                    <div id="add-fab-btn" class="w-12 h-12 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center text-xl shadow-lg shadow-emerald-500/40 -mt-6 border-4 border-slate-100 transition transform btn-press">
+                    <div id="add-fab-btn" class="w-12 h-12 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center text-xl shadow-lg shadow-emerald-500/40 -mt-6 border-4 border-slate-100 transition transform active:scale-95">
                         <i class="fa-solid fa-plus"></i>
                     </div>
                     <span class="text-[10px] text-slate-500 font-semibold mt-0.5">Agregar</span>
@@ -517,8 +464,6 @@
         let currentPhotoBase64 = null;
         let currentTheme = localStorage.getItem('app_theme') || 'emerald';
 
-        let calcExpr = '';
-
         let categories = [
             { name: 'Comida / Alimentos', color: '#EF4444', budget: 300 },
             { name: 'Transporte', color: '#3B82F6', budget: 200 },
@@ -559,55 +504,17 @@
             if (badge) badge.className = `${config.badgeBg} text-white w-8 h-8 rounded-xl flex items-center justify-center transition-colors duration-300`;
             if (brandSub) brandSub.className = `text-[9px] ${config.subText} font-semibold tracking-wide transition-colors duration-300`;
             if (balanceCard) balanceCard.className = `${config.cardBg} text-white p-5 rounded-3xl shadow-lg relative overflow-hidden transition-colors duration-300`;
-            if (fabBtn) fabBtn.className = `w-12 h-12 ${config.fabBg} text-white rounded-full flex items-center justify-center text-xl shadow-lg -mt-6 border-4 border-slate-100 transition transform btn-press`;
+            if (fabBtn) fabBtn.className = `w-12 h-12 ${config.fabBg} text-white rounded-full flex items-center justify-center text-xl shadow-lg -mt-6 border-4 border-slate-100 transition transform active:scale-95`;
         }
 
         window.toggleCalcModal = () => document.getElementById('calc-modal').classList.toggle('hidden');
-
-        window.calcKey = (val) => {
-            const screenExpr = document.getElementById('calc-screen-expr');
-            const screenVal = document.getElementById('calc-screen-val');
-
-            if (val === 'C') {
-                calcExpr = '';
-                screenExpr.textContent = '';
-                screenVal.textContent = '0';
-                return;
-            }
-            if (val === '=') {
-                try {
-                    const result = eval(calcExpr);
-                    screenExpr.textContent = calcExpr;
-                    screenVal.textContent = result;
-                    calcExpr = result.toString();
-                } catch (e) {
-                    screenVal.textContent = 'Error';
-                }
-                return;
-            }
-            calcExpr += val;
-            screenVal.textContent = calcExpr;
+        window.convertUsdToPen = () => {
+            const usd = parseFloat(document.getElementById('calc-usd').value) || 0;
+            document.getElementById('calc-pen').value = (usd * 3.75).toFixed(2);
         };
-
-        window.useCalcResult = () => {
-            const val = parseFloat(document.getElementById('calc-screen-val').textContent);
-            if (!isNaN(val) && val > 0) {
-                document.getElementById('tx-amount').value = val;
-                switchTab('add');
-                toggleCalcModal();
-            }
-        };
-
-        window.quickAddTransaction = async (description, amount, categoryName) => {
-            if (!currentUser) return;
-            const fullDateIso = new Date().toISOString();
-            const txData = { description, amount, type: 'expense', category: categoryName, date: fullDateIso, photo: null };
-            try {
-                const docRef = await addDoc(collection(db, `users/${currentUser.uid}/transactions`), txData);
-                transactions.push({ id: docRef.id, ...txData });
-                renderUI();
-                alert(`¡Registrado rápido con éxito!\n${description}: S/ ${amount.toFixed(2)}`);
-            } catch (err) { alert("Error al registrar gasto rápido."); }
+        window.convertPenToUsd = () => {
+            const pen = parseFloat(document.getElementById('calc-pen').value) || 0;
+            document.getElementById('calc-usd').value = (pen / 3.75).toFixed(2);
         };
 
         window.exportCSV = () => {
@@ -732,8 +639,8 @@
                         <div class="flex justify-between items-center text-[10px]">
                             <span class="font-semibold text-slate-400">${percent}% completado</span>
                             <div class="flex gap-2">
-                                <button onclick="adjustGoalAmount('${g.id}')" class="text-emerald-600 font-bold hover:underline btn-press">+ Abonar</button>
-                                <button onclick="deleteGoal('${g.id}')" class="text-slate-300 hover:text-red-500 btn-press"><i class="fa-solid fa-trash-can"></i></button>
+                                <button onclick="adjustGoalAmount('${g.id}')" class="text-emerald-600 font-bold hover:underline">+ Abonar</button>
+                                <button onclick="deleteGoal('${g.id}')" class="text-slate-300 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button>
                             </div>
                         </div>
                     </div>
@@ -819,11 +726,11 @@
             const expBtn = document.getElementById('btn-type-expense');
             const incBtn = document.getElementById('btn-type-income');
             if (type === 'expense') {
-                expBtn.className = "py-2.5 rounded-xl text-xs font-bold border border-red-500 text-red-500 bg-red-50 transition btn-press";
-                incBtn.className = "py-2.5 rounded-xl text-xs font-bold border border-slate-200 text-slate-400 transition btn-press";
+                expBtn.className = "py-2.5 rounded-xl text-xs font-bold border border-red-500 text-red-500 bg-red-50 transition";
+                incBtn.className = "py-2.5 rounded-xl text-xs font-bold border border-slate-200 text-slate-400 transition";
             } else {
-                incBtn.className = "py-2.5 rounded-xl text-xs font-bold border border-emerald-500 text-emerald-600 bg-emerald-50 transition btn-press";
-                expBtn.className = "py-2.5 rounded-xl text-xs font-bold border border-slate-200 text-slate-400 transition btn-press";
+                incBtn.className = "py-2.5 rounded-xl text-xs font-bold border border-emerald-500 text-emerald-600 bg-emerald-50 transition";
+                expBtn.className = "py-2.5 rounded-xl text-xs font-bold border border-slate-200 text-slate-400 transition";
             }
         };
 
@@ -967,10 +874,10 @@
                         <span class="text-slate-200 font-medium">${tx.description}</span>
                         <div class="flex items-center gap-1.5">
                             <span class="font-bold text-amber-400 mr-1">S/ ${tx.amount.toFixed(2)}</span>
-                            <button onclick="adjustDebtAmount('${tx.id}', 'sub')" title="Restar monto" class="bg-slate-700 hover:bg-slate-600 text-amber-400 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition btn-press"><i class="fa-solid fa-minus"></i></button>
-                            <button onclick="adjustDebtAmount('${tx.id}', 'add')" title="Sumar monto" class="bg-slate-700 hover:bg-slate-600 text-amber-400 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition btn-press"><i class="fa-solid fa-plus"></i></button>
-                            <button onclick="editTx('${tx.id}')" title="Editar" class="text-blue-400 hover:text-blue-300 text-xs transition px-0.5 ml-1 btn-press"><i class="fa-solid fa-pen-to-square"></i></button>
-                            <button onclick="deleteTx('${tx.id}')" title="Eliminar" class="text-slate-400 hover:text-red-400 text-xs transition px-0.5 btn-press"><i class="fa-solid fa-trash-can"></i></button>
+                            <button onclick="adjustDebtAmount('${tx.id}', 'sub')" title="Restar monto" class="bg-slate-700 hover:bg-slate-600 text-amber-400 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition"><i class="fa-solid fa-minus"></i></button>
+                            <button onclick="adjustDebtAmount('${tx.id}', 'add')" title="Sumar monto" class="bg-slate-700 hover:bg-slate-600 text-amber-400 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition"><i class="fa-solid fa-plus"></i></button>
+                            <button onclick="editTx('${tx.id}')" title="Editar" class="text-blue-400 hover:text-blue-300 text-xs transition px-0.5 ml-1"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteTx('${tx.id}')" title="Eliminar" class="text-slate-400 hover:text-red-400 text-xs transition px-0.5"><i class="fa-solid fa-trash-can"></i></button>
                         </div>
                     </div>
                 `;
@@ -1012,7 +919,7 @@
 
             Object.keys(monthlyDataMap).forEach(m => monthlyDataMap[m].net = monthlyDataMap[m].income - monthlyDataMap[m].expense);
 
-            // FILTRADO COMPLETO
+            // FILTRADO COMPLETO (Categoría + Búsqueda por texto)
             const filteredTransactions = timeFilteredTransactions.filter(tx => {
                 const matchCategory = (categoryFilter === 'all') || ((tx.category || 'General') === categoryFilter);
                 const matchSearch = searchQuery === '' || 
@@ -1033,7 +940,8 @@
                 const textColor = getContrastTextColor(catColor);
                 let formattedDate = tx.date ? tx.date.split('T')[0] : '';
                 
-                const photoBadge = tx.photo ? `<span onclick="openImageModal('${tx.photo}')" class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 px-2 py-0.5 rounded-md border border-emerald-300 transition cursor-pointer shrink-0 ml-1.5 btn-press"><i class="fa-solid fa-image text-emerald-600"></i> Ver</span>` : '';
+                // Mantiene el botón de ver imagen alineado en una sola línea al lado del nombre
+                const photoBadge = tx.photo ? `<span onclick="openImageModal('${tx.photo}')" class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 px-2 py-0.5 rounded-md border border-emerald-300 transition cursor-pointer shrink-0 ml-1.5"><i class="fa-solid fa-image text-emerald-600"></i> Ver</span>` : '';
 
                 const itemHTML = `
                     <div class="flex justify-between items-center p-3 bg-slate-50 rounded-2xl border border-slate-100">
@@ -1051,8 +959,8 @@
                         </div>
                         <div class="flex items-center space-x-2 shrink-0">
                             <span class="font-extrabold text-xs ${tx.type === 'income' ? 'text-emerald-600' : 'text-slate-800'}">${tx.type === 'income' ? '+' : '-'} S/ ${tx.amount.toFixed(2)}</span>
-                            <button onclick="editTx('${tx.id}')" title="Modificar" class="text-blue-400 hover:text-blue-600 text-xs pl-1 btn-press"><i class="fa-solid fa-pen-to-square"></i></button>
-                            <button onclick="deleteTx('${tx.id}')" title="Eliminar" class="text-slate-300 hover:text-red-500 text-xs pl-1 btn-press"><i class="fa-solid fa-trash-can"></i></button>
+                            <button onclick="editTx('${tx.id}')" title="Modificar" class="text-blue-400 hover:text-blue-600 text-xs pl-1"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteTx('${tx.id}')" title="Eliminar" class="text-slate-300 hover:text-red-500 text-xs pl-1"><i class="fa-solid fa-trash-can"></i></button>
                         </div>
                     </div>
                 `;
@@ -1117,8 +1025,7 @@
                         backgroundColor: 'rgba(59, 130, 246, 0.1)',
                         fill: true,
                         tension: 0.3,
-                        pointRadius: 4,
-                        pointHoverRadius: 6
+                        pointRadius: 3
                     }]
                 },
                 options: {
@@ -1196,7 +1103,7 @@
                     <div class="flex items-center justify-between gap-2">
                         <input type="color" value="${cat.color || '#3B82F6'}" id="cat-color-${index}" onchange="updateCategoryColor(${index})" class="w-7 h-7 p-0.5 border rounded-md cursor-pointer bg-slate-50">
                         <input type="text" value="${cat.name}" id="cat-input-${index}" onchange="updateCategoryName(${index})" class="flex-1 px-2 py-1 bg-slate-50 border rounded-md outline-none font-medium text-xs">
-                        <button type="button" onclick="deleteCategory(${index})" class="text-red-500 hover:text-red-700 px-2 btn-press"><i class="fa-solid fa-trash-can"></i></button>
+                        <button type="button" onclick="deleteCategory(${index})" class="text-red-500 hover:text-red-700 px-2"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
                     <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-100">
                         <span>Límite Presupuesto (S/):</span>
@@ -1244,4 +1151,177 @@
         };
 
         async function saveSettingsToCloud() {
-            const app
+            const appName = document.getElementById('setting-app-name').value.trim() || "Mis Finanzas";
+            try {
+                await setDoc(doc(db, `users_config/${currentUser.uid}`), { appName, categories }, { merge: true });
+                document.getElementById('app-brand-name').textContent = appName;
+            } catch (err) { console.error(err); }
+        }
+
+        window.saveSettings = async () => {
+            await saveSettingsToCloud();
+            toggleSettingsModal();
+            alert("¡Configuración guardada!");
+        };
+
+        document.getElementById('transaction-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const editId = document.getElementById('tx-edit-id').value;
+            const description = document.getElementById('tx-description').value.trim() || "Sin descripción";
+            const amount = parseFloat(document.getElementById('tx-amount').value);
+            const category = document.getElementById('tx-category').value;
+            const dateVal = document.getElementById('tx-date').value;
+
+            let fullDateIso;
+            if (editId) {
+                const existingTx = transactions.find(t => t.id === editId);
+                fullDateIso = existingTx ? existingTx.date : new Date().toISOString();
+            } else {
+                const now = new Date();
+                const selectedDate = new Date(dateVal + 'T00:00:00');
+                selectedDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
+                fullDateIso = selectedDate.toISOString();
+            }
+
+            const txData = { description, amount, type: currentType, category, date: fullDateIso, photo: currentPhotoBase64 || null };
+            try {
+                if (editId) {
+                    await updateDoc(doc(db, `users/${currentUser.uid}/transactions/${editId}`), txData);
+                    const index = transactions.findIndex(t => t.id === editId);
+                    if (index !== -1) transactions[index] = { id: editId, ...txData };
+                    alert("¡Transacción modificada con éxito!");
+                    cancelEdit();
+                } else {
+                    const docRef = await addDoc(collection(db, `users/${currentUser.uid}/transactions`), txData);
+                    transactions.push({ id: docRef.id, ...txData });
+                    document.getElementById('transaction-form').reset();
+                    document.getElementById('tx-date').valueAsDate = new Date();
+                    removeTxPhoto();
+                    setTxType('expense');
+                }
+                renderUI();
+                switchTab('dashboard');
+            } catch (err) { alert("Error al guardar la transacción."); }
+        });
+
+        window.editTx = (id) => {
+            const tx = transactions.find(t => t.id === id);
+            if (!tx) return;
+            document.getElementById('tx-edit-id').value = tx.id;
+            document.getElementById('tx-amount').value = tx.amount;
+            renderCategories();
+            document.getElementById('tx-category').value = tx.category || categories[0].name;
+            document.getElementById('tx-date').value = tx.date ? tx.date.split('T')[0] : '';
+            document.getElementById('tx-description').value = tx.description;
+            setTxType(tx.type);
+            if (tx.photo) {
+                currentPhotoBase64 = tx.photo;
+                document.getElementById('photo-preview-img').src = currentPhotoBase64;
+                document.getElementById('photo-upload-box').classList.add('hidden');
+                document.getElementById('photo-preview-container').classList.remove('hidden');
+            } else { removeTxPhoto(); }
+            document.getElementById('form-title').textContent = "MODIFICAR REGISTRO";
+            document.getElementById('form-submit-btn').textContent = "Actualizar Transacción";
+            document.getElementById('form-cancel-btn').classList.remove('hidden');
+            switchTab('add');
+        };
+
+        window.cancelEdit = () => {
+            document.getElementById('transaction-form').reset();
+            document.getElementById('tx-edit-id').value = '';
+            document.getElementById('tx-date').valueAsDate = new Date();
+            removeTxPhoto();
+            setTxType('expense');
+            document.getElementById('form-title').textContent = "NUEVO REGISTRO";
+            document.getElementById('form-submit-btn').textContent = "Guardar Transacción";
+            document.getElementById('form-cancel-btn').classList.add('hidden');
+            switchTab('dashboard');
+        };
+
+        window.deleteTx = async (id, askConfirm = true) => {
+            if (askConfirm && !confirm("¿Deseas eliminar este registro?")) return;
+            try {
+                await deleteDoc(doc(db, `users/${currentUser.uid}/transactions/${id}`));
+                transactions = transactions.filter(t => t.id !== id);
+                renderUI();
+            } catch (err) { alert("Error al eliminar."); }
+        };
+
+        window.startMasterVoiceAssistant = () => {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) { alert("Tu navegador no soporta voz."); return; }
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'es-PE';
+            recognition.interimResults = false;
+            const micIcon = document.getElementById('voice-mic-icon'), subtext = document.getElementById('voice-subtext');
+            recognition.onstart = () => { micIcon.className = "fa-solid fa-spinner fa-spin"; subtext.textContent = "Escuchando orden..."; };
+            recognition.onresult = async (event) => { await processVoiceCommand(event.results[0][0].transcript); };
+            recognition.onerror = () => { alert("No se reconoció la voz."); };
+            recognition.onend = () => { micIcon.className = "fa-solid fa-microphone"; subtext.textContent = "Toca el micro y habla"; };
+            recognition.start();
+        };
+
+        async function processVoiceCommand(rawText) {
+            const textNormalized = rawText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+            if (textNormalized.includes('categoria') || textNormalized.includes('crear') || textNormalized.includes('anadir')) {
+                let cleanCatName = rawText.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/crear|anadir|añadir|agregar|nueva|nuevo|categoria|categoría|de|llamada|que se llame/gi, '').trim();
+                if (cleanCatName.length > 0) {
+                    cleanCatName = cleanCatName.charAt(0).toUpperCase() + cleanCatName.slice(1).toLowerCase();
+                    if (!categories.some(c => c.name.toLowerCase() === cleanCatName.toLowerCase())) {
+                        categories.push({ name: cleanCatName, color: '#3B82F6', budget: 100 });
+                        renderCategories(); renderCategoriesManagement(); await saveSettingsToCloud();
+                        alert(`¡Categoría "${cleanCatName}" creada con éxito!`);
+                    }
+                    return;
+                }
+            }
+            let txType = (textNormalized.includes('ingreso') || textNormalized.includes('ganancia') || textNormalized.includes('cobro')) ? 'income' : 'expense';
+            const numbers = rawText.match(/\d+([.,]\d+)?/g);
+            if (!numbers) { alert("No detecté el monto."); return; }
+            const amount = parseFloat(numbers[0].replace(',', '.'));
+            let description = rawText.replace(/gasto|ingreso|de|en|por|soles|sol|ganancia|gané|cobro|\d+([.,]\d+)?/gi, '').trim() || "Movimiento por voz";
+            description = description.charAt(0).toUpperCase() + description.slice(1);
+            let matchedCategory = categories[0].name;
+            for (let cat of categories) {
+                if (textNormalized.includes(cat.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").split('/')[0].trim())) {
+                    matchedCategory = cat.name; break;
+                }
+            }
+            const newTx = { description, amount, type: txType, category: matchedCategory, date: new Date().toISOString(), photo: null };
+            try {
+                const docRef = await addDoc(collection(db, `users/${currentUser.uid}/transactions`), newTx);
+                transactions.push({ id: docRef.id, ...newTx });
+                renderUI(); switchTab('dashboard');
+                alert(`¡Registrado con éxito!\n${txType === 'income' ? 'Ingreso' : 'Gasto'}: S/ ${amount.toFixed(2)} (${description})`);
+            } catch (err) { alert("Error al guardar en la nube."); }
+        }
+
+        window.exportJSON = () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ transactions, categories, savingsGoals }));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", "misfinanzas_respaldo.json");
+            dlAnchorElem.click();
+        };
+
+        window.importJSON = async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.transactions) {
+                        for (let t of data.transactions) { delete t.id; await addDoc(collection(db, `users/${currentUser.uid}/transactions`), t); }
+                    }
+                    if (data.savingsGoals) {
+                        for (let g of data.savingsGoals) { delete g.id; await addDoc(collection(db, `users/${currentUser.uid}/savingsGoals`), g); }
+                    }
+                    alert("¡Datos importados con éxito!"); loadUserData();
+                } catch (err) { alert("Archivo no válido"); }
+            };
+            reader.readAsText(file);
+        };
+    </script>
+</body>
+</html>
