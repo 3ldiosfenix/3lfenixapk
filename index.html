@@ -1194,27 +1194,22 @@
             alert("¡Configuración guardada!");
         };
 
-        // CORRECCIÓN DE FECHA Y HORA LOCAL PARA EVITAR DESFASES Y ORDENAR CORRECTAMENTE
+        // CORRECCIÓN EXACTA DE LA FECHA AL EDITAR O CREAR TRANSACCIONES
         document.getElementById('transaction-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const editId = document.getElementById('tx-edit-id').value;
             const description = document.getElementById('tx-description').value.trim() || "Sin descripción";
             const amount = parseFloat(document.getElementById('tx-amount').value);
             const category = document.getElementById('tx-category').value;
-            const dateVal = document.getElementById('tx-date').value; // Formato YYYY-MM-DD
+            const dateVal = document.getElementById('tx-date').value; // Toma el valor YYYY-MM-DD del input de fecha
 
-            let fullDateIso;
-            if (editId) {
-                const existingTx = transactions.find(t => t.id === editId);
-                fullDateIso = existingTx ? existingTx.date : new Date().toISOString();
-            } else {
-                const now = new Date();
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                const seconds = String(now.getSeconds()).padStart(2, '0');
-                // Guardamos combinando la fecha exacta elegida con la hora actual local en formato ISO local
-                fullDateIso = `${dateVal}T${hours}:${minutes}:${seconds}`;
-            }
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            // Asignamos formalmente la fecha elegida en el calendario junto con la hora actual local
+            const fullDateIso = `${dateVal}T${hours}:${minutes}:${seconds}`;
 
             const txData = { description, amount, type: currentType, category, date: fullDateIso, photo: currentPhotoBase64 || null };
             try {
