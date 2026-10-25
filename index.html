@@ -85,7 +85,7 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-2 text-slate-300">
-                    <button onclick="toggleCalcModal()" title="Calculadora y Conversor USD" class="hover:text-emerald-400 text-sm p-1"><i class="fa-solid fa-calculator"></i></button>
+                    <button onclick="toggleCalcModal()" title="Calculadora Científica e Interactiva" class="hover:text-emerald-400 text-sm p-1"><i class="fa-solid fa-calculator"></i></button>
                     <button onclick="toggleSettingsModal()" title="Configuración y Categorías" class="hover:text-emerald-400 text-sm p-1"><i class="fa-solid fa-gear"></i></button>
                     <button onclick="exportCSV()" title="Exportar a Excel (CSV)" class="hover:text-emerald-400 text-sm p-1"><i class="fa-solid fa-file-excel"></i></button>
                     <button onclick="exportJSON()" title="Exportar Respaldo JSON" class="hover:text-emerald-400 text-sm p-1"><i class="fa-solid fa-download"></i></button>
@@ -270,7 +270,10 @@
                             <button type="button" id="btn-type-income" onclick="setTxType('income')" class="py-2.5 rounded-xl text-xs font-bold border border-slate-200 text-slate-400 transition">Ingreso</button>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Monto (S/)</label>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="block text-[10px] font-bold uppercase text-slate-400">Monto (S/)</label>
+                                <button type="button" onclick="toggleCalcModal()" class="text-[11px] text-emerald-600 font-bold hover:underline flex items-center"><i class="fa-solid fa-calculator mr-1"></i> Abrir Calculadora</button>
+                            </div>
                             <input type="number" step="0.01" id="tx-amount" placeholder="0.00" required class="w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500">
                         </div>
                         <div>
@@ -334,30 +337,52 @@
                 </div>
             </main>
 
-            <!-- Modal Calculadora y Conversor USD -->
-            <div id="calc-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                <div class="bg-white w-full max-w-sm p-5 rounded-3xl shadow-2xl space-y-4">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-sm font-bold text-slate-800"><i class="fa-solid fa-calculator text-emerald-600 mr-1.5"></i> Conversor USD / PEN</h3>
-                        <button onclick="toggleCalcModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-                    </div>
-                    
-                    <div class="space-y-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
-                        <div class="flex justify-between items-center text-xs">
-                            <span class="font-bold text-slate-500">Tipo de cambio aprox:</span>
-                            <span class="font-bold text-emerald-600">1 USD = 3.75 PEN</span>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Dólares (USD)</label>
-                            <input type="number" id="calc-usd" oninput="convertUsdToPen()" placeholder="0.00" class="w-full px-3 py-2 bg-white border text-sm rounded-xl outline-none font-bold text-slate-700">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Soles (PEN)</label>
-                            <input type="number" id="calc-pen" oninput="convertPenToUsd()" placeholder="0.00" class="w-full px-3 py-2 bg-white border text-sm rounded-xl outline-none font-bold text-emerald-600">
-                        </div>
+            <!-- Modal Calculadora Científica e Interactiva Flotante -->
+            <div id="calc-modal" class="hidden fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div class="bg-slate-900 text-white w-full max-w-xs p-5 rounded-3xl shadow-2xl space-y-4 border border-slate-800">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                        <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center"><i class="fa-solid fa-calculator mr-1.5"></i> Calculadora Interactiva</h3>
+                        <button onclick="toggleCalcModal()" class="text-slate-400 hover:text-white text-sm"><i class="fa-solid fa-xmark"></i></button>
                     </div>
 
-                    <button type="button" onclick="toggleCalcModal()" class="w-full bg-slate-800 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-slate-700 transition">Cerrar</button>
+                    <!-- Pantalla de la calculadora -->
+                    <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 text-right space-y-1">
+                        <div id="calc-history" class="text-[10px] text-slate-500 h-4 truncate">0</div>
+                        <div id="calc-display" class="text-2xl font-black text-emerald-400 truncate">0</div>
+                    </div>
+
+                    <!-- Teclado Científico / Básico -->
+                    <div class="grid grid-cols-4 gap-2 text-xs font-bold">
+                        <button onclick="calcClear()" class="bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 p-2.5 rounded-xl transition">AC</button>
+                        <button onclick="calcBackSpace()" class="bg-slate-800 text-slate-300 hover:bg-slate-700 p-2.5 rounded-xl transition"><i class="fa-solid fa-delete-left"></i></button>
+                        <button onclick="calcAppend('%')" class="bg-slate-800 text-slate-300 hover:bg-slate-700 p-2.5 rounded-xl transition">%</button>
+                        <button onclick="calcAppend('/')" class="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 p-2.5 rounded-xl transition">÷</button>
+
+                        <button onclick="calcAppend('Math.sqrt(')" class="bg-slate-800 text-amber-400 hover:bg-slate-700 p-2.5 rounded-xl transition">√</button>
+                        <button onclick="calcAppend('7')" class="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-xl transition">7</button>
+                        <button onclick="calcAppend('8')" class="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-xl transition">8</button>
+                        <button onclick="calcAppend('9')" class="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-xl transition">9</button>
+
+                        <button onclick="calcAppend('**2')" class="bg-slate-800 text-amber-400 hover:bg-slate-700 p-2.5 rounded-xl transition">x²</button>
+                        <button onclick="calcAppend('4')" class="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-xl transition">4</button>
+                        <button onclick="calcAppend('5')" class="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-xl transition">5</button>
+                        <button onclick="calcAppend('6')" class="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-xl transition">6</button>
+
+                        <button onclick="calcAppend('-')" class="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 p-2.5 rounded-xl transition">-</button>
+                        <button onclick="calcAppend('1')" class="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-xl transition">1</button>
+                        <button onclick="calcAppend('2')" class="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-xl transition">2</button>
+                        <button onclick="calcAppend('3')" class="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-xl transition">3</button>
+
+                        <button onclick="calcAppend('+')" class="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 p-2.5 rounded-xl transition">+</button>
+                        <button onclick="calcAppend('0')" class="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-xl transition col-span-2">0</button>
+                        <button onclick="calcAppend('.')" class="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-xl transition">.</button>
+                        <button onclick="calcEvaluate()" class="bg-emerald-600 hover:bg-emerald-700 text-white p-2.5 rounded-xl transition">=</button>
+                    </div>
+
+                    <!-- Botón rápido para enviar al formulario -->
+                    <button type="button" onclick="sendCalcToForm()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl text-xs font-bold transition shadow-lg shadow-emerald-500/20">
+                        <i class="fa-solid fa-paper-plane mr-1.5"></i> Enviar resultado al gasto
+                    </button>
                 </div>
             </div>
 
@@ -464,6 +489,10 @@
         let currentPhotoBase64 = null;
         let currentTheme = localStorage.getItem('app_theme') || 'emerald';
 
+        // Variables de la calculadora
+        let calcInput = "0";
+        let calcHistoryStr = "";
+
         let categories = [
             { name: 'Comida / Alimentos', color: '#EF4444', budget: 300 },
             { name: 'Transporte', color: '#3B82F6', budget: 200 },
@@ -507,14 +536,63 @@
             if (fabBtn) fabBtn.className = `w-12 h-12 ${config.fabBg} text-white rounded-full flex items-center justify-center text-xl shadow-lg -mt-6 border-4 border-slate-100 transition transform active:scale-95`;
         }
 
-        window.toggleCalcModal = () => document.getElementById('calc-modal').classList.toggle('hidden');
-        window.convertUsdToPen = () => {
-            const usd = parseFloat(document.getElementById('calc-usd').value) || 0;
-            document.getElementById('calc-pen').value = (usd * 3.75).toFixed(2);
+        // LÓGICA DE LA CALCULADORA CIENTÍFICA E INTERACTIVA
+        window.toggleCalcModal = () => {
+            document.getElementById('calc-modal').classList.toggle('hidden');
         };
-        window.convertPenToUsd = () => {
-            const pen = parseFloat(document.getElementById('calc-pen').value) || 0;
-            document.getElementById('calc-usd').value = (pen / 3.75).toFixed(2);
+
+        window.calcClear = () => {
+            calcInput = "0";
+            calcHistoryStr = "";
+            updateCalcDisplay();
+        };
+
+        window.calcBackSpace = () => {
+            if (calcInput.length > 1) {
+                calcInput = calcInput.slice(0, -1);
+            } else {
+                calcInput = "0";
+            }
+            updateCalcDisplay();
+        };
+
+        window.calcAppend = (val) => {
+            if (calcInput === "0" && !isNaN(val)) {
+                calcInput = val;
+            } else {
+                calcInput += val;
+            }
+            updateCalcDisplay();
+        };
+
+        window.calcEvaluate = () => {
+            try {
+                calcHistoryStr = calcInput;
+                // Reemplazamos símbolos visuales por sintaxis evaluable de JS
+                let evaluated = eval(calcInput.replace('×', '*').replace('÷', '/'));
+                calcInput = Number(evaluated.toFixed(2)).toString();
+                updateCalcDisplay();
+            } catch (e) {
+                calcInput = "Error";
+                updateCalcDisplay();
+            }
+        };
+
+        function updateCalcDisplay() {
+            document.getElementById('calc-display').textContent = calcInput;
+            document.getElementById('calc-history').textContent = calcHistoryStr;
+        }
+
+        window.sendCalcToForm = () => {
+            let finalVal = parseFloat(calcInput);
+            if (isNaN(finalVal)) {
+                try {
+                    finalVal = eval(calcInput);
+                } catch(e) { finalVal = 0; }
+            }
+            document.getElementById('tx-amount').value = finalVal.toFixed(2);
+            toggleCalcModal();
+            switchTab('add');
         };
 
         window.exportCSV = () => {
@@ -940,7 +1018,6 @@
                 const textColor = getContrastTextColor(catColor);
                 let formattedDate = tx.date ? tx.date.split('T')[0] : '';
                 
-                // Botón de ver imagen integrado fluidamente al lado del nombre o descripción
                 const photoBadge = tx.photo ? `<span onclick="openImageModal('${tx.photo}')" class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 px-2 py-0.5 rounded-md border border-emerald-300 transition cursor-pointer shrink-0 ml-1.5"><i class="fa-solid fa-image text-emerald-600"></i> Ver</span>` : '';
 
                 const itemHTML = `
@@ -1306,7 +1383,7 @@
 
         window.importJSON = async (event) => {
             const file = event.target.files[0];
-            if (!file) return;
+            if (-!file) return; // (Validación por si acaso)
             const reader = new FileReader();
             reader.onload = async function(e) {
                 try {
