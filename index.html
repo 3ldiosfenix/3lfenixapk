@@ -940,7 +940,7 @@
                 const textColor = getContrastTextColor(catColor);
                 let formattedDate = tx.date ? tx.date.split('T')[0] : '';
                 
-                // Mantiene el botón de ver imagen alineado en una sola línea al lado del nombre
+                // Botón de ver imagen integrado fluidamente al lado del nombre o descripción
                 const photoBadge = tx.photo ? `<span onclick="openImageModal('${tx.photo}')" class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 px-2 py-0.5 rounded-md border border-emerald-300 transition cursor-pointer shrink-0 ml-1.5"><i class="fa-solid fa-image text-emerald-600"></i> Ver</span>` : '';
 
                 const itemHTML = `
