@@ -489,7 +489,6 @@
         let currentPhotoBase64 = null;
         let currentTheme = localStorage.getItem('app_theme') || 'emerald';
 
-        // Variables de la calculadora
         let calcInput = "0";
         let calcHistoryStr = "";
 
@@ -536,70 +535,32 @@
             if (fabBtn) fabBtn.className = `w-12 h-12 ${config.fabBg} text-white rounded-full flex items-center justify-center text-xl shadow-lg -mt-6 border-4 border-slate-100 transition transform active:scale-95`;
         }
 
-        // LÓGICA DE LA CALCULADORA CIENTÍFICA E INTERACTIVA
-        window.toggleCalcModal = () => {
-            document.getElementById('calc-modal').classList.toggle('hidden');
-        };
-
-        window.calcClear = () => {
-            calcInput = "0";
-            calcHistoryStr = "";
-            updateCalcDisplay();
-        };
-
-        window.calcBackSpace = () => {
-            if (calcInput.length > 1) {
-                calcInput = calcInput.slice(0, -1);
-            } else {
-                calcInput = "0";
-            }
-            updateCalcDisplay();
-        };
-
-        window.calcAppend = (val) => {
-            if (calcInput === "0" && !isNaN(val)) {
-                calcInput = val;
-            } else {
-                calcInput += val;
-            }
-            updateCalcDisplay();
-        };
-
+        window.toggleCalcModal = () => document.getElementById('calc-modal').classList.toggle('hidden');
+        window.calcClear = () => { calcInput = "0"; calcHistoryStr = ""; updateCalcDisplay(); };
+        window.calcBackSpace = () => { calcInput = calcInput.length > 1 ? calcInput.slice(0, -1) : "0"; updateCalcDisplay(); };
+        window.calcAppend = (val) => { calcInput = (calcInput === "0" && !isNaN(val)) ? val : calcInput + val; updateCalcDisplay(); };
         window.calcEvaluate = () => {
             try {
                 calcHistoryStr = calcInput;
-                // Reemplazamos símbolos visuales por sintaxis evaluable de JS
                 let evaluated = eval(calcInput.replace('×', '*').replace('÷', '/'));
                 calcInput = Number(evaluated.toFixed(2)).toString();
                 updateCalcDisplay();
-            } catch (e) {
-                calcInput = "Error";
-                updateCalcDisplay();
-            }
+            } catch (e) { calcInput = "Error"; updateCalcDisplay(); }
         };
-
         function updateCalcDisplay() {
             document.getElementById('calc-display').textContent = calcInput;
             document.getElementById('calc-history').textContent = calcHistoryStr;
         }
-
         window.sendCalcToForm = () => {
             let finalVal = parseFloat(calcInput);
-            if (isNaN(finalVal)) {
-                try {
-                    finalVal = eval(calcInput);
-                } catch(e) { finalVal = 0; }
-            }
+            if (isNaN(finalVal)) { try { finalVal = eval(calcInput); } catch(e) { finalVal = 0; } }
             document.getElementById('tx-amount').value = finalVal.toFixed(2);
             toggleCalcModal();
             switchTab('add');
         };
 
         window.exportCSV = () => {
-            if (transactions.length === 0) {
-                alert("No hay transacciones para exportar.");
-                return;
-            }
+            if (transactions.length === 0) { alert("No hay transacciones para exportar."); return; }
             let csvContent = "data:text/csv;charset=utf-8,ID,Descripcion,Tipo,Categoria,Monto,Fecha\r\n";
             transactions.forEach(t => {
                 const row = [t.id, `"${t.description}"`, t.type, `"${t.category}"`, t.amount, t.date];
@@ -633,16 +594,10 @@
             const inputVal = prompt(promptMsg, "0.00");
             if (inputVal === null) return;
             const amountToAdjust = parseFloat(inputVal.replace(',', '.'));
-            if (isNaN(amountToAdjust) || amountToAdjust <= 0) {
-                alert("Por favor ingresa un monto válido mayor a 0.");
-                return;
-            }
+            if (isNaN(amountToAdjust) || amountToAdjust <= 0) { alert("Por favor ingresa un monto válido mayor a 0."); return; }
             let newAmount = mode === 'add' ? tx.amount + amountToAdjust : tx.amount - amountToAdjust;
             if (newAmount <= 0) {
-                if (confirm(`La deuda queda en S/ 0.00. ¿Deseas eliminar este registro?`)) {
-                    await deleteTx(id, false);
-                    return;
-                }
+                if (confirm(`La deuda queda en S/ 0.00. ¿Deseas eliminar este registro?`)) { await deleteTx(id, false); return; }
                 newAmount = 0;
             }
             try {
@@ -650,9 +605,7 @@
                 const index = transactions.findIndex(t => t.id === id);
                 if (index !== -1) transactions[index].amount = newAmount;
                 renderUI();
-            } catch (err) {
-                alert("Error al actualizar la deuda.");
-            }
+            } catch (err) { alert("Error al actualizar la deuda."); }
         };
 
         window.addQuickGoal = async () => {
@@ -997,7 +950,7 @@
 
             Object.keys(monthlyDataMap).forEach(m => monthlyDataMap[m].net = monthlyDataMap[m].income - monthlyDataMap[m].expense);
 
-            // FILTRADO COMPLETO (Categoría + Búsqueda por texto)
+            // FILTRADO Y ORDENAMIENTO ESTRICTO POR FECHA Y HORA (MÁS RECIENTE PRIMERO)
             const filteredTransactions = timeFilteredTransactions.filter(tx => {
                 const matchCategory = (categoryFilter === 'all') || ((tx.category || 'General') === categoryFilter);
                 const matchSearch = searchQuery === '' || 
@@ -1241,13 +1194,14 @@
             alert("¡Configuración guardada!");
         };
 
+        // CORRECCIÓN DE FECHA Y HORA LOCAL PARA EVITAR DESFASES Y ORDENAR CORRECTAMENTE
         document.getElementById('transaction-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const editId = document.getElementById('tx-edit-id').value;
             const description = document.getElementById('tx-description').value.trim() || "Sin descripción";
             const amount = parseFloat(document.getElementById('tx-amount').value);
             const category = document.getElementById('tx-category').value;
-            const dateVal = document.getElementById('tx-date').value;
+            const dateVal = document.getElementById('tx-date').value; // Formato YYYY-MM-DD
 
             let fullDateIso;
             if (editId) {
@@ -1255,9 +1209,11 @@
                 fullDateIso = existingTx ? existingTx.date : new Date().toISOString();
             } else {
                 const now = new Date();
-                const selectedDate = new Date(dateVal + 'T00:00:00');
-                selectedDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
-                fullDateIso = selectedDate.toISOString();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                // Guardamos combinando la fecha exacta elegida con la hora actual local en formato ISO local
+                fullDateIso = `${dateVal}T${hours}:${minutes}:${seconds}`;
             }
 
             const txData = { description, amount, type: currentType, category, date: fullDateIso, photo: currentPhotoBase64 || null };
@@ -1364,7 +1320,14 @@
                     matchedCategory = cat.name; break;
                 }
             }
-            const newTx = { description, amount, type: txType, category: matchedCategory, date: new Date().toISOString(), photo: null };
+            const now = new Date();
+            const todayStr = now.toISOString().split('T')[0];
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const voiceDateIso = `${todayStr}T${hours}:${minutes}:${seconds}`;
+
+            const newTx = { description, amount, type: txType, category: matchedCategory, date: voiceDateIso, photo: null };
             try {
                 const docRef = await addDoc(collection(db, `users/${currentUser.uid}/transactions`), newTx);
                 transactions.push({ id: docRef.id, ...newTx });
@@ -1383,7 +1346,7 @@
 
         window.importJSON = async (event) => {
             const file = event.target.files[0];
-            if (-!file) return; // (Validación por si acaso)
+            if (!file) return;
             const reader = new FileReader();
             reader.onload = async function(e) {
                 try {
