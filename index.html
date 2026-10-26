@@ -345,7 +345,7 @@
                 </div>
             </main>
 
-            <!-- Sección de Mantenimiento y Alertas de Moto (ESTRUCTURA NUEVA) -->
+            <!-- Sección de Mantenimiento y Alertas de Moto -->
             <main id="tab-moto" class="hidden p-4 space-y-4">
                 <div class="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-4 transition-colors duration-300">
                     <div class="flex justify-between items-center">
@@ -400,16 +400,33 @@
                         </div>
                     </div>
 
-                    <!-- 2. BLOQUE INFERIOR: Mantenimiento por km -->
+                    <!-- 2. BLOQUE INFERIOR: Mantenimiento por km con Próximos Mantenimientos -->
                     <div class="bg-slate-900 text-white p-4 rounded-2xl space-y-3 shadow-md border border-slate-800">
                         <div class="flex justify-between items-center">
                             <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider"><i class="fa-solid fa-gauge mr-1"></i> Mantenimiento por km</h4>
                             <span id="moto-km-status" class="text-[9px] font-bold px-2 py-0.5 rounded-full inline-block bg-slate-800 text-slate-300">Sin km actual</span>
                         </div>
-                        <p class="text-[10px] text-slate-400">Controla el kilometraje de tus mantenimientos (aceite, cadena, bujía, etc.).</p>
+                        <p class="text-[10px] text-slate-400">Ingresa tu kilometraje actual para calcular automáticamente tus próximos mantenimientos.</p>
                         <div class="flex gap-2">
-                            <input type="number" id="moto-km-input" placeholder="Ej. 12500" class="w-full bg-slate-800 border border-slate-700 text-white text-xs px-3 py-2 rounded-xl outline-none focus:ring-1 focus:ring-amber-400">
+                            <input type="number" id="moto-km-input" placeholder="Ej. 21616" class="w-full bg-slate-800 border border-slate-700 text-white text-xs px-3 py-2 rounded-xl outline-none focus:ring-1 focus:ring-amber-400">
                             <button type="button" onclick="saveMotoKm()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs px-4 py-2 rounded-xl font-bold transition">Guardar</button>
+                        </div>
+
+                        <!-- Panel de Próximos Mantenimientos (Estilo Mecánico) -->
+                        <div id="moto-proximos-mantenimientos" class="hidden mt-3 pt-3 border-t border-slate-800 space-y-2">
+                            <div class="flex items-center gap-1.5 text-amber-400 font-bold text-xs uppercase tracking-wider">
+                                <i class="fa-solid fa-calendar-days"></i> Próximos Mantenimientos
+                            </div>
+                            <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700/80 space-y-2 text-xs">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-slate-300 font-medium">• Cambio de aceite:</span>
+                                    <span id="prox-aceite" class="font-bold text-emerald-400">-- km</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-slate-300 font-medium">• Afinamiento integral:</span>
+                                    <span id="prox-afinamiento" class="font-bold text-emerald-400">-- km</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -825,13 +842,24 @@
         function updateMotoKmUI() {
             const statusEl = document.getElementById('moto-km-status');
             const inputEl = document.getElementById('moto-km-input');
+            const proximosBox = document.getElementById('moto-proximos-mantenimientos');
+            
             if (currentMotoKm !== null && currentMotoKm !== undefined) {
                 statusEl.textContent = `${currentMotoKm} km`;
                 statusEl.className = "text-[9px] font-bold px-2 py-0.5 rounded-full inline-block bg-amber-500/20 text-amber-400 border border-amber-500/30";
                 if (inputEl) inputEl.value = currentMotoKm;
+
+                // Cálculos automáticos estilo mecánico
+                const aceiteKm = currentMotoKm + 2500;
+                const afinamientoKm = currentMotoKm + 5000;
+
+                document.getElementById('prox-aceite').textContent = `${aceiteKm.toLocaleString()} km (dentro de 2,500 km)`;
+                document.getElementById('prox-afinamiento').textContent = `${afinamientoKm.toLocaleString()} km (dentro de 5,000 km)`;
+                proximosBox.classList.remove('hidden');
             } else {
                 statusEl.textContent = "Sin km actual";
                 statusEl.className = "text-[9px] font-bold px-2 py-0.5 rounded-full inline-block bg-slate-800 text-slate-300";
+                proximosBox.classList.add('hidden');
             }
         }
 
