@@ -71,11 +71,13 @@
                         <span class="text-[9px] text-emerald-400 font-semibold tracking-wide">by 3ldiosfenix</span>
                     </div>
                 </div>
-                <div class="flex items-center space-x-1 text-slate-300">
+                <div class="flex items-center space-x-0.5 text-slate-300">
                     <button onclick="switchTab('moto')" title="Moto" class="hover:text-emerald-400 text-sm p-1.5"><i class="fa-solid fa-motorcycle"></i></button>
                     <button onclick="switchTab('gallery')" title="Galería" class="hover:text-emerald-400 text-sm p-1.5"><i class="fa-solid fa-images"></i></button>
                     <button onclick="toggleDarkMode()" title="Tema" class="hover:text-emerald-400 text-sm p-1.5"><i id="theme-toggle-icon" class="fa-solid fa-moon"></i></button>
-                    <button onclick="logout()" title="Salir" class="text-red-400 hover:text-red-300 text-sm p-1.5 ml-1"><i class="fa-solid fa-right-from-bracket"></i></button>
+                    <button onclick="toggleCalcModal()" title="Calculadora" class="hover:text-emerald-400 text-sm p-1.5"><i class="fa-solid fa-calculator"></i></button>
+                    <button onclick="toggleSettingsModal()" title="Configuración" class="hover:text-emerald-400 text-sm p-1.5"><i class="fa-solid fa-gear"></i></button>
+                    <button onclick="logout()" title="Salir" class="text-red-400 hover:text-red-300 text-sm p-1.5 ml-0.5"><i class="fa-solid fa-right-from-bracket"></i></button>
                 </div>
             </header>
 
@@ -114,12 +116,54 @@
                     </div>
                 </div>
 
+                <!-- Deudas -->
+                <div class="bg-slate-900 text-white p-4 rounded-3xl shadow-md border border-slate-800 space-y-2">
+                    <div class="flex justify-between items-center px-1">
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-xs font-bold text-amber-400 uppercase"><i class="fa-solid fa-address-book mr-1.5"></i> AGENDA DE DEUDAS</h3>
+                            <button onclick="addQuickDebt()" class="bg-amber-400 hover:bg-amber-500 text-slate-900 w-5 h-5 rounded-full flex items-center justify-center text-xs font-black"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                        <span id="total-debt-amount" class="text-xs font-extrabold text-amber-400">S/ 0.00</span>
+                    </div>
+                    <div id="debtors-list" class="space-y-1.5 pt-1 max-h-36 overflow-y-auto custom-scroll pr-1"></div>
+                </div>
+
+                <!-- Metas de Ahorro -->
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-3">
+                    <div class="flex justify-between items-center px-1">
+                        <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase"><i class="fa-solid fa-piggy-bank text-emerald-500 mr-1.5"></i> METAS DE AHORRO</h3>
+                        <button onclick="addQuickGoal()" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline"><i class="fa-solid fa-plus mr-1"></i>Nueva Meta</button>
+                    </div>
+                    <div id="savings-goals-list" class="space-y-2.5"></div>
+                </div>
+
+                <!-- Gráfico Tendencia -->
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-3">
+                    <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase"><i class="fa-solid fa-chart-line text-blue-500 mr-1.5"></i> TENDENCIA DE GASTOS DIARIOS</h3>
+                    <div class="h-44 w-full relative"><canvas id="dailyTrendChart"></canvas></div>
+                </div>
+
+                <!-- Gráfico Barras -->
+                <div class="bg-slate-900 text-white p-4 rounded-3xl shadow-md border border-slate-800 space-y-3">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase">RESUMEN MENSUAL</h3>
+                    <div class="h-52 w-full relative bg-slate-900/50 rounded-2xl p-2"><canvas id="financialBarChart"></canvas></div>
+                </div>
+
+                <!-- Gráfico Dona -->
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-700/80">
+                    <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase mb-3">GASTOS POR CATEGORÍA</h3>
+                    <div class="w-full h-48 relative flex items-center justify-center"><canvas id="categoryChart"></canvas></div>
+                </div>
+
                 <!-- Movimientos Recientes -->
                 <div class="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-3">
                     <div class="flex justify-between items-center">
                         <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">MOVIMIENTOS RECIENTES</h3>
                         <button onclick="switchTab('history')" class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">Ver todos</button>
                     </div>
+                    <select id="category-filter" onchange="renderUI()" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs rounded-xl px-3 py-2 outline-none">
+                        <option value="all">🔍 Todas las Categorías</option>
+                    </select>
                     <div id="dashboard-recent-list" class="space-y-2 max-h-80 overflow-y-auto custom-scroll pr-1"></div>
                 </div>
             </main>
@@ -127,17 +171,29 @@
             <!-- Transacción Tab -->
             <main id="tab-add" class="hidden p-4 space-y-4">
                 <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-4">
-                    <h2 class="text-base font-bold text-slate-800 dark:text-slate-100">NUEVO REGISTRO</h2>
+                    <h2 id="form-title" class="text-base font-bold text-slate-800 dark:text-slate-100">NUEVO REGISTRO</h2>
                     <form id="transaction-form" onsubmit="saveTransaction(event)" class="space-y-4">
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" id="btn-type-expense" onclick="setTxType('expense')" class="py-2.5 rounded-xl text-xs font-bold border border-red-500 text-red-500 bg-red-50 dark:bg-red-950/40">Gasto</button>
+                            <button type="button" id="btn-type-income" onclick="setTxType('income')" class="py-2.5 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 text-slate-400">Ingreso</button>
+                        </div>
                         <div>
                             <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Monto (S/)</label>
                             <input type="number" step="0.01" id="tx-amount" placeholder="0.00" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 dark:text-white rounded-xl text-sm outline-none">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Descripción</label>
-                            <input type="text" id="tx-description" placeholder="Ej. PedidosYa, Gasolina" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 dark:text-white rounded-xl text-sm outline-none">
+                            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Categoría</label>
+                            <select id="tx-category" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 dark:text-white rounded-xl text-sm outline-none"></select>
                         </div>
-                        <button type="submit" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 text-sm">Guardar Transacción</button>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Fecha</label>
+                            <input type="date" id="tx-date" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 dark:text-white rounded-xl text-sm outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Nota / Descripción</label>
+                            <input type="text" id="tx-description" placeholder="Ej. PedidosYa, Gasolina" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 dark:text-white rounded-xl text-sm outline-none">
+                        </div>
+                        <button type="submit" id="form-submit-btn" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 text-sm">Guardar Transacción</button>
                     </form>
                 </div>
             </main>
@@ -146,6 +202,7 @@
             <main id="tab-history" class="hidden p-4 space-y-4">
                 <div class="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-3">
                     <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">HISTORIAL COMPLETO</h3>
+                    <input type="text" id="history-search-input" onkeyup="renderUI()" placeholder="Buscar..." class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 dark:text-white rounded-xl text-xs outline-none">
                     <div id="full-history-list" class="space-y-2 max-h-[65vh] overflow-y-auto custom-scroll pr-1"></div>
                 </div>
             </main>
@@ -153,7 +210,8 @@
             <!-- Moto Tab -->
             <main id="tab-moto" class="hidden p-4 space-y-4">
                 <div class="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-4">
-                    <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase"><i class="fa-solid fa-motorcycle text-emerald-500 mr-1.5"></i> Control de Moto</h3>
+                    <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase"><i class="fa-solid fa-motorcycle text-emerald-500 mr-1.5"></i> Control y Mantenimiento de Moto</h3>
+                    
                     <div class="bg-slate-900 text-white p-4 rounded-2xl space-y-3 shadow-md border border-slate-800">
                         <h4 class="text-xs font-bold text-emerald-400 uppercase"><i class="fa-solid fa-id-card mr-1"></i> Datos de la Moto</h4>
                         <div class="grid grid-cols-2 gap-3">
@@ -171,6 +229,30 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="bg-slate-900 text-white p-4 rounded-2xl space-y-3 shadow-md border border-slate-800">
+                        <h4 class="text-xs font-bold text-amber-400 uppercase"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Estado de Documentos</h4>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-2">
+                                <span class="text-[10px] text-slate-400 font-semibold block">SOAT Vencimiento</span>
+                                <input type="date" id="moto-soat-date" onchange="saveMotoDocs()" class="w-full bg-slate-900 border border-slate-700 text-white text-xs px-2 py-1 rounded-lg outline-none">
+                                <span id="soat-status-badge" class="text-[9px] font-bold px-2 py-0.5 rounded-full inline-block mt-1">Verificando...</span>
+                            </div>
+                            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-2">
+                                <span class="text-[10px] text-slate-400 font-semibold block">Revisión Técnica</span>
+                                <input type="date" id="moto-rev-date" onchange="saveMotoDocs()" class="w-full bg-slate-900 border border-slate-700 text-white text-xs px-2 py-1 rounded-lg outline-none">
+                                <span id="rev-status-badge" class="text-[9px] font-bold px-2 py-0.5 rounded-full inline-block mt-1">Verificando...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h4 class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">Repuestos</h4>
+                            <button onclick="openMotoSpareModal()" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline">+ Registrar Repuesto</button>
+                        </div>
+                        <div id="moto-spares-list" class="space-y-2 max-h-60 overflow-y-auto custom-scroll pr-1"></div>
+                    </div>
                 </div>
             </main>
 
@@ -181,6 +263,70 @@
                     <div id="gallery-grid" class="grid grid-cols-2 gap-3 max-h-[70vh] overflow-y-auto custom-scroll pr-1"></div>
                 </div>
             </main>
+
+            <!-- Modal Repuesto -->
+            <div id="moto-spare-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 w-full max-w-sm p-5 rounded-3xl shadow-2xl space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-bold">Registrar Repuesto</h3>
+                        <button onclick="closeMotoSpareModal()"><i class="fa-solid fa-xmark text-lg"></i></button>
+                    </div>
+                    <form onsubmit="saveMotoSpare(event)" class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-semibold mb-1">Nombre</label>
+                            <input type="text" id="spare-name" required class="w-full px-3 py-2 border dark:border-slate-700 dark:bg-slate-800 rounded-xl text-sm outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold mb-1">Costo (S/)</label>
+                            <input type="number" step="0.01" id="spare-cost" required class="w-full px-3 py-2 border dark:border-slate-700 dark:bg-slate-800 rounded-xl text-sm outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold mb-1">Fecha</label>
+                            <input type="date" id="spare-date" required class="w-full px-3 py-2 border dark:border-slate-700 dark:bg-slate-800 rounded-xl text-sm outline-none">
+                        </div>
+                        <button type="submit" class="w-full bg-emerald-600 text-white py-2.5 rounded-xl text-xs font-bold">Guardar</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Modal Calculadora -->
+            <div id="calc-modal" class="hidden fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div class="bg-slate-900 text-white w-full max-w-xs p-5 rounded-3xl shadow-2xl space-y-4 border border-slate-800">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                        <h3 class="text-xs font-bold text-emerald-400 uppercase">Calculadora</h3>
+                        <button onclick="toggleCalcModal()"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div class="bg-slate-950 p-3 rounded-2xl text-right text-2xl font-black text-emerald-400" id="calc-display">0</div>
+                    <div class="grid grid-cols-4 gap-2 text-xs font-bold">
+                        <button onclick="calcClear()" class="bg-rose-500/20 text-rose-400 p-2.5 rounded-xl">AC</button>
+                        <button onclick="calcAppend('7')" class="bg-slate-800 p-2.5 rounded-xl">7</button>
+                        <button onclick="calcAppend('8')" class="bg-slate-800 p-2.5 rounded-xl">8</button>
+                        <button onclick="calcAppend('9')" class="bg-slate-800 p-2.5 rounded-xl">9</button>
+                        <button onclick="calcAppend('4')" class="bg-slate-800 p-2.5 rounded-xl">4</button>
+                        <button onclick="calcAppend('5')" class="bg-slate-800 p-2.5 rounded-xl">5</button>
+                        <button onclick="calcAppend('6')" class="bg-slate-800 p-2.5 rounded-xl">6</button>
+                        <button onclick="calcAppend('+')" class="bg-emerald-500/20 text-emerald-400 p-2.5 rounded-xl">+</button>
+                        <button onclick="calcAppend('1')" class="bg-slate-800 p-2.5 rounded-xl">1</button>
+                        <button onclick="calcAppend('2')" class="bg-slate-800 p-2.5 rounded-xl">2</button>
+                        <button onclick="calcAppend('3')" class="bg-slate-800 p-2.5 rounded-xl">3</button>
+                        <button onclick="calcEvaluate()" class="bg-emerald-600 text-white p-2.5 rounded-xl row-span-2">=</button>
+                        <button onclick="calcAppend('0')" class="bg-slate-800 p-2.5 rounded-xl col-span-2">0</button>
+                        <button onclick="calcAppend('.')" class="bg-slate-800 p-2.5 rounded-xl">.</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Configuración -->
+            <div id="settings-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 w-full max-w-sm p-5 rounded-3xl shadow-2xl space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-bold">Configuración</h3>
+                        <button onclick="toggleSettingsModal()"><i class="fa-solid fa-xmark text-lg"></i></button>
+                    </div>
+                    <p class="text-xs text-slate-400">Categorías y Ajustes de la Aplicación.</p>
+                    <button onclick="toggleSettingsModal()" class="w-full bg-emerald-600 text-white py-2.5 rounded-xl text-xs font-bold">Cerrar</button>
+                </div>
+            </div>
 
             <!-- Navegación Inferior -->
             <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-6 py-2 flex justify-around items-center z-40">
@@ -200,7 +346,7 @@
         </div>
     </div>
 
-    <!-- Scripts Firebase y Lógica Global -->
+    <!-- Scripts y Lógica Consolidada -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -221,22 +367,35 @@
 
         let currentUser = null;
         let transactions = [];
+        let savingsGoals = [];
+        let motoSpares = [];
         let isBalanceVisible = false;
         let isRegister = false;
         let tarjetaPdfBase64 = null;
         let vehiculoPhotoBase64 = null;
+        let currentType = 'expense';
+        let calcInput = "0";
 
-        window.toggleDarkMode = () => {
-            const html = document.getElementById('html-root');
-            html.classList.toggle('dark');
-        };
+        let categories = [
+            { name: 'Comida / Alimentos', color: '#EF4444' },
+            { name: 'Transporte', color: '#3B82F6' },
+            { name: 'Servicios', color: '#F59E0B' },
+            { name: 'Salario', color: '#10B981' },
+            { name: 'Deudas', color: '#8B5CF6' },
+            { name: 'General', color: '#64748B' }
+        ];
 
+        let chartInstance = null, barChartInstance = null, dailyChartInstance = null;
+
+        document.getElementById('tx-date').valueAsDate = new Date();
+        document.getElementById('spare-date').valueAsDate = new Date();
+
+        window.toggleDarkMode = () => document.getElementById('html-root').classList.toggle('dark');
         window.switchTab = (tab) => {
-            ['tab-dashboard', 'tab-add', 'tab-history', 'tab-moto', 'tab-gallery'].forEach(t => {
-                document.getElementById(t).classList.add('hidden');
-            });
+            ['dashboard', 'add', 'history', 'moto', 'gallery'].forEach(t => document.getElementById(`tab-${t}`).classList.add('hidden'));
             document.getElementById(`tab-${tab}`).classList.remove('hidden');
             if (tab === 'gallery') renderGallery();
+            if (tab === 'moto') renderMotoUI();
         };
 
         window.toggleBalanceVisibility = () => {
@@ -253,6 +412,51 @@
         };
 
         window.logout = () => signOut(auth);
+        window.toggleCalcModal = () => document.getElementById('calc-modal').classList.toggle('hidden');
+        window.toggleSettingsModal = () => document.getElementById('settings-modal').classList.toggle('hidden');
+        window.openMotoSpareModal = () => document.getElementById('moto-spare-modal').classList.remove('hidden');
+        window.closeMotoSpareModal = () => document.getElementById('moto-spare-modal').classList.add('hidden');
+
+        window.setTxType = (type) => {
+            currentType = type;
+            const exp = document.getElementById('btn-type-expense');
+            const inc = document.getElementById('btn-type-income');
+            if (type === 'expense') {
+                exp.className = "py-2.5 rounded-xl text-xs font-bold border border-red-500 text-red-500 bg-red-50 dark:bg-red-950/40";
+                inc.className = "py-2.5 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 text-slate-400";
+            } else {
+                inc.className = "py-2.5 rounded-xl text-xs font-bold border border-emerald-500 text-emerald-500 bg-emerald-50 dark:bg-emerald-950/40";
+                exp.className = "py-2.5 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 text-slate-400";
+            }
+        };
+
+        window.calcClear = () => { calcInput = "0"; document.getElementById('calc-display').textContent = calcInput; };
+        window.calcAppend = (val) => { calcInput = (calcInput === "0" && !isNaN(val)) ? val : calcInput + val; document.getElementById('calc-display').textContent = calcInput; };
+        window.calcEvaluate = () => {
+            try { calcInput = eval(calcInput).toString(); document.getElementById('calc-display').textContent = calcInput; } catch(e) { document.getElementById('calc-display').textContent = "Error"; }
+        };
+
+        window.addQuickDebt = async () => {
+            const desc = prompt("Nombre o descripción de la deuda:");
+            if (!desc) return;
+            const amount = parseFloat(prompt("Monto de la deuda (S/):", "0"));
+            if (isNaN(amount) || amount <= 0) return;
+            const txData = { description: desc, amount, type: 'expense', category: 'Deudas', date: new Date().toISOString() };
+            const ref = await addDoc(collection(db, `users/${currentUser.uid}/transactions`), txData);
+            transactions.push({ id: ref.id, ...txData });
+            renderUI();
+        };
+
+        window.addQuickGoal = async () => {
+            const title = prompt("Nombre del objetivo de ahorro:");
+            if (!title) return;
+            const target = parseFloat(prompt("Monto objetivo (S/):", "500"));
+            if (isNaN(target) || target <= 0) return;
+            const goal = { title, target, current: 0 };
+            const ref = await addDoc(collection(db, `users/${currentUser.uid}/savingsGoals`), goal);
+            savingsGoals.push({ id: ref.id, ...goal });
+            renderGoalsUI();
+        };
 
         document.getElementById('auth-form').onsubmit = async (e) => {
             e.preventDefault();
@@ -291,40 +495,75 @@
 
         async function loadUserData() {
             try {
-                const snap = await getDocs(collection(db, `users/${currentUser.uid}/transactions`));
+                const snapTx = await getDocs(collection(db, `users/${currentUser.uid}/transactions`));
                 transactions = [];
-                snap.forEach(doc => transactions.push({ id: doc.id, ...doc.data() }));
+                snapTx.forEach(doc => transactions.push({ id: doc.id, ...doc.data() }));
+
+                const snapGoals = await getDocs(collection(db, `users/${currentUser.uid}/savingsGoals`));
+                savingsGoals = [];
+                snapGoals.forEach(doc => savingsGoals.push({ id: doc.id, ...doc.data() }));
+
+                const snapSpares = await getDocs(collection(db, `users/${currentUser.uid}/motoSpares`));
+                motoSpares = [];
+                snapSpares.forEach(doc => motoSpares.push({ id: doc.id, ...doc.data() }));
 
                 const cfg = await getDoc(doc(db, `users_config/${currentUser.uid}`));
                 if (cfg.exists() && cfg.data().motoDocs) {
                     const docs = cfg.data().motoDocs;
                     tarjetaPdfBase64 = docs.tarjetaPdf || null;
                     vehiculoPhotoBase64 = docs.vehiculoPhoto || null;
+                    if (docs.soatDate) document.getElementById('moto-soat-date').value = docs.soatDate;
+                    if (docs.revDate) document.getElementById('moto-rev-date').value = docs.revDate;
                     updateMotoDocsUI();
                 }
             } catch (e) {
                 console.error("Error cargando datos:", e);
             }
+            renderCategories();
+            renderGoalsUI();
+            renderMotoUI();
             renderUI();
         }
+
+        window.renderCategories = () => {
+            const select = document.getElementById('tx-category');
+            if (select) select.innerHTML = categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+        };
 
         window.renderUI = () => {
             const recentEl = document.getElementById('dashboard-recent-list');
             const historyEl = document.getElementById('full-history-list');
+            const debtorsEl = document.getElementById('debtors-list');
             recentEl.innerHTML = '';
             historyEl.innerHTML = '';
+            debtorsEl.innerHTML = '';
 
-            let income = 0, expense = 0;
+            let income = 0, expense = 0, totalDebt = 0;
+            const categoryTotals = {};
 
             transactions.forEach(t => {
+                const isDebt = (t.category || '').toLowerCase().includes('deuda');
                 if (t.type === 'income') income += t.amount;
-                else expense += t.amount;
+                else {
+                    if (!isDebt) {
+                        expense += t.amount;
+                        categoryTotals[t.category || 'General'] = (categoryTotals[t.category || 'General'] || 0) + t.amount;
+                    } else {
+                        totalDebt += t.amount;
+                        debtorsEl.innerHTML += `
+                            <div class="flex justify-between items-center bg-slate-800 px-3 py-2 rounded-xl text-xs text-white">
+                                <span>${t.description}</span>
+                                <span class="font-bold text-amber-400">S/ ${t.amount.toFixed(2)}</span>
+                            </div>
+                        `;
+                    }
+                }
 
                 const html = `
                     <div class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
                         <div>
                             <span class="font-bold text-xs block">${t.description}</span>
-                            <span class="text-[10px] text-slate-400">${t.date ? t.date.split('T')[0] : ''}</span>
+                            <span class="text-[10px] text-slate-400">${t.date ? t.date.split('T')[0] : ''} • ${t.category || 'General'}</span>
                         </div>
                         <span class="font-extrabold text-xs ${t.type === 'income' ? 'text-emerald-500' : ''}">${t.type === 'income' ? '+' : '-'} S/ ${t.amount.toFixed(2)}</span>
                     </div>
@@ -332,6 +571,9 @@
                 recentEl.innerHTML += html;
                 historyEl.innerHTML += html;
             });
+
+            if (debtorsEl.innerHTML === '') debtorsEl.innerHTML = `<p class="text-[11px] text-slate-500 text-center py-1">Sin deudas registradas</p>`;
+            document.getElementById('total-debt-amount').textContent = `S/ ${totalDebt.toFixed(2)}`;
 
             if (transactions.length === 0) {
                 recentEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">Sin movimientos</p>`;
@@ -348,30 +590,74 @@
                 document.getElementById('total-income').textContent = `S/ *****`;
                 document.getElementById('total-expense').textContent = `S/ *****`;
             }
+
+            renderChart(categoryTotals);
+        };
+
+        window.renderGoalsUI = () => {
+            const list = document.getElementById('savings-goals-list');
+            list.innerHTML = savingsGoals.length === 0 ? `<p class="text-[11px] text-slate-400 text-center py-1">Sin metas activas</p>` : '';
+            savingsGoals.forEach(g => {
+                const p = Math.min(100, Math.round((g.current / g.target) * 100));
+                list.innerHTML += `
+                    <div class="bg-slate-50 dark:bg-slate-900 border p-2.5 rounded-2xl space-y-1">
+                        <div class="flex justify-between text-xs font-bold"><span>${g.title}</span><span>S/ ${g.current.toFixed(2)} / ${g.target.toFixed(2)}</span></div>
+                        <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden"><div class="bg-emerald-500 h-full" style="width: ${p}%"></div></div>
+                    </div>
+                `;
+            });
+        };
+
+        window.renderMotoUI = () => {
+            const list = document.getElementById('moto-spares-list');
+            list.innerHTML = motoSpares.length === 0 ? `<p class="text-[11px] text-slate-400 text-center py-3">Sin repuestos</p>` : '';
+            motoSpares.forEach(s => {
+                list.innerHTML += `
+                    <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900 border p-3 rounded-2xl text-xs">
+                        <div><span class="font-bold block">${s.name}</span><span class="text-[10px] text-slate-400">${s.date}</span></div>
+                        <span class="font-extrabold text-emerald-600">S/ ${s.cost.toFixed(2)}</span>
+                    </div>
+                `;
+            });
         };
 
         window.saveTransaction = async (e) => {
             e.preventDefault();
             const amount = parseFloat(document.getElementById('tx-amount').value);
             const description = document.getElementById('tx-description').value.trim();
-            const txData = { description, amount, type: 'expense', date: new Date().toISOString() };
+            const category = document.getElementById('tx-category').value;
+            const date = document.getElementById('tx-date').value || new Date().toISOString().split('T')[0];
+            const txData = { description, amount, type: currentType, category, date };
             
             const ref = await addDoc(collection(db, `users/${currentUser.uid}/transactions`), txData);
             transactions.push({ id: ref.id, ...txData });
             document.getElementById('transaction-form').reset();
+            document.getElementById('tx-date').valueAsDate = new Date();
             renderUI();
             switchTab('dashboard');
+        };
+
+        window.saveMotoSpare = async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('spare-name').value.trim();
+            const cost = parseFloat(document.getElementById('spare-cost').value);
+            const date = document.getElementById('spare-date').value;
+            const spare = { name, cost, date };
+            const ref = await addDoc(collection(db, `users/${currentUser.uid}/motoSpares`), spare);
+            motoSpares.push({ id: ref.id, ...spare });
+            closeMotoSpareModal();
+            renderMotoUI();
         };
 
         window.uploadTarjetaPdf = (e) => {
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = async (event) => {
-                tarjetaPdfBase64 = event.target.result;
+            reader.onload = async (ev) => {
+                tarjetaPdfBase64 = ev.target.result;
                 await saveMotoDocsCloud();
                 updateMotoDocsUI();
-                alert("¡PDF de tarjeta de propiedad subido!");
+                alert("¡PDF subido!");
             };
             reader.readAsDataURL(file);
         };
@@ -380,40 +666,50 @@
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = async (event) => {
-                vehiculoPhotoBase64 = event.target.result;
+            reader.onload = async (ev) => {
+                vehiculoPhotoBase64 = ev.target.result;
                 await saveMotoDocsCloud();
                 updateMotoDocsUI();
-                alert("¡Foto del vehículo subida!");
+                alert("¡Foto subida!");
             };
             reader.readAsDataURL(file);
         };
 
+        window.saveMotoDocs = async () => {
+            await saveMotoDocsCloud();
+        };
+
         async function saveMotoDocsCloud() {
+            const soatDate = document.getElementById('moto-soat-date').value;
+            const revDate = document.getElementById('moto-rev-date').value;
             await setDoc(doc(db, `users_config/${currentUser.uid}`), {
-                motoDocs: { tarjetaPdf: tarjetaPdfBase64, vehiculoPhoto: vehiculoPhotoBase64 }
+                motoDocs: { tarjetaPdf: tarjetaPdfBase64, vehiculoPhoto: vehiculoPhotoBase64, soatDate, revDate }
             }, { merge: true });
         }
 
         function updateMotoDocsUI() {
-            const pdfStatus = document.getElementById('tarjeta-pdf-status');
-            if (tarjetaPdfBase64) pdfStatus.innerHTML = `<a href="${tarjetaPdfBase64}" target="_blank" class="text-emerald-400 font-bold underline">Ver PDF</a>`;
-            const photoStatus = document.getElementById('vehiculo-photo-status');
-            if (vehiculoPhotoBase64) photoStatus.innerHTML = `<span class="text-emerald-400 font-bold">Foto cargada</span>`;
+            if (tarjetaPdfBase64) document.getElementById('tarjeta-pdf-status').innerHTML = `<a href="${tarjetaPdfBase64}" target="_blank" class="text-emerald-400 font-bold underline">Ver PDF</a>`;
+            if (vehiculoPhotoBase64) document.getElementById('vehiculo-photo-status').innerHTML = `<span class="text-emerald-400 font-bold">Cargada</span>`;
         }
 
         function renderGallery() {
             const grid = document.getElementById('gallery-grid');
             grid.innerHTML = '';
-            if (tarjetaPdfBase64) {
-                grid.innerHTML += `<div class="p-2 bg-slate-900 rounded-xl text-center"><p class="text-xs text-white mb-1">Tarjeta Propiedad</p><a href="${tarjetaPdfBase64}" target="_blank" class="text-xs text-emerald-400 underline">Abrir PDF</a></div>`;
-            }
-            if (vehiculoPhotoBase64) {
-                grid.innerHTML += `<div class="p-2 bg-slate-900 rounded-xl text-center"><p class="text-xs text-white mb-1">Foto Vehículo</p><img src="${vehiculoPhotoBase64}" class="w-full h-20 object-cover rounded-lg"></div>`;
-            }
-            if (!tarjetaPdfBase64 && !vehiculoPhotoBase64) {
-                grid.innerHTML = `<p class="col-span-2 text-xs text-slate-400 text-center py-6">No hay archivos en la galería.</p>`;
-            }
+            if (tarjetaPdfBase64) grid.innerHTML += `<div class="p-2 bg-slate-900 rounded-xl text-center"><p class="text-xs text-white mb-1">Tarjeta Propiedad</p><a href="${tarjetaPdfBase64}" target="_blank" class="text-xs text-emerald-400 underline">Ver PDF</a></div>`;
+            if (vehiculoPhotoBase64) grid.innerHTML += `<div class="p-2 bg-slate-900 rounded-xl text-center"><p class="text-xs text-white mb-1">Datos Vehículo</p><img src="${vehiculoPhotoBase64}" class="w-full h-20 object-cover rounded-lg"></div>`;
+            if (!tarjetaPdfBase64 && !vehiculoPhotoBase64) grid.innerHTML = `<p class="col-span-2 text-xs text-slate-400 text-center py-6">Sin archivos</p>`;
+        }
+
+        function renderChart(totals) {
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            const labels = Object.keys(totals);
+            const data = labels.map(l => totals[l]);
+            if (chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels: labels.length ? labels : ['Sin Gastos'], datasets: [{ data: data.length ? data : [1], backgroundColor: ['#EF4444', '#3B82F6', '#F59E0B', '#8B5CF6', '#64748B'] }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 9 }, color: '#94A3B8' } } }, cutout: '65%' }
+            });
         }
     </script>
 </body>
