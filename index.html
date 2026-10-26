@@ -89,7 +89,8 @@
                         <span id="app-brand-sub" class="text-[9px] text-emerald-400 font-semibold tracking-wide transition-colors duration-300">by 3ldiosfenix</span>
                     </div>
                 </div>
-                <div class="flex items-center space-x-1 text-slate-300">
+                <div class="flex items-center space-x-0.5 text-slate-300">
+                    <button onclick="switchTab('moto')" title="Mantenimiento y Moto" class="hover:text-emerald-400 text-sm p-1.5"><i class="fa-solid fa-motorcycle"></i></button>
                     <button onclick="switchTab('gallery')" title="Galería de Comprobantes" class="hover:text-emerald-400 text-sm p-1.5"><i class="fa-solid fa-images"></i></button>
                     <button onclick="toggleDarkMode()" title="Cambiar Modo Claro / Oscuro" class="hover:text-emerald-400 text-sm p-1.5"><i id="theme-toggle-icon" class="fa-solid fa-moon"></i></button>
                     <button onclick="toggleCalcModal()" title="Calculadora Científica e Interactiva" class="hover:text-emerald-400 text-sm p-1.5"><i class="fa-solid fa-calculator"></i></button>
@@ -344,6 +345,41 @@
                 </div>
             </main>
 
+            <!-- Sección de Mantenimiento y Alertas de Moto -->
+            <main id="tab-moto" class="hidden p-4 space-y-4">
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-4 transition-colors duration-300">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 tracking-wider uppercase"><i class="fa-solid fa-motorcycle text-emerald-500 mr-1.5"></i> Control y Mantenimiento de Moto</h3>
+                    </div>
+
+                    <!-- Alertas de Documentos (SOAT y Revisión Técnica) -->
+                    <div class="bg-slate-900 text-white p-4 rounded-2xl space-y-3 shadow-md border border-slate-800">
+                        <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Estado de Documentos</h4>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-1">
+                                <span class="text-[10px] text-slate-400 block font-semibold">SOAT Vencimiento</span>
+                                <input type="date" id="moto-soat-date" onchange="saveMotoDocs()" class="w-full bg-slate-900 border border-slate-700 text-white text-xs px-2 py-1 rounded-lg outline-none">
+                                <span id="soat-status-badge" class="text-[9px] font-bold px-2 py-0.5 rounded-full inline-block mt-1">Verificando...</span>
+                            </div>
+                            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-1">
+                                <span class="text-[10px] text-slate-400 block font-semibold">Revisión Técnica</span>
+                                <input type="date" id="moto-rev-date" onchange="saveMotoDocs()" class="w-full bg-slate-900 border border-slate-700 text-white text-xs px-2 py-1 rounded-lg outline-none">
+                                <span id="rev-status-badge" class="text-[9px] font-bold px-2 py-0.5 rounded-full inline-block mt-1">Verificando...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Registro de Repuestos / Mantenimientos -->
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h4 class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider"><i class="fa-solid fa-wrench mr-1"></i> Historial de Repuestos</h4>
+                            <button onclick="openMotoSpareModal()" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline"><i class="fa-solid fa-plus mr-1"></i>Registrar Repuesto</button>
+                        </div>
+                        <div id="moto-spares-list" class="space-y-2 max-h-60 overflow-y-auto custom-scroll pr-1"></div>
+                    </div>
+                </div>
+            </main>
+
             <!-- Galería de Comprobantes y Fotos -->
             <main id="tab-gallery" class="hidden p-4 space-y-4">
                 <div class="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-3 transition-colors duration-300">
@@ -356,6 +392,31 @@
                     <div id="gallery-grid" class="grid grid-cols-2 gap-3 max-h-[70vh] overflow-y-auto custom-scroll pr-1 pt-1"></div>
                 </div>
             </main>
+
+            <!-- Modal Registrar Repuesto de Moto -->
+            <div id="moto-spare-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 w-full max-w-sm p-5 rounded-3xl shadow-2xl space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100"><i class="fa-solid fa-wrench text-emerald-600 mr-2"></i> Registrar Repuesto / Mantenimiento</h3>
+                        <button onclick="closeMotoSpareModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                    </div>
+                    <form id="moto-spare-form" onsubmit="saveMotoSpare(event)" class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Nombre del Repuesto / Servicio</label>
+                            <input type="text" id="spare-name" placeholder="Ej. Cambio de Aceite, Frenos, Llantas" required class="w-full px-3 py-2 border dark:border-slate-700 dark:bg-slate-800 dark:text-white text-sm rounded-xl outline-none focus:ring-1 focus:ring-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Costo (S/)</label>
+                            <input type="number" step="0.01" id="spare-cost" placeholder="0.00" required class="w-full px-3 py-2 border dark:border-slate-700 dark:bg-slate-800 dark:text-white text-sm rounded-xl outline-none focus:ring-1 focus:ring-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Fecha de Compra</label>
+                            <input type="date" id="spare-date" required class="w-full px-3 py-2 border dark:border-slate-700 dark:bg-slate-800 dark:text-white text-sm rounded-xl outline-none focus:ring-1 focus:ring-emerald-500">
+                        </div>
+                        <button type="submit" class="w-full bg-emerald-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-emerald-700 transition">Guardar Repuesto</button>
+                    </form>
+                </div>
+            </div>
 
             <!-- Modal Calculadora Científica e Interactiva Flotante -->
             <div id="calc-modal" class="hidden fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -494,6 +555,7 @@
         let currentType = 'expense';
         let transactions = [];
         let savingsGoals = [];
+        let motoSpares = [];
         let isBalanceVisible = false;
         let isRegister = false;
         let currentPhotoBase64 = null;
@@ -536,6 +598,7 @@
         let dailyChartInstance = null;
 
         document.getElementById('tx-date').valueAsDate = new Date();
+        document.getElementById('spare-date').valueAsDate = new Date();
 
         window.toggleCalcModal = () => document.getElementById('calc-modal').classList.toggle('hidden');
         window.calcClear = () => { calcInput = "0"; calcHistoryStr = ""; updateCalcDisplay(); };
@@ -681,6 +744,106 @@
             });
         }
 
+        // MOTO & REPUESTOS LOGIC
+        window.openMotoSpareModal = () => document.getElementById('moto-spare-modal').classList.remove('hidden');
+        window.closeMotoSpareModal = () => document.getElementById('moto-spare-modal').classList.add('hidden');
+
+        window.saveMotoSpare = async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('spare-name').value.trim();
+            const cost = parseFloat(document.getElementById('spare-cost').value);
+            const date = document.getElementById('spare-date').value;
+
+            const spareData = { name, cost, date };
+            try {
+                const docRef = await addDoc(collection(db, `users/${currentUser.uid}/motoSpares`), spareData);
+                motoSpares.push({ id: docRef.id, ...spareData });
+                document.getElementById('moto-spare-form').reset();
+                document.getElementById('spare-date').valueAsDate = new Date();
+                closeMotoSpareModal();
+                renderMotoUI();
+                alert("¡Repuesto registrado con éxito!");
+            } catch (err) { alert("Error al guardar repuesto."); }
+        };
+
+        window.deleteMotoSpare = async (id) => {
+            if (!confirm("¿Eliminar este registro de repuesto?")) return;
+            try {
+                await deleteDoc(doc(db, `users/${currentUser.uid}/motoSpares/${id}`));
+                motoSpares = motoSpares.filter(s => s.id !== id);
+                renderMotoUI();
+            } catch (err) { alert("Error al eliminar."); }
+        };
+
+        window.saveMotoDocs = async () => {
+            const soatDate = document.getElementById('moto-soat-date').value;
+            const revDate = document.getElementById('moto-rev-date').value;
+            try {
+                await setDoc(doc(db, `users_config/${currentUser.uid}`), { motoDocs: { soatDate, revDate } }, { merge: true });
+                checkMotoDocAlerts(soatDate, revDate);
+            } catch (err) { console.error(err); }
+        };
+
+        function checkMotoDocAlerts(soatDate, revDate) {
+            const today = new Date();
+            if (soatDate) {
+                const soat = new Date(soatDate);
+                const diffDays = Math.ceil((soat - today) / (1000 * 60 * 60 * 24));
+                const badge = document.getElementById('soat-status-badge');
+                if (diffDays < 0) {
+                    badge.className = "text-[9px] font-bold px-2 py-0.5 rounded-full inline-block mt-1 bg-red-500/20 text-red-400 border border-red-500/30";
+                    badge.textContent = "¡SOAT Vencido!";
+                } else if (diffDays <= 15) {
+                    badge.className = "text-[9px] font-bold px-2 py-0.5 rounded-full inline-block mt-1 bg-amber-500/20 text-amber-400 border border-amber-500/30";
+                    badge.textContent = `Vence en ${diffDays} días`;
+                } else {
+                    badge.className = "text-[9px] font-bold px-2 py-0.5 rounded-full inline-block mt-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+                    badge.textContent = "Vigente";
+                }
+            }
+            if (revDate) {
+                const rev = new Date(revDate);
+                const diffDays = Math.ceil((rev - today) / (1000 * 60 * 60 * 24));
+                const badge = document.getElementById('rev-status-badge');
+                if (diffDays < 0) {
+                    badge.className = "text-[9px] font-bold px-2 py-0.5 rounded-full inline-block mt-1 bg-red-500/20 text-red-400 border border-red-500/30";
+                    badge.textContent = "¡Rev. Técnica Vencida!";
+                } else if (diffDays <= 15) {
+                    badge.className = "text-[9px] font-bold px-2 py-0.5 rounded-full inline-block mt-1 bg-amber-500/20 text-amber-400 border border-amber-500/30";
+                    badge.textContent = `Vence en ${diffDays} días`;
+                } else {
+                    badge.className = "text-[9px] font-bold px-2 py-0.5 rounded-full inline-block mt-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+                    badge.textContent = "Vigente";
+                }
+            }
+        }
+
+        function renderMotoUI() {
+            const listEl = document.getElementById('moto-spares-list');
+            listEl.innerHTML = '';
+            motoSpares.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (motoSpares.length === 0) {
+                listEl.innerHTML = `<p class="text-[11px] text-slate-400 text-center py-3">No hay repuestos registrados todavía.</p>`;
+                return;
+            }
+
+            motoSpares.forEach(s => {
+                listEl.innerHTML += `
+                    <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-2xl">
+                        <div>
+                            <p class="font-bold text-slate-800 dark:text-slate-100 text-xs">${s.name}</p>
+                            <p class="text-[10px] text-slate-400">${s.date}</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="font-extrabold text-xs text-emerald-600 dark:text-emerald-400">S/ ${s.cost.toFixed(2)}</span>
+                            <button onclick="deleteMotoSpare('${s.id}')" class="text-slate-300 hover:text-red-500 text-xs"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
         window.clearHistorySearch = () => {
             document.getElementById('history-search-input').value = '';
             document.getElementById('clear-search-btn').classList.add('hidden');
@@ -696,7 +859,6 @@
             document.getElementById('modal-image-view').src = '';
         };
 
-        // ELIMINAR SOLO LA FOTO DE UNA TRANSACCIÓN
         window.removePhotoFromTx = async (id) => {
             if (!confirm("¿Deseas eliminar este comprobante/foto de la transacción?")) return;
             try {
@@ -753,6 +915,7 @@
             document.getElementById('tab-add').classList.add('hidden');
             document.getElementById('tab-history').classList.add('hidden');
             document.getElementById('tab-gallery').classList.add('hidden');
+            document.getElementById('tab-moto').classList.add('hidden');
             document.getElementById('nav-btn-dashboard').className = "flex flex-col items-center text-slate-400 text-[11px] font-semibold";
             document.getElementById('nav-btn-history').className = "flex flex-col items-center text-slate-400 text-[11px] font-semibold";
 
@@ -767,10 +930,12 @@
             } else if (tab === 'gallery') {
                 document.getElementById('tab-gallery').classList.remove('hidden');
                 renderGallery();
+            } else if (tab === 'moto') {
+                document.getElementById('tab-moto').classList.remove('hidden');
+                renderMotoUI();
             }
         };
 
-        // RENDERIZAR LA GALERÍA DE FOTOS
         function renderGallery() {
             const gridEl = document.getElementById('gallery-grid');
             gridEl.innerHTML = '';
@@ -888,6 +1053,10 @@
                 savingsGoals = [];
                 querySnapGoals.forEach((doc) => savingsGoals.push({ id: doc.id, ...doc.data() }));
 
+                const querySnapSpares = await getDocs(collection(db, `users/${currentUser.uid}/motoSpares`));
+                motoSpares = [];
+                querySnapSpares.forEach((doc) => motoSpares.push({ id: doc.id, ...doc.data() }));
+
                 const catDoc = await getDoc(doc(db, `users_config/${currentUser.uid}`));
                 if (catDoc.exists()) {
                     const data = catDoc.data();
@@ -898,10 +1067,16 @@
                         document.getElementById('app-brand-name').textContent = data.appName;
                         document.getElementById('setting-app-name').value = data.appName;
                     }
+                    if (data.motoDocs) {
+                        if (data.motoDocs.soatDate) document.getElementById('moto-soat-date').value = data.motoDocs.soatDate;
+                        if (data.motoDocs.revDate) document.getElementById('moto-rev-date').value = data.motoDocs.revDate;
+                        checkMotoDocAlerts(data.motoDocs.soatDate, data.motoDocs.revDate);
+                    }
                 }
             } catch (e) { console.error(e); }
             renderCategories();
             renderGoalsUI();
+            renderMotoUI();
             renderUI();
         }
 
@@ -1396,7 +1571,7 @@
         }
 
         window.exportJSON = () => {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ transactions, categories, savingsGoals }));
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ transactions, categories, savingsGoals, motoSpares }));
             const dlAnchorElem = document.createElement('a');
             dlAnchorElem.setAttribute("href", dataStr);
             dlAnchorElem.setAttribute("download", "misfinanzas_respaldo.json");
@@ -1415,6 +1590,9 @@
                     }
                     if (data.savingsGoals) {
                         for (let g of data.savingsGoals) { delete g.id; await addDoc(collection(db, `users/${currentUser.uid}/savingsGoals`), g); }
+                    }
+                    if (data.motoSpares) {
+                        for (let s of data.motoSpares) { delete s.id; await addDoc(collection(db, `users/${currentUser.uid}/motoSpares`), s); }
                     }
                     alert("¡Datos importados con éxito!"); loadUserData();
                 } catch (err) { alert("Archivo no válido"); }
