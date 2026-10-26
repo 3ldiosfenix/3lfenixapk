@@ -352,6 +352,36 @@
                         <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 tracking-wider uppercase"><i class="fa-solid fa-motorcycle text-emerald-500 mr-1.5"></i> Control y Mantenimiento de Moto</h3>
                     </div>
 
+                    <!-- Nueva Sección: Datos de la Moto (Tarjeta de Propiedad PDF y Foto de Datos del Vehículo) -->
+                    <div class="bg-slate-900 text-white p-4 rounded-2xl space-y-3 shadow-md border border-slate-800">
+                        <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider"><i class="fa-solid fa-id-card mr-1"></i> Datos de la Moto</h4>
+                        <div class="grid grid-cols-2 gap-3">
+                            <!-- Tarjeta de Propiedad PDF -->
+                            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-2 flex flex-col justify-between">
+                                <div>
+                                    <span class="text-[10px] text-slate-400 block font-semibold mb-1">Tarjeta Propiedad (PDF)</span>
+                                    <label class="cursor-pointer bg-slate-900 hover:bg-slate-950 text-emerald-400 border border-slate-700 text-[10px] font-bold px-2.5 py-1.5 rounded-lg flex items-center justify-center gap-1 transition">
+                                        <i class="fa-solid fa-file-pdf"></i> Subir PDF
+                                        <input type="file" id="tarjeta-pdf-input" accept="application/pdf" class="hidden" onchange="uploadTarjetaPdf(event)">
+                                    </label>
+                                </div>
+                                <div id="tarjeta-pdf-status" class="text-[10px] text-slate-400 truncate">Sin archivo</div>
+                            </div>
+
+                            <!-- Foto Datos del Vehículo -->
+                            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-2 flex flex-col justify-between">
+                                <div>
+                                    <span class="text-[10px] text-slate-400 block font-semibold mb-1">Foto Datos Vehículo</span>
+                                    <label class="cursor-pointer bg-slate-900 hover:bg-slate-950 text-emerald-400 border border-slate-700 text-[10px] font-bold px-2.5 py-1.5 rounded-lg flex items-center justify-center gap-1 transition">
+                                        <i class="fa-solid fa-camera"></i> Subir Foto
+                                        <input type="file" id="vehiculo-photo-input" accept="image/*" class="hidden" onchange="uploadVehiculoPhoto(event)">
+                                    </label>
+                                </div>
+                                <div id="vehiculo-photo-status" class="text-[10px] text-slate-400 truncate">Sin foto</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Alertas de Documentos (SOAT y Revisión Técnica) -->
                     <div class="bg-slate-900 text-white p-4 rounded-2xl space-y-3 shadow-md border border-slate-800">
                         <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Estado de Documentos</h4>
@@ -400,7 +430,7 @@
                         <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 tracking-wider uppercase"><i class="fa-solid fa-images text-emerald-500 mr-1.5"></i> Galería de Comprobantes</h3>
                         <span id="gallery-count" class="text-[10px] text-slate-400 font-semibold">0 fotos</span>
                     </div>
-                    <p class="text-[10px] text-slate-400">Aquí puedes ver todos los comprobantes, fotos de repuestos y tu SOAT subido. Puedes abrirlos en grande o eliminarlos para limpiar espacio.</p>
+                    <p class="text-[10px] text-slate-400">Aquí puedes ver todos los comprobantes, fotos de repuestos y documentos de tu moto. Puedes abrirlos en grande o eliminarlos para limpiar espacio.</p>
                     
                     <div id="gallery-grid" class="grid grid-cols-2 gap-3 max-h-[70vh] overflow-y-auto custom-scroll pr-1 pt-1"></div>
                 </div>
@@ -587,6 +617,8 @@
         let savingsGoals = [];
         let motoSpares = [];
         let soatPhotoBase64 = null;
+        let tarjetaPdfBase64 = null;
+        let vehiculoPhotoBase64 = null;
         let isBalanceVisible = false;
         let isRegister = false;
         let currentPhotoBase64 = null;
@@ -776,7 +808,7 @@
             });
         }
 
-        // MOTO & REPUESTOS LOGIC CON FOTO DE SOAT
+        // MOTO & REPUESTOS LOGIC
         window.openMotoSpareModal = () => document.getElementById('moto-spare-modal').classList.remove('hidden');
         window.closeMotoSpareModal = () => document.getElementById('moto-spare-modal').classList.add('hidden');
 
@@ -844,6 +876,60 @@
             alert("Foto del SOAT eliminada.");
         };
 
+        window.uploadTarjetaPdf = (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                tarjetaPdfBase64 = e.target.result;
+                await saveMotoDocs();
+                updateMotoDocsUI();
+                alert("¡Tarjeta de Propiedad (PDF) subida con éxito!");
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.removeTarjetaPdf = async () => {
+            if (!confirm("¿Deseas eliminar la tarjeta de propiedad?")) return;
+            tarjetaPdfBase64 = null;
+            await saveMotoDocs();
+            updateMotoDocsUI();
+            alert("Tarjeta de propiedad eliminada.");
+        };
+
+        window.uploadVehiculoPhoto = (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = async function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const MAX_WIDTH = 1200, MAX_HEIGHT = 1200;
+                    let width = img.width, height = img.height;
+                    if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } }
+                    else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
+                    canvas.width = width; canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+                    vehiculoPhotoBase64 = canvas.toDataURL('image/jpeg', 0.9);
+                    await saveMotoDocs();
+                    updateMotoDocsUI();
+                    alert("¡Foto de datos del vehículo subida con éxito!");
+                }
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.removeVehiculoPhoto = async () => {
+            if (!confirm("¿Deseas eliminar la foto de datos del vehículo?")) return;
+            vehiculoPhotoBase64 = null;
+            await saveMotoDocs();
+            updateMotoDocsUI();
+            alert("Foto eliminada.");
+        };
+
         window.saveMotoSpare = async (e) => {
             e.preventDefault();
             const name = document.getElementById('spare-name').value.trim();
@@ -889,10 +975,27 @@
             const soatDate = document.getElementById('moto-soat-date').value;
             const revDate = document.getElementById('moto-rev-date').value;
             try {
-                await setDoc(doc(db, `users_config/${currentUser.uid}`), { motoDocs: { soatDate, revDate, soatPhoto: soatPhotoBase64 } }, { merge: true });
+                await setDoc(doc(db, `users_config/${currentUser.uid}`), { motoDocs: { soatDate, revDate, soatPhoto: soatPhotoBase64, tarjetaPdf: tarjetaPdfBase64, vehiculoPhoto: vehiculoPhotoBase64 } }, { merge: true });
                 checkMotoDocAlerts(soatDate, revDate);
+                updateMotoDocsUI();
             } catch (err) { console.error(err); }
         };
+
+        function updateMotoDocsUI() {
+            const pdfStatus = document.getElementById('tarjeta-pdf-status');
+            if (tarjetaPdfBase64) {
+                pdfStatus.innerHTML = `<a href="${tarjetaPdfBase64}" target="_blank" class="text-emerald-400 font-bold hover:underline"><i class="fa-solid fa-eye mr-0.5"></i> Ver</a> <button onclick="removeTarjetaPdf()" class="text-rose-400 font-bold hover:underline ml-1"><i class="fa-solid fa-trash-can"></i></button>`;
+            } else {
+                pdfStatus.textContent = "Sin archivo";
+            }
+
+            const vehiculoStatus = document.getElementById('vehiculo-photo-status');
+            if (vehiculoPhotoBase64) {
+                vehiculoStatus.innerHTML = `<button onclick="openImageModal('${vehiculoPhotoBase64}')" class="text-emerald-400 font-bold hover:underline"><i class="fa-solid fa-eye mr-0.5"></i> Ver</button> <button onclick="removeVehiculoPhoto()" class="text-rose-400 font-bold hover:underline ml-1"><i class="fa-solid fa-trash-can"></i></button>`;
+            } else {
+                vehiculoStatus.textContent = "Sin foto";
+            }
+        }
 
         function checkMotoDocAlerts(soatDate, revDate) {
             const today = new Date();
@@ -1068,6 +1171,9 @@
             if (soatPhotoBase64) {
                 allPhotos.push({ id: 'soat-doc', title: '[SOAT Vigente]', date: '2026', amount: 0, photo: soatPhotoBase64, type: 'soat' });
             }
+            if (vehiculoPhotoBase64) {
+                allPhotos.push({ id: 'vehiculo-doc', title: '[Datos del Vehículo]', date: '2026', amount: 0, photo: vehiculoPhotoBase64, type: 'vehiculo' });
+            }
 
             document.getElementById('gallery-count').textContent = `${allPhotos.length} fotos`;
 
@@ -1081,7 +1187,8 @@
                 let deleteAction = '';
                 if (item.type === 'tx') deleteAction = `removePhotoFromTx('${item.id}')`;
                 else if (item.type === 'spare') deleteAction = `removePhotoFromSpare('${item.id}')`;
-                else deleteAction = `removeSoatPhoto()`;
+                else if (item.type === 'soat') deleteAction = `removeSoatPhoto()`;
+                else deleteAction = `removeVehiculoPhoto()`;
 
                 gridEl.innerHTML += `
                     <div class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-2.5 flex flex-col justify-between space-y-2 transition-colors duration-300">
@@ -1205,7 +1312,10 @@
                         if (data.motoDocs.soatDate) document.getElementById('moto-soat-date').value = data.motoDocs.soatDate;
                         if (data.motoDocs.revDate) document.getElementById('moto-rev-date').value = data.motoDocs.revDate;
                         if (data.motoDocs.soatPhoto) soatPhotoBase64 = data.motoDocs.soatPhoto;
+                        if (data.motoDocs.tarjetaPdf) tarjetaPdfBase64 = data.motoDocs.tarjetaPdf;
+                        if (data.motoDocs.vehiculoPhoto) vehiculoPhotoBase64 = data.motoDocs.vehiculoPhoto;
                         checkMotoDocAlerts(data.motoDocs.soatDate, data.motoDocs.revDate);
+                        updateMotoDocsUI();
                     }
                 }
             } catch (e) { console.error(e); }
@@ -1706,7 +1816,7 @@
         }
 
         window.exportJSON = () => {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ transactions, categories, savingsGoals, motoSpares, soatPhotoBase64 }));
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ transactions, categories, savingsGoals, motoSpares, soatPhotoBase64, tarjetaPdfBase64, vehiculoPhotoBase64 }));
             const dlAnchorElem = document.createElement('a');
             dlAnchorElem.setAttribute("href", dataStr);
             dlAnchorElem.setAttribute("download", "misfinanzas_respaldo.json");
@@ -1731,8 +1841,14 @@
                     }
                     if (data.soatPhotoBase64) {
                         soatPhotoBase64 = data.soatPhotoBase64;
-                        await saveMotoDocs();
                     }
+                    if (data.tarjetaPdfBase64) {
+                        tarjetaPdfBase64 = data.tarjetaPdfBase64;
+                    }
+                    if (data.vehiculoPhotoBase64) {
+                        vehiculoPhotoBase64 = data.vehiculoPhotoBase64;
+                    }
+                    await saveMotoDocs();
                     alert("¡Datos importados con éxito!"); loadUserData();
                 } catch (err) { alert("Archivo no válido"); }
             };
