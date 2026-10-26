@@ -16,29 +16,6 @@ let currentPhotoBase64 = null;
 let sparePhotoBase64 = null;
 
 let isDarkMode = localStorage.getItem('app_dark_mode') !== 'false';
-applyDarkMode(isDarkMode);
-
-window.toggleDarkMode = () => {
-    isDarkMode = !isDarkMode;
-    localStorage.setItem('app_dark_mode', isDarkMode);
-    applyDarkMode(isDarkMode);
-    renderUI();
-};
-
-function applyDarkMode(dark) {
-    const htmlRoot = document.getElementById('html-root');
-    const icon = document.getElementById('theme-toggle-icon');
-    if (dark) {
-        htmlRoot.classList.add('dark');
-        if (icon) icon.className = "fa-solid fa-sun text-amber-400";
-    } else {
-        htmlRoot.classList.remove('dark');
-        if (icon) icon.className = "fa-solid fa-moon text-slate-300";
-    }
-}
-
-let calcInput = "0";
-let calcHistoryStr = "";
 
 let categories = [
     { name: 'Comida / Alimentos', color: '#EF4444', budget: 300 },
@@ -53,6 +30,26 @@ let chartInstance = null;
 let barChartInstance = null;
 let dailyChartInstance = null;
 
+// Exponer funciones necesarias al objeto global (window)
+window.applyDarkMode = (dark) => {
+    const htmlRoot = document.getElementById('html-root');
+    const icon = document.getElementById('theme-toggle-icon');
+    if (dark) {
+        htmlRoot.classList.add('dark');
+        if (icon) icon.className = "fa-solid fa-sun text-amber-400";
+    } else {
+        htmlRoot.classList.remove('dark');
+        if (icon) icon.className = "fa-solid fa-moon text-slate-300";
+    }
+};
+
+window.toggleDarkMode = () => {
+    isDarkMode = !isDarkMode;
+    localStorage.setItem('app_dark_mode', isDarkMode);
+    window.applyDarkMode(isDarkMode);
+    window.renderUI();
+};
+
 window.switchTab = (tab) => {
     document.getElementById('tab-dashboard').classList.add('hidden');
     document.getElementById('tab-add').classList.add('hidden');
@@ -65,109 +62,83 @@ window.switchTab = (tab) => {
     else if (tab === 'history') document.getElementById('tab-history').classList.remove('hidden');
     else if (tab === 'gallery') {
         document.getElementById('tab-gallery').classList.remove('hidden');
-        renderGallery();
+        window.renderGallery();
     } else if (tab === 'moto') {
         document.getElementById('tab-moto').classList.remove('hidden');
-        renderMotoUI();
+        window.renderMotoUI();
     }
 };
 
 window.logout = () => signOut(auth);
 
-let isRegister = false;
-window.toggleAuthMode = () => {
-    isRegister = !isRegister;
-    document.getElementById('name-field').classList.toggle('hidden', !isRegister);
-    document.getElementById('auth-title').textContent = isRegister ? 'Crear Cuenta' : 'Iniciar Sesión';
-    document.getElementById('auth-btn').textContent = isRegister ? 'Registrarse' : 'Iniciar Sesión';
-    document.getElementById('auth-switch').textContent = isRegister ? '¿Ya tienes cuenta? Inicia Sesión' : '¿No tienes cuenta? Regístrate';
-};
-
-document.getElementById('auth-switch').onclick = window.toggleAuthMode;
-
-document.getElementById('auth-form').onsubmit = async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('auth-email').value.trim();
-    const password = document.getElementById('auth-password').value.trim();
-    const name = document.getElementById('auth-name').value.trim();
-    const errDiv = document.getElementById('auth-error');
-    errDiv.classList.add('hidden');
-
-    try {
-        if (isRegister) {
-            const res = await createUserWithEmailAndPassword(auth, email, password);
-            if (name) await updateProfile(res.user, { displayName: name });
-        } else {
-            await signInWithEmailAndPassword(auth, email, password);
-        }
-    } catch (err) {
-        errDiv.textContent = "Error al autenticar. Verifica tus datos.";
-        errDiv.classList.remove('hidden');
-    }
-};
-
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        currentUser = user;
-        document.getElementById('auth-screen').classList.add('hidden');
-        document.getElementById('app-screen').classList.remove('hidden');
-        document.getElementById('user-display-name').textContent = user.displayName || user.email;
-        await loadUserData();
-    } else {
-        currentUser = null;
-        document.getElementById('app-screen').classList.add('hidden');
-        document.getElementById('auth-screen').classList.remove('hidden');
-    }
-});
-
-async function loadUserData() {
-    try {
-        const querySnapTx = await getDocs(collection(db, `users/${currentUser.uid}/transactions`));
-        transactions = [];
-        querySnapTx.forEach((doc) => transactions.push({ id: doc.id, ...doc.data() }));
-
-        const querySnapGoals = await getDocs(collection(db, `users/${currentUser.uid}/savingsGoals`));
-        savingsGoals = [];
-        querySnapGoals.forEach((doc) => savingsGoals.push({ id: doc.id, ...doc.data() }));
-
-        const querySnapSpares = await getDocs(collection(db, `users/${currentUser.uid}/motoSpares`));
-        motoSpares = [];
-        querySnapSpares.forEach((doc) => motoSpares.push({ id: doc.id, ...doc.data() }));
-
-        const catDoc = await getDoc(doc(db, `users_config/${currentUser.uid}`));
-        if (catDoc.exists()) {
-            const data = catDoc.data();
-            if (data.categories && data.categories.length > 0) {
-                categories = data.categories.map(c => typeof c === 'string' ? { name: c, color: '#3B82F6', budget: 0 } : { budget: 0, ...c });
-            }
-            if (data.appName) {
-                document.getElementById('app-brand-name').textContent = data.appName;
-            }
-            if (data.motoDocs) {
-                if (data.motoDocs.soatDate) document.getElementById('moto-soat-date').value = data.motoDocs.soatDate;
-                if (data.motoDocs.revDate) document.getElementById('moto-rev-date').value = data.motoDocs.revDate;
-                if (data.motoDocs.soatPhoto) soatPhotoBase64 = data.motoDocs.soatPhoto;
-                if (data.motoDocs.tarjetaPdf) tarjetaPdfBase64 = data.motoDocs.tarjetaPdf;
-                if (data.motoDocs.vehiculoPhoto) vehiculoPhotoBase64 = data.motoDocs.vehiculoPhoto;
-                checkMotoDocAlerts(data.motoDocs.soatDate, data.motoDocs.revDate);
-                updateMotoDocsUI();
-            }
-        }
-    } catch (e) { console.error(e); }
-    renderCategories();
-    renderGoalsUI();
-    renderMotoUI();
-    renderUI();
-}
-
 window.toggleBalanceVisibility = () => {
     isBalanceVisible = !isBalanceVisible;
-    document.getElementById('toggle-eye-icon').className = isBalanceVisible ? "fa-solid fa-eye" : "fa-solid fa-eye-slash";
-    renderUI();
+    const eyeIcon = document.getElementById('toggle-eye-icon');
+    if (eyeIcon) eyeIcon.className = isBalanceVisible ? "fa-solid fa-eye" : "fa-solid fa-eye-slash";
+    window.renderUI();
+};
+
+window.renderGoalsUI = () => {
+    const listEl = document.getElementById('savings-goals-list');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    if (savingsGoals.length === 0) {
+        listEl.innerHTML = `<p class="text-[11px] text-slate-400 text-center py-1">No tienes metas activas.</p>`;
+        return;
+    }
+    savingsGoals.forEach(g => {
+        const percent = Math.min(100, Math.round((g.current / g.target) * 100));
+        listEl.innerHTML += `
+            <div class="bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 p-2.5 rounded-2xl space-y-1.5">
+                <div class="flex justify-between items-center text-xs">
+                    <span class="font-bold text-slate-800 dark:text-slate-200">${g.title}</span>
+                    <span class="text-[11px] font-extrabold text-emerald-600">S/ ${g.current.toFixed(2)} / S/ ${g.target.toFixed(2)}</span>
+                </div>
+                <div class="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+                    <div class="bg-emerald-500 h-full rounded-full" style="width: ${percent}%;"></div>
+                </div>
+            </div>
+        `;
+    });
+};
+
+window.renderMotoUI = () => {
+    const listEl = document.getElementById('moto-spares-list');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    if (motoSpares.length === 0) {
+        listEl.innerHTML = `<p class="text-[11px] text-slate-400 text-center py-3">No hay repuestos registrados.</p>`;
+        return;
+    }
+    motoSpares.forEach(s => {
+        listEl.innerHTML += `
+            <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-2xl">
+                <div>
+                    <p class="font-bold text-slate-800 dark:text-slate-100 text-xs">${s.name}</p>
+                    <p class="text-[10px] text-slate-400">${s.date}</p>
+                </div>
+                <span class="font-extrabold text-xs text-emerald-600">S/ ${s.cost.toFixed(2)}</span>
+            </div>
+        `;
+    });
+};
+
+window.renderGallery = () => {
+    const gridEl = document.getElementById('gallery-grid');
+    if (!gridEl) return;
+    gridEl.innerHTML = `<p class="col-span-2 text-xs text-slate-400 text-center py-6">Galería sincronizada.</p>`;
+};
+
+window.renderCategories = () => {
+    const selectForm = document.getElementById('tx-category');
+    if (selectForm) {
+        selectForm.innerHTML = categories.map(cat => `<option value="${cat.name}">${cat.name}</option>`).join('');
+    }
 };
 
 window.renderUI = () => {
-    const timeFilter = document.getElementById('time-filter').value;
+    const timeFilterEl = document.getElementById('time-filter');
+    const timeFilter = timeFilterEl ? timeFilterEl.value : 'all';
     const categoryFilterSelect = document.getElementById('category-filter');
     const categoryFilter = categoryFilterSelect ? categoryFilterSelect.value : 'all';
     const searchInput = document.getElementById('history-search-input');
@@ -183,12 +154,7 @@ window.renderUI = () => {
     const monthlyDataMap = {};
     const monthNames = ['may', 'jun', 'jul', 'ago', 'sept', 'oct', 'nov', 'dic', 'ene', 'feb', 'mar', 'abr'];
 
-    const timeFilteredTransactions = transactions.filter(tx => {
-        if (!tx.date) return true;
-        return true;
-    });
-
-    timeFilteredTransactions.forEach(tx => {
+    transactions.forEach(tx => {
         const txDate = new Date(tx.date || Date.now());
         const monthKey = monthNames[txDate.getMonth() % 12];
         if (!monthlyDataMap[monthKey]) monthlyDataMap[monthKey] = { income: 0, expense: 0, net: 0 };
@@ -217,9 +183,7 @@ window.renderUI = () => {
         categoryFilterSelect.value = categoryFilter;
     }
 
-    Object.keys(monthlyDataMap).forEach(m => monthlyDataMap[m].net = monthlyDataMap[m].income - monthlyDataMap[m].expense);
-
-    const filteredTransactions = timeFilteredTransactions.filter(tx => {
+    const filteredTransactions = transactions.filter(tx => {
         const matchCategory = (categoryFilter === 'all') || ((tx.category || 'General') === categoryFilter);
         const matchSearch = searchQuery === '' || 
             (tx.description || '').toLowerCase().includes(searchQuery) || 
@@ -235,10 +199,7 @@ window.renderUI = () => {
     }
 
     filteredTransactions.forEach((tx) => {
-        const catObj = categories.find(c => c.name === (tx.category || 'General'));
-        const catColor = catObj ? catObj.color : '#000000';
         let formattedDate = tx.date ? tx.date.split('T')[0] : '';
-        
         const itemHTML = `
             <div class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
                 <div class="flex items-center space-x-3 overflow-hidden mr-2">
@@ -267,79 +228,93 @@ window.renderUI = () => {
         if (document.getElementById('total-income')) document.getElementById('total-income').textContent = `S/ *****`;
         if (document.getElementById('total-expense')) document.getElementById('total-expense').textContent = `S/ *****`;
     }
+};
+
+async function loadUserData() {
+    try {
+        const querySnapTx = await getDocs(collection(db, `users/${currentUser.uid}/transactions`));
+        transactions = [];
+        querySnapTx.forEach((doc) => transactions.push({ id: doc.id, ...doc.data() }));
+
+        const querySnapGoals = await getDocs(collection(db, `users/${currentUser.uid}/savingsGoals`));
+        savingsGoals = [];
+        querySnapGoals.forEach((doc) => savingsGoals.push({ id: doc.id, ...doc.data() }));
+
+        const querySnapSpares = await getDocs(collection(db, `users/${currentUser.uid}/motoSpares`));
+        motoSpares = [];
+        querySnapSpares.forEach((doc) => motoSpares.push({ id: doc.id, ...doc.data() }));
+
+        const catDoc = await getDoc(doc(db, `users_config/${currentUser.uid}`));
+        if (catDoc.exists()) {
+            const data = catDoc.data();
+            if (data.categories && data.categories.length > 0) {
+                categories = data.categories.map(c => typeof c === 'string' ? { name: c, color: '#3B82F6', budget: 0 } : { budget: 0, ...c });
+            }
+            if (data.appName) {
+                const brandEl = document.getElementById('app-brand-name');
+                if (brandEl) brandEl.textContent = data.appName;
+            }
+        }
+    } catch (e) { console.error("Error al cargar datos del usuario:", e); }
+
+    window.renderCategories();
+    window.renderGoalsUI();
+    window.renderMotoUI();
+    window.renderUI();
 }
 
-function renderCategories() {
-    const selectForm = document.getElementById('tx-category');
-    if (selectForm) {
-        selectForm.innerHTML = categories.map(cat => `<option value="${cat.name}">${cat.name}</option>`).join('');
+// Inicializar Autenticación y Eventos
+window.applyDarkMode(isDarkMode);
+
+const authSwitchBtn = document.getElementById('auth-switch');
+if (authSwitchBtn) {
+    authSwitchBtn.onclick = () => {
+        isRegister = !isRegister;
+        document.getElementById('name-field').classList.toggle('hidden', !isRegister);
+        document.getElementById('auth-title').textContent = isRegister ? 'Crear Cuenta' : 'Iniciar Sesión';
+        document.getElementById('auth-btn').textContent = isRegister ? 'Registrarse' : 'Iniciar Sesión';
+        authSwitchBtn.textContent = isRegister ? '¿Ya tienes cuenta? Inicia Sesión' : '¿No tienes cuenta? Regístrate';
+    };
+}
+
+const authForm = document.getElementById('auth-form');
+if (authForm) {
+    authForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('auth-email').value.trim();
+        const password = document.getElementById('auth-password').value.trim();
+        const nameField = document.getElementById('auth-name');
+        const name = nameField ? nameField.value.trim() : '';
+        const errDiv = document.getElementById('auth-error');
+        if (errDiv) errDiv.classList.add('hidden');
+
+        try {
+            if (isRegister) {
+                const res = await createUserWithEmailAndPassword(auth, email, password);
+                if (name) await updateProfile(res.user, { displayName: name });
+            } else {
+                await signInWithEmailAndPassword(auth, email, password);
+            }
+        } catch (err) {
+            if (errDiv) {
+                errDiv.textContent = "Error de autenticación. Revisa tu correo y contraseña.";
+                errDiv.classList.remove('hidden');
+            }
+        }
+    };
+}
+
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        currentUser = user;
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('app-screen').classList.remove('hidden');
+        const nameEl = document.getElementById('user-display-name');
+        if (nameEl) nameEl.textContent = user.displayName || user.email;
+        await loadUserData();
+    } else {
+        currentUser = null;
+        document.getElementById('app-screen').classList.add('hidden');
+        document.getElementById('auth-screen').classList.remove('hidden');
     }
-}
-
-function renderGoalsUI() {
-    const listEl = document.getElementById('savings-goals-list');
-    if (!listEl) return;
-    listEl.innerHTML = '';
-    if (savingsGoals.length === 0) {
-        listEl.innerHTML = `<p class="text-[11px] text-slate-400 text-center py-1">No tienes metas activas.</p>`;
-        return;
-    }
-    savingsGoals.forEach(g => {
-        const percent = Math.min(100, Math.round((g.current / g.target) * 100));
-        listEl.innerHTML += `
-            <div class="bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 p-2.5 rounded-2xl space-y-1.5">
-                <div class="flex justify-between items-center text-xs">
-                    <span class="font-bold text-slate-800 dark:text-slate-200">${g.title}</span>
-                    <span class="text-[11px] font-extrabold text-emerald-600">S/ ${g.current.toFixed(2)} / S/ ${g.target.toFixed(2)}</span>
-                </div>
-                <div class="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
-                    <div class="bg-emerald-500 h-full rounded-full" style="width: ${percent}%;"></div>
-                </div>
-            </div>
-        `;
-    });
-}
-
-function renderMotoUI() {
-    const listEl = document.getElementById('moto-spares-list');
-    if (!listEl) return;
-    listEl.innerHTML = '';
-    if (motoSpares.length === 0) {
-        listEl.innerHTML = `<p class="text-[11px] text-slate-400 text-center py-3">No hay repuestos registrados.</p>`;
-        return;
-    }
-    motoSpares.forEach(s => {
-        listEl.innerHTML += `
-            <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-2xl">
-                <div>
-                    <p class="font-bold text-slate-800 dark:text-slate-100 text-xs">${s.name}</p>
-                    <p class="text-[10px] text-slate-400">${s.date}</p>
-                </div>
-                <span class="font-extrabold text-xs text-emerald-600">S/ ${s.cost.toFixed(2)}</span>
-            </div>
-        `;
-    });
-}
-
-function renderGallery() {
-    const gridEl = document.getElementById('gallery-grid');
-    if (!gridEl) return;
-    gridEl.innerHTML = `<p class="col-span-2 text-xs text-slate-400 text-center py-6">Galería sincronizada.</p>`;
-}
-
-function checkMotoDocAlerts(soatDate, revDate) {
-    const today = new Date();
-    const badge = document.getElementById('soat-status-badge');
-    if (soatDate && badge) {
-        const soat = new Date(soatDate);
-        const diffDays = Math.ceil((soat - today) / (1000 * 60 * 60 * 24));
-        badge.textContent = diffDays < 0 ? "¡Vencido!" : `Vigente (${diffDays}d)`;
-    }
-}
-
-function updateMotoDocsUI() {
-    const pdfStatus = document.getElementById('tarjeta-pdf-status');
-    if (pdfStatus && tarjetaPdfBase64) pdfStatus.textContent = "Subido con éxito";
-    const vehiculoStatus = document.getElementById('vehiculo-photo-status');
-    if (vehiculoStatus && vehiculoPhotoBase64) vehiculoStatus.textContent = "Foto cargada";
-}
+});
