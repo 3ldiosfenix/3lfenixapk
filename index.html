@@ -400,28 +400,39 @@
                         </div>
                     </div>
 
-                    <!-- 2. BLOQUE INFERIOR: Mantenimiento por km con Km Inicial y Km Actual -->
+                    <!-- 2. BLOQUE INFERIOR: Mantenimiento Independiente por Km -->
                     <div class="bg-slate-900 text-white p-4 rounded-2xl space-y-3 shadow-md border border-slate-800">
                         <div class="flex justify-between items-center">
-                            <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider"><i class="fa-solid fa-gauge mr-1"></i> Mantenimiento por km</h4>
+                            <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider"><i class="fa-solid fa-gauge mr-1"></i> Control de Mantenimiento</h4>
                             <span id="moto-km-status" class="text-[9px] font-bold px-2 py-0.5 rounded-full inline-block bg-slate-800 text-slate-300">Sin datos</span>
                         </div>
-                        <p class="text-[10px] text-slate-400">Ingresa tu kilometraje inicial de mantenimiento y tu kilometraje actual en ruta.</p>
+                        <p class="text-[10px] text-slate-400">Configura el kilometraje inicial independiente para cada mantenimiento y actualiza tu odómetro actual.</p>
                         
-                        <div class="space-y-2 pt-1">
-                            <div>
-                                <label class="block text-[10px] font-semibold text-slate-400 mb-1">Kilometraje Inicial (Referencia mantenimiento)</label>
+                        <div class="space-y-3 pt-1">
+                            <!-- Km Inicial Cambio de Aceite -->
+                            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-1.5">
+                                <label class="block text-[10px] font-bold text-emerald-400 uppercase">Km Inicial - Cambio de Aceite (Cada 2,500 km)</label>
                                 <div class="flex gap-2">
-                                    <input type="number" id="moto-km-input" placeholder="Ej. 21616" class="w-full bg-slate-800 border border-slate-700 text-white text-xs px-3 py-2 rounded-xl outline-none focus:ring-1 focus:ring-amber-400">
-                                    <button type="button" onclick="saveMotoKm()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs px-4 py-2 rounded-xl font-bold transition">Guardar</button>
+                                    <input type="number" id="moto-km-aceite-input" placeholder="Ej. 24116" class="w-full bg-slate-900 border border-slate-700 text-white text-xs px-3 py-2 rounded-xl outline-none focus:ring-1 focus:ring-emerald-400">
+                                    <button type="button" onclick="saveMotoKmAceite()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-4 py-2 rounded-xl font-bold transition">Guardar</button>
                                 </div>
                             </div>
 
-                            <div>
-                                <label class="block text-[10px] font-semibold text-slate-400 mb-1">Kilometraje Actual (Odómetro de la moto)</label>
+                            <!-- Km Inicial Mantenimiento Integral -->
+                            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-1.5">
+                                <label class="block text-[10px] font-bold text-amber-400 uppercase">Km Inicial - Mantenimiento Integral (Cada 5,000 km)</label>
                                 <div class="flex gap-2">
-                                    <input type="number" id="moto-current-odometer-input" placeholder="Ej. 22000" class="w-full bg-slate-800 border border-slate-700 text-white text-xs px-3 py-2 rounded-xl outline-none focus:ring-1 focus:ring-emerald-400">
-                                    <button type="button" onclick="saveMotoOdometer()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-4 py-2 rounded-xl font-bold transition">Actualizar</button>
+                                    <input type="number" id="moto-km-afinamiento-input" placeholder="Ej. 24116" class="w-full bg-slate-900 border border-slate-700 text-white text-xs px-3 py-2 rounded-xl outline-none focus:ring-1 focus:ring-amber-400">
+                                    <button type="button" onclick="saveMotoKmAfinamiento()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs px-4 py-2 rounded-xl font-bold transition">Guardar</button>
+                                </div>
+                            </div>
+
+                            <!-- Kilometraje Actual (Odómetro General) -->
+                            <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700 space-y-1.5">
+                                <label class="block text-[10px] font-bold text-slate-300 uppercase">Kilometraje Actual (Odómetro de la moto)</label>
+                                <div class="flex gap-2">
+                                    <input type="number" id="moto-current-odometer-input" placeholder="Ej. 25000" class="w-full bg-slate-900 border border-slate-700 text-white text-xs px-3 py-2 rounded-xl outline-none focus:ring-1 focus:ring-blue-400">
+                                    <button type="button" onclick="saveMotoOdometer()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2 rounded-xl font-bold transition">Actualizar</button>
                                 </div>
                             </div>
                         </div>
@@ -429,7 +440,7 @@
                         <!-- Panel de Próximos Mantenimientos y Cuánto Falta -->
                         <div id="moto-proximos-mantenimientos" class="hidden mt-3 pt-3 border-t border-slate-800 space-y-2">
                             <div class="flex items-center gap-1.5 text-amber-400 font-bold text-xs uppercase tracking-wider">
-                                <i class="fa-solid fa-calendar-days"></i> Próximos Mantenimientos
+                                <i class="fa-solid fa-calendar-days"></i> Resultados y Metas
                             </div>
                             <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700/80 space-y-2.5 text-xs">
                                 <div class="flex justify-between items-center">
@@ -437,8 +448,8 @@
                                     <span id="prox-aceite" class="font-bold text-emerald-400">-- km</span>
                                 </div>
                                 <div class="flex justify-between items-center">
-                                    <span class="text-slate-300 font-medium">• Afinamiento integral:</span>
-                                    <span id="prox-afinamiento" class="font-bold text-emerald-400">-- km</span>
+                                    <span class="text-slate-300 font-medium">• Mantenimiento integral:</span>
+                                    <span id="prox-afinamiento" class="font-bold text-amber-400">-- km</span>
                                 </div>
                             </div>
                         </div>
@@ -652,7 +663,9 @@
         let isRegister = false;
         let currentPhotoBase64 = null;
         let sparePhotoBase64 = null;
-        let currentMotoKm = null;
+        
+        let currentMotoKmAceite = null;
+        let currentMotoKmAfinamiento = null;
         let currentMotoOdometer = null;
         
         let isDarkMode = localStorage.getItem('app_dark_mode') !== 'false';
@@ -843,15 +856,26 @@
         window.openMotoSpareModal = () => document.getElementById('moto-spare-modal').classList.remove('hidden');
         window.closeMotoSpareModal = () => document.getElementById('moto-spare-modal').classList.add('hidden');
 
-        window.saveMotoKm = async () => {
-            const inputVal = document.getElementById('moto-km-input').value.trim();
+        window.saveMotoKmAceite = async () => {
+            const inputVal = document.getElementById('moto-km-aceite-input').value.trim();
             if (!inputVal) return;
             const km = parseFloat(inputVal);
             if (isNaN(km)) return;
-            currentMotoKm = km;
+            currentMotoKmAceite = km;
             await saveMotoDocs();
             updateMotoKmUI();
-            alert("¡Kilometraje inicial guardado correctamente!");
+            alert("¡Kilometraje inicial de Aceite guardado!");
+        };
+
+        window.saveMotoKmAfinamiento = async () => {
+            const inputVal = document.getElementById('moto-km-afinamiento-input').value.trim();
+            if (!inputVal) return;
+            const km = parseFloat(inputVal);
+            if (isNaN(km)) return;
+            currentMotoKmAfinamiento = km;
+            await saveMotoDocs();
+            updateMotoKmUI();
+            alert("¡Kilometraje inicial de Mantenimiento Integral guardado!");
         };
 
         window.saveMotoOdometer = async () => {
@@ -867,34 +891,44 @@
 
         function updateMotoKmUI() {
             const statusEl = document.getElementById('moto-km-status');
-            const inputEl = document.getElementById('moto-km-input');
-            const odInputEl = document.getElementById('moto-current-odometer-input');
+            const aceiteInput = document.getElementById('moto-km-aceite-input');
+            const afinInput = document.getElementById('moto-km-afinamiento-input');
+            const odInput = document.getElementById('moto-current-odometer-input');
             const proximosBox = document.getElementById('moto-proximos-mantenimientos');
             
-            if (currentMotoKm !== null && currentMotoKm !== undefined) {
-                if (inputEl) inputEl.value = currentMotoKm;
-                if (currentMotoOdometer !== null && currentMotoOdometer !== undefined) {
-                    if (odInputEl) odInputEl.value = currentMotoOdometer;
-                    statusEl.textContent = `Actual: ${currentMotoOdometer} km`;
-                    statusEl.className = "text-[9px] font-bold px-2 py-0.5 rounded-full inline-block bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+            if (aceiteInput && currentMotoKmAceite !== null) aceiteInput.value = currentMotoKmAceite;
+            if (afinInput && currentMotoKmAfinamiento !== null) afinInput.value = currentMotoKmAfinamiento;
+            if (odInput && currentMotoOdometer !== null) odInput.value = currentMotoOdometer;
+
+            if (currentMotoKmAceite !== null || currentMotoKmAfinamiento !== null) {
+                if (currentMotoOdometer !== null) {
+                    statusEl.textContent = `Odómetro: ${currentMotoOdometer} km`;
+                    statusEl.className = "text-[9px] font-bold px-2 py-0.5 rounded-full inline-block bg-blue-500/20 text-blue-400 border border-blue-500/30";
                 } else {
-                    statusEl.textContent = `Inicial: ${currentMotoKm} km`;
-                    statusEl.className = "text-[9px] font-bold px-2 py-0.5 rounded-full inline-block bg-amber-500/20 text-amber-400 border border-amber-500/30";
+                    statusEl.textContent = "Configurado";
+                    statusEl.className = "text-[9px] font-bold px-2 py-0.5 rounded-full inline-block bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
                 }
 
-                // Cálculos automáticos de metas y lo que falta
-                const aceiteMeta = currentMotoKm + 2500;
-                const afinamientoMeta = currentMotoKm + 5000;
+                // Cálculo Aceite (cada 2500 km)
+                let aceiteText = "Sin definir";
+                if (currentMotoKmAceite !== null) {
+                    const aceiteMeta = currentMotoKmAceite + 2500;
+                    aceiteText = `${aceiteMeta.toLocaleString()} km`;
+                    if (currentMotoOdometer !== null) {
+                        const faltaAceite = aceiteMeta - currentMotoOdometer;
+                        aceiteText += ` (Faltan ${faltaAceite > 0 ? faltaAceite.toLocaleString() : 0} km)`;
+                    }
+                }
 
-                let aceiteText = `${aceiteMeta.toLocaleString()} km`;
-                let afinamientoText = `${afinamientoMeta.toLocaleString()} km`;
-
-                if (currentMotoOdometer !== null && currentMotoOdometer !== undefined) {
-                    const faltaAceite = aceiteMeta - currentMotoOdometer;
-                    const faltaAfinamiento = afinamientoMeta - currentMotoOdometer;
-
-                    aceiteText += ` (Faltan ${faltaAceite > 0 ? faltaAceite.toLocaleString() : 0} km)`;
-                    afinamientoText += ` (Faltan ${faltaAfinamiento > 0 ? faltaAfinamiento.toLocaleString() : 0} km)`;
+                // Cálculo Afinamiento (cada 5000 km)
+                let afinamientoText = "Sin definir";
+                if (currentMotoKmAfinamiento !== null) {
+                    const afinamientoMeta = currentMotoKmAfinamiento + 5000;
+                    afinamientoText = `${afinamientoMeta.toLocaleString()} km`;
+                    if (currentMotoOdometer !== null) {
+                        const faltaAfinamiento = afinamientoMeta - currentMotoOdometer;
+                        afinamientoText += ` (Faltan ${faltaAfinamiento > 0 ? faltaAfinamiento.toLocaleString() : 0} km)`;
+                    }
                 }
 
                 document.getElementById('prox-aceite').textContent = aceiteText;
@@ -1069,7 +1103,17 @@
         window.saveMotoDocs = async () => {
             const soatDate = document.getElementById('moto-soat-date').value;
             try {
-                await setDoc(doc(db, `users_config/${currentUser.uid}`), { motoDocs: { soatDate, km: currentMotoKm, odometer: currentMotoOdometer, soatPhoto: soatPhotoBase64, tarjetaPdf: tarjetaPdfBase64, vehiculoPhoto: vehiculoPhotoBase64 } }, { merge: true });
+                await setDoc(doc(db, `users_config/${currentUser.uid}`), { 
+                    motoDocs: { 
+                        soatDate, 
+                        kmAceite: currentMotoKmAceite, 
+                        kmAfinamiento: currentMotoKmAfinamiento, 
+                        odometer: currentMotoOdometer, 
+                        soatPhoto: soatPhotoBase64, 
+                        tarjetaPdf: tarjetaPdfBase64, 
+                        vehiculoPhoto: vehiculoPhotoBase64 
+                    } 
+                }, { merge: true });
                 checkMotoDocAlerts(soatDate);
                 updateMotoDocsUI();
                 updateMotoKmUI();
@@ -1390,7 +1434,8 @@
                     }
                     if (data.motoDocs) {
                         if (data.motoDocs.soatDate) document.getElementById('moto-soat-date').value = data.motoDocs.soatDate;
-                        if (data.motoDocs.km !== undefined) currentMotoKm = data.motoDocs.km;
+                        if (data.motoDocs.kmAceite !== undefined) currentMotoKmAceite = data.motoDocs.kmAceite;
+                        if (data.motoDocs.kmAfinamiento !== undefined) currentMotoKmAfinamiento = data.motoDocs.kmAfinamiento;
                         if (data.motoDocs.odometer !== undefined) currentMotoOdometer = data.motoDocs.odometer;
                         if (data.motoDocs.soatPhoto) soatPhotoBase64 = data.motoDocs.soatPhoto;
                         if (data.motoDocs.tarjetaPdf) tarjetaPdfBase64 = data.motoDocs.tarjetaPdf;
@@ -1897,7 +1942,7 @@
         }
 
         window.exportJSON = () => {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ transactions, categories, savingsGoals, motoSpares, soatPhotoBase64, tarjetaPdfBase64, vehiculoPhotoBase64, currentMotoKm, currentMotoOdometer }));
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ transactions, categories, savingsGoals, motoSpares, soatPhotoBase64, tarjetaPdfBase64, vehiculoPhotoBase64, currentMotoKmAceite, currentMotoKmAfinamiento, currentMotoOdometer }));
             const dlAnchorElem = document.createElement('a');
             dlAnchorElem.setAttribute("href", dataStr);
             dlAnchorElem.setAttribute("download", "misfinanzas_respaldo.json");
@@ -1923,7 +1968,8 @@
                     if (data.soatPhotoBase64) soatPhotoBase64 = data.soatPhotoBase64;
                     if (data.tarjetaPdfBase64) tarjetaPdfBase64 = data.tarjetaPdfBase64;
                     if (data.vehiculoPhotoBase64) vehiculoPhotoBase64 = data.vehiculoPhotoBase64;
-                    if (data.currentMotoKm !== undefined) currentMotoKm = data.currentMotoKm;
+                    if (data.currentMotoKmAceite !== undefined) currentMotoKmAceite = data.currentMotoKmAceite;
+                    if (data.currentMotoKmAfinamiento !== undefined) currentMotoKmAfinamiento = data.currentMotoKmAfinamiento;
                     if (data.currentMotoOdometer !== undefined) currentMotoOdometer = data.currentMotoOdometer;
                     await saveMotoDocs();
                     alert("¡Datos importados con éxito!"); loadUserData();
