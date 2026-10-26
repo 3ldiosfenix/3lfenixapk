@@ -345,18 +345,37 @@
                 </div>
             </main>
 
-            <!-- Sección de Mantenimiento y Alertas de Moto -->
+            <!-- Sección de Mantenimiento y Alertas de Moto (ESTRUCTURA NUEVA) -->
             <main id="tab-moto" class="hidden p-4 space-y-4">
                 <div class="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-4 transition-colors duration-300">
                     <div class="flex justify-between items-center">
                         <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 tracking-wider uppercase"><i class="fa-solid fa-motorcycle text-emerald-500 mr-1.5"></i> Control y Mantenimiento de Moto</h3>
                     </div>
 
-                    <!-- Sección: Datos de la Moto (Tarjeta de Propiedad PDF y Foto de Datos del Vehículo) -->
+                    <!-- 1. BLOQUE SUPERIOR: Estado de Documentos (SOAT Arriba) -->
                     <div class="bg-slate-900 text-white p-4 rounded-2xl space-y-3 shadow-md border border-slate-800">
-                        <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider"><i class="fa-solid fa-id-card mr-1"></i> Datos de la Moto</h4>
-                        <div class="grid grid-cols-2 gap-3">
-                            <!-- Tarjeta de Propiedad PDF -->
+                        <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Estado de Documentos</h4>
+                        
+                        <!-- SOAT Arriba -->
+                        <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="text-[10px] text-slate-400 block font-semibold">SOAT Vencimiento</span>
+                                <div id="soat-photo-action">
+                                    <label class="cursor-pointer text-emerald-400 hover:text-emerald-300 text-[10px] font-bold" title="Subir foto del SOAT">
+                                        <i class="fa-solid fa-camera mr-0.5"></i> Foto
+                                        <input type="file" id="soat-file-input" accept="image/*" class="hidden" onchange="uploadSoatPhoto(event)">
+                                    </label>
+                                </div>
+                            </div>
+                            <input type="date" id="moto-soat-date" onchange="saveMotoDocs()" class="w-full bg-slate-900 border border-slate-700 text-white text-xs px-2 py-1 rounded-lg outline-none">
+                            <div class="flex justify-between items-center mt-1">
+                                <span id="soat-status-badge" class="text-[9px] font-bold px-2 py-0.5 rounded-full inline-block">Verificando...</span>
+                                <span id="soat-view-btn" class="hidden"></span>
+                            </div>
+                        </div>
+
+                        <!-- Tarjeta de Propiedad y Foto del Vehículo (Abajo del SOAT) -->
+                        <div class="grid grid-cols-2 gap-3 pt-1">
                             <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-2 flex flex-col justify-between">
                                 <div>
                                     <span class="text-[10px] text-slate-400 block font-semibold mb-1">Tarjeta Propiedad (PDF)</span>
@@ -368,7 +387,6 @@
                                 <div id="tarjeta-pdf-status" class="text-[10px] text-slate-400 truncate">Sin archivo</div>
                             </div>
 
-                            <!-- Foto Datos del Vehículo -->
                             <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-2 flex flex-col justify-between">
                                 <div>
                                     <span class="text-[10px] text-slate-400 block font-semibold mb-1">Foto Datos Vehículo</span>
@@ -382,33 +400,16 @@
                         </div>
                     </div>
 
-                    <!-- Alertas de Documentos (SOAT y Revisión Técnica) -->
+                    <!-- 2. BLOQUE INFERIOR: Mantenimiento por km -->
                     <div class="bg-slate-900 text-white p-4 rounded-2xl space-y-3 shadow-md border border-slate-800">
-                        <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Estado de Documentos</h4>
-                        <div class="grid grid-cols-2 gap-3">
-                            <!-- SOAT con opción de foto -->
-                            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-2">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-[10px] text-slate-400 block font-semibold">SOAT Vencimiento</span>
-                                    <div id="soat-photo-action">
-                                        <label class="cursor-pointer text-emerald-400 hover:text-emerald-300 text-[10px] font-bold" title="Subir foto del SOAT">
-                                            <i class="fa-solid fa-camera mr-0.5"></i> Foto
-                                            <input type="file" id="soat-file-input" accept="image/*" class="hidden" onchange="uploadSoatPhoto(event)">
-                                        </label>
-                                    </div>
-                                </div>
-                                <input type="date" id="moto-soat-date" onchange="saveMotoDocs()" class="w-full bg-slate-900 border border-slate-700 text-white text-xs px-2 py-1 rounded-lg outline-none">
-                                <div class="flex justify-between items-center mt-1">
-                                    <span id="soat-status-badge" class="text-[9px] font-bold px-2 py-0.5 rounded-full inline-block">Verificando...</span>
-                                    <span id="soat-view-btn" class="hidden"></span>
-                                </div>
-                            </div>
-
-                            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-1">
-                                <span class="text-[10px] text-slate-400 block font-semibold">Revisión Técnica</span>
-                                <input type="date" id="moto-rev-date" onchange="saveMotoDocs()" class="w-full bg-slate-900 border border-slate-700 text-white text-xs px-2 py-1 rounded-lg outline-none">
-                                <span id="rev-status-badge" class="text-[9px] font-bold px-2 py-0.5 rounded-full inline-block mt-1">Verificando...</span>
-                            </div>
+                        <div class="flex justify-between items-center">
+                            <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider"><i class="fa-solid fa-gauge mr-1"></i> Mantenimiento por km</h4>
+                            <span id="moto-km-status" class="text-[9px] font-bold px-2 py-0.5 rounded-full inline-block bg-slate-800 text-slate-300">Sin km actual</span>
+                        </div>
+                        <p class="text-[10px] text-slate-400">Controla el kilometraje de tus mantenimientos (aceite, cadena, bujía, etc.).</p>
+                        <div class="flex gap-2">
+                            <input type="number" id="moto-km-input" placeholder="Ej. 12500" class="w-full bg-slate-800 border border-slate-700 text-white text-xs px-3 py-2 rounded-xl outline-none focus:ring-1 focus:ring-amber-400">
+                            <button type="button" onclick="saveMotoKm()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs px-4 py-2 rounded-xl font-bold transition">Guardar</button>
                         </div>
                     </div>
 
@@ -436,7 +437,7 @@
                 </div>
             </main>
 
-            <!-- Modal Registrar Repuesto de Moto (CON FOTO) -->
+            <!-- Modal Registrar Repuesto de Moto -->
             <div id="moto-spare-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                 <div class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 w-full max-w-sm p-5 rounded-3xl shadow-2xl space-y-4">
                     <div class="flex justify-between items-center">
@@ -478,7 +479,7 @@
                 </div>
             </div>
 
-            <!-- Modal Calculadora Científica e Interactiva Flotante -->
+            <!-- Modal Calculadora -->
             <div id="calc-modal" class="hidden fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                 <div class="bg-slate-900 text-white w-full max-w-xs p-5 rounded-3xl shadow-2xl space-y-4 border border-slate-800">
                     <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -620,6 +621,7 @@
         let isRegister = false;
         let currentPhotoBase64 = null;
         let sparePhotoBase64 = null;
+        let currentMotoKm = null;
         
         let isDarkMode = localStorage.getItem('app_dark_mode') !== 'false';
         applyDarkMode(isDarkMode);
@@ -809,6 +811,30 @@
         window.openMotoSpareModal = () => document.getElementById('moto-spare-modal').classList.remove('hidden');
         window.closeMotoSpareModal = () => document.getElementById('moto-spare-modal').classList.add('hidden');
 
+        window.saveMotoKm = async () => {
+            const inputVal = document.getElementById('moto-km-input').value.trim();
+            if (!inputVal) return;
+            const km = parseFloat(inputVal);
+            if (isNaN(km)) return;
+            currentMotoKm = km;
+            await saveMotoDocs();
+            updateMotoKmUI();
+            alert("¡Kilometraje actualizado correctamente!");
+        };
+
+        function updateMotoKmUI() {
+            const statusEl = document.getElementById('moto-km-status');
+            const inputEl = document.getElementById('moto-km-input');
+            if (currentMotoKm !== null && currentMotoKm !== undefined) {
+                statusEl.textContent = `${currentMotoKm} km`;
+                statusEl.className = "text-[9px] font-bold px-2 py-0.5 rounded-full inline-block bg-amber-500/20 text-amber-400 border border-amber-500/30";
+                if (inputEl) inputEl.value = currentMotoKm;
+            } else {
+                statusEl.textContent = "Sin km actual";
+                statusEl.className = "text-[9px] font-bold px-2 py-0.5 rounded-full inline-block bg-slate-800 text-slate-300";
+            }
+        }
+
         window.previewSparePhoto = (event) => {
             const file = event.target.files[0];
             if (!file) return;
@@ -970,11 +996,11 @@
 
         window.saveMotoDocs = async () => {
             const soatDate = document.getElementById('moto-soat-date').value;
-            const revDate = document.getElementById('moto-rev-date').value;
             try {
-                await setDoc(doc(db, `users_config/${currentUser.uid}`), { motoDocs: { soatDate, revDate, soatPhoto: soatPhotoBase64, tarjetaPdf: tarjetaPdfBase64, vehiculoPhoto: vehiculoPhotoBase64 } }, { merge: true });
-                checkMotoDocAlerts(soatDate, revDate);
+                await setDoc(doc(db, `users_config/${currentUser.uid}`), { motoDocs: { soatDate, km: currentMotoKm, soatPhoto: soatPhotoBase64, tarjetaPdf: tarjetaPdfBase64, vehiculoPhoto: vehiculoPhotoBase64 } }, { merge: true });
+                checkMotoDocAlerts(soatDate);
                 updateMotoDocsUI();
+                updateMotoKmUI();
             } catch (err) { console.error(err); }
         };
 
@@ -994,7 +1020,7 @@
             }
         }
 
-        function checkMotoDocAlerts(soatDate, revDate) {
+        function checkMotoDocAlerts(soatDate) {
             const today = new Date();
             const viewBtn = document.getElementById('soat-view-btn');
             if (soatPhotoBase64) {
@@ -1016,21 +1042,6 @@
                     badge.textContent = `Vence en ${diffDays} días`;
                 } else {
                     badge.className = "text-[9px] font-bold px-2 py-0.5 rounded-full inline-block bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
-                    badge.textContent = "Vigente";
-                }
-            }
-            if (revDate) {
-                const rev = new Date(revDate);
-                const diffDays = Math.ceil((rev - today) / (1000 * 60 * 60 * 24));
-                const badge = document.getElementById('rev-status-badge');
-                if (diffDays < 0) {
-                    badge.className = "text-[9px] font-bold px-2 py-0.5 rounded-full inline-block mt-1 bg-red-500/20 text-red-400 border border-red-500/30";
-                    badge.textContent = "¡Rev. Técnica Vencida!";
-                } else if (diffDays <= 15) {
-                    badge.className = "text-[9px] font-bold px-2 py-0.5 rounded-full inline-block mt-1 bg-amber-500/20 text-amber-400 border border-amber-500/30";
-                    badge.textContent = `Vence en ${diffDays} días`;
-                } else {
-                    badge.className = "text-[9px] font-bold px-2 py-0.5 rounded-full inline-block mt-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
                     badge.textContent = "Vigente";
                 }
             }
@@ -1307,12 +1318,13 @@
                     }
                     if (data.motoDocs) {
                         if (data.motoDocs.soatDate) document.getElementById('moto-soat-date').value = data.motoDocs.soatDate;
-                        if (data.motoDocs.revDate) document.getElementById('moto-rev-date').value = data.motoDocs.revDate;
+                        if (data.motoDocs.km !== undefined) currentMotoKm = data.motoDocs.km;
                         if (data.motoDocs.soatPhoto) soatPhotoBase64 = data.motoDocs.soatPhoto;
                         if (data.motoDocs.tarjetaPdf) tarjetaPdfBase64 = data.motoDocs.tarjetaPdf;
                         if (data.motoDocs.vehiculoPhoto) vehiculoPhotoBase64 = data.motoDocs.vehiculoPhoto;
-                        checkMotoDocAlerts(data.motoDocs.soatDate, data.motoDocs.revDate);
+                        checkMotoDocAlerts(data.motoDocs.soatDate);
                         updateMotoDocsUI();
+                        updateMotoKmUI();
                     }
                 }
             } catch (e) { console.error(e); }
@@ -1812,7 +1824,7 @@
         }
 
         window.exportJSON = () => {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ transactions, categories, savingsGoals, motoSpares, soatPhotoBase64, tarjetaPdfBase64, vehiculoPhotoBase64 }));
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ transactions, categories, savingsGoals, motoSpares, soatPhotoBase64, tarjetaPdfBase64, vehiculoPhotoBase64, currentMotoKm }));
             const dlAnchorElem = document.createElement('a');
             dlAnchorElem.setAttribute("href", dataStr);
             dlAnchorElem.setAttribute("download", "misfinanzas_respaldo.json");
@@ -1835,15 +1847,10 @@
                     if (data.motoSpares) {
                         for (let s of data.motoSpares) { delete s.id; await addDoc(collection(db, `users/${currentUser.uid}/motoSpares`), s); }
                     }
-                    if (data.soatPhotoBase64) {
-                        soatPhotoBase64 = data.soatPhotoBase64;
-                    }
-                    if (data.tarjetaPdfBase64) {
-                        tarjetaPdfBase64 = data.tarjetaPdfBase64;
-                    }
-                    if (data.vehiculoPhotoBase64) {
-                        vehiculoPhotoBase64 = data.vehiculoPhotoBase64;
-                    }
+                    if (data.soatPhotoBase64) soatPhotoBase64 = data.soatPhotoBase64;
+                    if (data.tarjetaPdfBase64) tarjetaPdfBase64 = data.tarjetaPdfBase64;
+                    if (data.vehiculoPhotoBase64) vehiculoPhotoBase64 = data.vehiculoPhotoBase64;
+                    if (data.currentMotoKm !== undefined) currentMotoKm = data.currentMotoKm;
                     await saveMotoDocs();
                     alert("¡Datos importados con éxito!"); loadUserData();
                 } catch (err) { alert("Archivo no válido"); }
