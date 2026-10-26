@@ -11,7 +11,12 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="./css/style.css">
+    <style>
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: rgba(148, 163, 184, 0.1); border-radius: 8px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 8px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    </style>
 </head>
 <body class="bg-slate-950 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col justify-between font-sans transition-colors duration-300">
 
@@ -24,14 +29,13 @@
                     <img id="admin-avatar" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Admin" class="w-full h-full object-cover">
                 </div>
                 <h1 id="auth-title" class="text-2xl font-bold">Iniciar Sesión</h1>
-                <p class="text-xs text-slate-400 mt-1">Gestiona tus finanzas personales y tu moto</p>
+                <p class="text-xs text-slate-400 mt-1">Gestiona tus finanzas y tu moto</p>
                 <div class="inline-block mt-3 px-3 py-1 bg-slate-800 border border-slate-700 rounded-full shadow-inner">
                     <span class="text-[10px] text-emerald-400 font-bold tracking-wider"><i class="fa-solid fa-code mr-1"></i> Desarrollado por 3ldiosfenix</span>
                 </div>
             </div>
 
             <div id="auth-error" class="hidden bg-red-500/20 text-red-300 p-3 rounded-xl text-xs mb-4 text-center border border-red-500/30"></div>
-            <div id="auth-success" class="hidden bg-emerald-500/20 text-emerald-300 p-3 rounded-xl text-xs mb-4 text-center border border-emerald-500/30"></div>
 
             <form id="auth-form" class="space-y-4">
                 <div id="name-field" class="hidden">
@@ -43,17 +47,14 @@
                     <input type="email" id="auth-email" required class="w-full px-4 py-3 bg-slate-800 border border-slate-700 text-white rounded-xl focus:border-emerald-500 outline-none text-sm">
                 </div>
                 <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <label class="block text-[10px] font-bold uppercase text-slate-400 tracking-wider">Contraseña</label>
-                        <button type="button" id="forgot-password-link" class="text-[11px] text-emerald-400 hover:underline">¿Olvidaste tu contraseña?</button>
-                    </div>
+                    <label class="block text-[10px] font-bold uppercase text-slate-400 tracking-wider mb-1">Contraseña</label>
                     <input type="password" id="auth-password" required class="w-full px-4 py-3 bg-slate-800 border border-slate-700 text-white rounded-xl focus:border-emerald-500 outline-none text-sm">
                 </div>
                 <button type="submit" id="auth-btn" class="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/20 text-sm cursor-pointer">Iniciar Sesión</button>
             </form>
 
             <div class="text-center mt-4">
-                <button type="button" id="auth-switch" class="text-xs text-emerald-400 hover:underline py-1 block mx-auto cursor-pointer">¿No tienes cuenta? Regístrate</button>
+                <button type="button" id="auth-switch" onclick="toggleAuthMode()" class="text-xs text-emerald-400 hover:underline py-1 block mx-auto cursor-pointer">¿No tienes cuenta? Regístrate</button>
             </div>
         </div>
 
@@ -70,19 +71,11 @@
                         <span class="text-[9px] text-emerald-400 font-semibold tracking-wide">by 3ldiosfenix</span>
                     </div>
                 </div>
-                <div class="flex items-center space-x-0.5 text-slate-300">
-                    <button onclick="switchTab('moto')" title="Mantenimiento y Moto" class="hover:text-emerald-400 text-sm p-1.5"><i class="fa-solid fa-motorcycle"></i></button>
-                    <button onclick="switchTab('gallery')" title="Galería de Comprobantes" class="hover:text-emerald-400 text-sm p-1.5"><i class="fa-solid fa-images"></i></button>
-                    <button onclick="toggleDarkMode()" title="Cambiar Modo Claro / Oscuro" class="hover:text-emerald-400 text-sm p-1.5"><i id="theme-toggle-icon" class="fa-solid fa-moon"></i></button>
-                    <button onclick="toggleCalcModal()" title="Calculadora" class="hover:text-emerald-400 text-sm p-1.5"><i class="fa-solid fa-calculator"></i></button>
-                    <button onclick="toggleSettingsModal()" title="Configuración" class="hover:text-emerald-400 text-sm p-1.5"><i class="fa-solid fa-gear"></i></button>
-                    <button onclick="exportCSV()" title="Exportar CSV" class="hover:text-emerald-400 text-sm p-1.5"><i class="fa-solid fa-file-excel"></i></button>
-                    <button onclick="exportJSON()" title="Respaldo JSON" class="hover:text-emerald-400 text-sm p-1.5"><i class="fa-solid fa-download"></i></button>
-                    <label title="Importar" class="hover:text-emerald-400 cursor-pointer text-sm p-1.5">
-                        <i class="fa-solid fa-upload"></i>
-                        <input type="file" id="import-file" accept=".json" class="hidden">
-                    </label>
-                    <button onclick="logout()" title="Cerrar Sesión" class="text-red-400 hover:text-red-300 text-sm p-1.5 ml-0.5"><i class="fa-solid fa-right-from-bracket"></i></button>
+                <div class="flex items-center space-x-1 text-slate-300">
+                    <button onclick="switchTab('moto')" title="Moto" class="hover:text-emerald-400 text-sm p-1.5"><i class="fa-solid fa-motorcycle"></i></button>
+                    <button onclick="switchTab('gallery')" title="Galería" class="hover:text-emerald-400 text-sm p-1.5"><i class="fa-solid fa-images"></i></button>
+                    <button onclick="toggleDarkMode()" title="Tema" class="hover:text-emerald-400 text-sm p-1.5"><i id="theme-toggle-icon" class="fa-solid fa-moon"></i></button>
+                    <button onclick="logout()" title="Salir" class="text-red-400 hover:text-red-300 text-sm p-1.5 ml-1"><i class="fa-solid fa-right-from-bracket"></i></button>
                 </div>
             </header>
 
@@ -93,7 +86,7 @@
                         <p class="text-[11px] text-slate-500 dark:text-slate-400">Hola,</p>
                         <h2 id="user-display-name" class="font-bold text-slate-800 dark:text-slate-100 text-sm">Usuario</h2>
                     </div>
-                    <select id="time-filter" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs rounded-xl px-3 py-1.5 font-semibold outline-none shadow-sm">
+                    <select id="time-filter" onchange="renderUI()" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs rounded-xl px-3 py-1.5 font-semibold outline-none shadow-sm">
                         <option value="all">Todo el Historial</option>
                         <option value="month">Este Mes</option>
                         <option value="week">Esta Semana</option>
@@ -121,49 +114,12 @@
                     </div>
                 </div>
 
-                <!-- Deudas -->
-                <div class="bg-slate-900 text-white p-4 rounded-3xl shadow-md border border-slate-800 space-y-2">
-                    <div class="flex justify-between items-center px-1">
-                        <h3 class="text-xs font-bold text-amber-400 uppercase"><i class="fa-solid fa-address-book mr-1.5"></i> AGENDA DE DEUDAS</h3>
-                        <span id="total-debt-amount" class="text-xs font-extrabold text-amber-400">S/ 0.00</span>
-                    </div>
-                    <div id="debtors-list" class="space-y-1.5 pt-1 max-h-36 overflow-y-auto custom-scroll pr-1"></div>
-                </div>
-
-                <!-- Metas -->
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-3">
-                    <div class="flex justify-between items-center px-1">
-                        <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase"><i class="fa-solid fa-piggy-bank text-emerald-500 mr-1.5"></i> METAS DE AHORRO</h3>
-                        <button onclick="addQuickGoal()" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline"><i class="fa-solid fa-plus mr-1"></i>Nueva Meta</button>
-                    </div>
-                    <div id="savings-goals-list" class="space-y-2.5"></div>
-                </div>
-
-                <!-- Gráficos y Tendencias -->
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-3">
-                    <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase"><i class="fa-solid fa-chart-line text-blue-500 mr-1.5"></i> TENDENCIA DE GASTOS DIARIOS</h3>
-                    <div class="h-44 w-full relative"><canvas id="dailyTrendChart"></canvas></div>
-                </div>
-
-                <div class="bg-slate-900 text-white p-4 rounded-3xl shadow-md border border-slate-800 space-y-3">
-                    <h3 class="text-xs font-bold text-slate-300 uppercase">RESUMEN MENSUAL</h3>
-                    <div class="h-52 w-full relative bg-slate-900/50 rounded-2xl p-2"><canvas id="financialBarChart"></canvas></div>
-                </div>
-
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-700/80">
-                    <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase mb-3">GASTOS POR CATEGORÍA</h3>
-                    <div class="w-full h-48 relative flex items-center justify-center"><canvas id="categoryChart"></canvas></div>
-                </div>
-
                 <!-- Movimientos Recientes -->
                 <div class="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-3">
                     <div class="flex justify-between items-center">
                         <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">MOVIMIENTOS RECIENTES</h3>
                         <button onclick="switchTab('history')" class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">Ver todos</button>
                     </div>
-                    <select id="category-filter" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs rounded-xl px-3 py-2 outline-none">
-                        <option value="all">🔍 Todas las Categorías</option>
-                    </select>
                     <div id="dashboard-recent-list" class="space-y-2 max-h-80 overflow-y-auto custom-scroll pr-1"></div>
                 </div>
             </main>
@@ -171,33 +127,17 @@
             <!-- Transacción Tab -->
             <main id="tab-add" class="hidden p-4 space-y-4">
                 <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-4">
-                    <h2 id="form-title" class="text-base font-bold text-slate-800 dark:text-slate-100">NUEVO REGISTRO</h2>
-                    <form id="transaction-form" class="space-y-4">
-                        <input type="hidden" id="tx-edit-id" value="">
-                        <div class="grid grid-cols-2 gap-2">
-                            <button type="button" id="btn-type-expense" onclick="setTxType('expense')" class="py-2.5 rounded-xl text-xs font-bold border border-red-500 text-red-500 bg-red-50 dark:bg-red-950/40">Gasto</button>
-                            <button type="button" id="btn-type-income" onclick="setTxType('income')" class="py-2.5 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 text-slate-400">Ingreso</button>
-                        </div>
+                    <h2 class="text-base font-bold text-slate-800 dark:text-slate-100">NUEVO REGISTRO</h2>
+                    <form id="transaction-form" onsubmit="saveTransaction(event)" class="space-y-4">
                         <div>
                             <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Monto (S/)</label>
                             <input type="number" step="0.01" id="tx-amount" placeholder="0.00" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 dark:text-white rounded-xl text-sm outline-none">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Categoría</label>
-                            <select id="tx-category" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 dark:text-white rounded-xl text-sm outline-none"></select>
+                            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Descripción</label>
+                            <input type="text" id="tx-description" placeholder="Ej. PedidosYa, Gasolina" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 dark:text-white rounded-xl text-sm outline-none">
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Fecha</label>
-                            <input type="date" id="tx-date" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 dark:text-white rounded-xl text-sm outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Nota / Descripción</label>
-                            <input type="text" id="tx-description" placeholder="Ej. Repuesto, Comida" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 dark:text-white rounded-xl text-sm outline-none">
-                        </div>
-                        <div class="flex gap-2 pt-2">
-                            <button type="submit" id="form-submit-btn" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 text-sm">Guardar</button>
-                            <button type="button" onclick="cancelEdit()" id="form-cancel-btn" class="hidden bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-200 px-4 py-3 rounded-xl font-bold text-sm">Cancelar</button>
-                        </div>
+                        <button type="submit" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 text-sm">Guardar Transacción</button>
                     </form>
                 </div>
             </main>
@@ -205,79 +145,31 @@
             <!-- Historial Tab -->
             <main id="tab-history" class="hidden p-4 space-y-4">
                 <div class="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-3">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">HISTORIAL COMPLETO</h3>
-                        <span id="history-count" class="text-[10px] text-slate-400">0 registros</span>
-                    </div>
-                    <div class="relative">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                        <input type="text" id="history-search-input" placeholder="Buscar..." class="w-full pl-9 pr-8 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 dark:text-white rounded-xl text-xs outline-none">
-                    </div>
+                    <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">HISTORIAL COMPLETO</h3>
                     <div id="full-history-list" class="space-y-2 max-h-[65vh] overflow-y-auto custom-scroll pr-1"></div>
                 </div>
             </main>
 
-            <!-- Moto & Mantenimiento Tab -->
+            <!-- Moto Tab -->
             <main id="tab-moto" class="hidden p-4 space-y-4">
                 <div class="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-4">
-                    <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase"><i class="fa-solid fa-motorcycle text-emerald-500 mr-1.5"></i> Control y Mantenimiento de Moto</h3>
-
-                    <!-- Datos de la Moto -->
+                    <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase"><i class="fa-solid fa-motorcycle text-emerald-500 mr-1.5"></i> Control de Moto</h3>
                     <div class="bg-slate-900 text-white p-4 rounded-2xl space-y-3 shadow-md border border-slate-800">
                         <h4 class="text-xs font-bold text-emerald-400 uppercase"><i class="fa-solid fa-id-card mr-1"></i> Datos de la Moto</h4>
                         <div class="grid grid-cols-2 gap-3">
-                            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-2">
+                            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 text-center">
                                 <span class="text-[10px] text-slate-400 block font-semibold mb-1">Tarjeta Propiedad (PDF)</span>
-                                <label class="cursor-pointer bg-slate-900 text-emerald-400 border border-slate-700 text-[10px] font-bold px-2 py-1.5 rounded-lg flex items-center justify-center gap-1">
-                                    <i class="fa-solid fa-file-pdf"></i> Subir PDF
-                                    <input type="file" id="tarjeta-pdf-input" accept="application/pdf" class="hidden">
-                                </label>
-                                <div id="tarjeta-pdf-status" class="text-[10px] text-slate-400 truncate">Sin archivo</div>
+                                <input type="file" id="tarjeta-pdf-input" accept="application/pdf" onchange="uploadTarjetaPdf(event)" class="hidden">
+                                <label for="tarjeta-pdf-input" class="cursor-pointer bg-slate-900 text-emerald-400 border border-slate-700 text-[10px] font-bold px-2 py-1 rounded-lg inline-block">Subir PDF</label>
+                                <div id="tarjeta-pdf-status" class="text-[10px] text-slate-400 mt-1 truncate">Sin archivo</div>
                             </div>
-                            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-2">
+                            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 text-center">
                                 <span class="text-[10px] text-slate-400 block font-semibold mb-1">Foto Datos Vehículo</span>
-                                <label class="cursor-pointer bg-slate-900 text-emerald-400 border border-slate-700 text-[10px] font-bold px-2.5 py-1.5 rounded-lg flex items-center justify-center gap-1">
-                                    <i class="fa-solid fa-camera"></i> Subir Foto
-                                    <input type="file" id="vehiculo-photo-input" accept="image/*" class="hidden">
-                                </label>
-                                <div id="vehiculo-photo-status" class="text-[10px] text-slate-400 truncate">Sin foto</div>
+                                <input type="file" id="vehiculo-photo-input" accept="image/*" onchange="uploadVehiculoPhoto(event)" class="hidden">
+                                <label for="vehiculo-photo-input" class="cursor-pointer bg-slate-900 text-emerald-400 border border-slate-700 text-[10px] font-bold px-2 py-1 rounded-lg inline-block">Subir Foto</label>
+                                <div id="vehiculo-photo-status" class="text-[10px] text-slate-400 mt-1 truncate">Sin foto</div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Alertas de Documentos -->
-                    <div class="bg-slate-900 text-white p-4 rounded-2xl space-y-3 shadow-md border border-slate-800">
-                        <h4 class="text-xs font-bold text-amber-400 uppercase"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Estado de Documentos</h4>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-2">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-[10px] text-slate-400 font-semibold">SOAT Vencimiento</span>
-                                    <label class="cursor-pointer text-emerald-400 text-[10px] font-bold">
-                                        <i class="fa-solid fa-camera"></i> Foto
-                                        <input type="file" id="soat-file-input" accept="image/*" class="hidden">
-                                    </label>
-                                </div>
-                                <input type="date" id="moto-soat-date" class="w-full bg-slate-900 border border-slate-700 text-white text-xs px-2 py-1 rounded-lg outline-none">
-                                <div class="flex justify-between items-center mt-1">
-                                    <span id="soat-status-badge" class="text-[9px] font-bold px-2 py-0.5 rounded-full inline-block">Verificando...</span>
-                                    <span id="soat-view-btn" class="hidden"></span>
-                                </div>
-                            </div>
-                            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-1">
-                                <span class="text-[10px] text-slate-400 block font-semibold">Revisión Técnica</span>
-                                <input type="date" id="moto-rev-date" class="w-full bg-slate-900 border border-slate-700 text-white text-xs px-2 py-1 rounded-lg outline-none">
-                                <span id="rev-status-badge" class="text-[9px] font-bold px-2 py-0.5 rounded-full inline-block mt-1">Verificando...</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Repuestos -->
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center">
-                            <h4 class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase"><i class="fa-solid fa-wrench mr-1"></i> Historial de Repuestos</h4>
-                            <button onclick="openMotoSpareModal()" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline"><i class="fa-solid fa-plus mr-1"></i>Registrar Repuesto</button>
-                        </div>
-                        <div id="moto-spares-list" class="space-y-2 max-h-60 overflow-y-auto custom-scroll pr-1"></div>
                     </div>
                 </div>
             </main>
@@ -285,11 +177,8 @@
             <!-- Galería Tab -->
             <main id="tab-gallery" class="hidden p-4 space-y-4">
                 <div class="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-3">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase"><i class="fa-solid fa-images text-emerald-500 mr-1.5"></i> Galería de Comprobantes</h3>
-                        <span id="gallery-count" class="text-[10px] text-slate-400">0 fotos</span>
-                    </div>
-                    <div id="gallery-grid" class="grid grid-cols-2 gap-3 max-h-[70vh] overflow-y-auto custom-scroll pr-1 pt-1"></div>
+                    <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">Galería de Comprobantes</h3>
+                    <div id="gallery-grid" class="grid grid-cols-2 gap-3 max-h-[70vh] overflow-y-auto custom-scroll pr-1"></div>
                 </div>
             </main>
 
@@ -311,6 +200,221 @@
         </div>
     </div>
 
-    <script type="module" src="./js/app.js"></script>
+    <!-- Scripts Firebase y Lógica Global -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCuwUQojfewTYO-A2iaO75HHp234r-Z0Tg",
+            authDomain: "misfinanzasapp-dc2d1.firebaseapp.com",
+            projectId: "misfinanzasapp-dc2d1",
+            storageBucket: "misfinanzasapp-dc2d1.firebasestorage.app",
+            messagingSenderId: "735407911555",
+            appId: "1:735407911555:web:2333eeb95dd41548ce21b6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let transactions = [];
+        let isBalanceVisible = false;
+        let isRegister = false;
+        let tarjetaPdfBase64 = null;
+        let vehiculoPhotoBase64 = null;
+
+        window.toggleDarkMode = () => {
+            const html = document.getElementById('html-root');
+            html.classList.toggle('dark');
+        };
+
+        window.switchTab = (tab) => {
+            ['tab-dashboard', 'tab-add', 'tab-history', 'tab-moto', 'tab-gallery'].forEach(t => {
+                document.getElementById(t).classList.add('hidden');
+            });
+            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+            if (tab === 'gallery') renderGallery();
+        };
+
+        window.toggleBalanceVisibility = () => {
+            isBalanceVisible = !isBalanceVisible;
+            document.getElementById('toggle-eye-icon').className = isBalanceVisible ? "fa-solid fa-eye" : "fa-solid fa-eye-slash";
+            renderUI();
+        };
+
+        window.toggleAuthMode = () => {
+            isRegister = !isRegister;
+            document.getElementById('name-field').classList.toggle('hidden', !isRegister);
+            document.getElementById('auth-title').textContent = isRegister ? 'Crear Cuenta' : 'Iniciar Sesión';
+            document.getElementById('auth-btn').textContent = isRegister ? 'Registrarse' : 'Iniciar Sesión';
+        };
+
+        window.logout = () => signOut(auth);
+
+        document.getElementById('auth-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value.trim();
+            const name = document.getElementById('auth-name').value.trim();
+            const errDiv = document.getElementById('auth-error');
+            errDiv.classList.add('hidden');
+
+            try {
+                if (isRegister) {
+                    const res = await createUserWithEmailAndPassword(auth, email, password);
+                    if (name) await updateProfile(res.user, { displayName: name });
+                } else {
+                    await signInWithEmailAndPassword(auth, email, password);
+                }
+            } catch (err) {
+                errDiv.textContent = "Error de autenticación. Verifica tus datos.";
+                errDiv.classList.remove('hidden');
+            }
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('app-screen').classList.remove('hidden');
+                document.getElementById('user-display-name').textContent = user.displayName || user.email;
+                await loadUserData();
+            } else {
+                currentUser = null;
+                document.getElementById('app-screen').classList.add('hidden');
+                document.getElementById('auth-screen').classList.remove('hidden');
+            }
+        });
+
+        async function loadUserData() {
+            try {
+                const snap = await getDocs(collection(db, `users/${currentUser.uid}/transactions`));
+                transactions = [];
+                snap.forEach(doc => transactions.push({ id: doc.id, ...doc.data() }));
+
+                const cfg = await getDoc(doc(db, `users_config/${currentUser.uid}`));
+                if (cfg.exists() && cfg.data().motoDocs) {
+                    const docs = cfg.data().motoDocs;
+                    tarjetaPdfBase64 = docs.tarjetaPdf || null;
+                    vehiculoPhotoBase64 = docs.vehiculoPhoto || null;
+                    updateMotoDocsUI();
+                }
+            } catch (e) {
+                console.error("Error cargando datos:", e);
+            }
+            renderUI();
+        }
+
+        window.renderUI = () => {
+            const recentEl = document.getElementById('dashboard-recent-list');
+            const historyEl = document.getElementById('full-history-list');
+            recentEl.innerHTML = '';
+            historyEl.innerHTML = '';
+
+            let income = 0, expense = 0;
+
+            transactions.forEach(t => {
+                if (t.type === 'income') income += t.amount;
+                else expense += t.amount;
+
+                const html = `
+                    <div class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                        <div>
+                            <span class="font-bold text-xs block">${t.description}</span>
+                            <span class="text-[10px] text-slate-400">${t.date ? t.date.split('T')[0] : ''}</span>
+                        </div>
+                        <span class="font-extrabold text-xs ${t.type === 'income' ? 'text-emerald-500' : ''}">${t.type === 'income' ? '+' : '-'} S/ ${t.amount.toFixed(2)}</span>
+                    </div>
+                `;
+                recentEl.innerHTML += html;
+                historyEl.innerHTML += html;
+            });
+
+            if (transactions.length === 0) {
+                recentEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">Sin movimientos</p>`;
+                historyEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Sin movimientos</p>`;
+            }
+
+            const balance = income - expense;
+            if (isBalanceVisible) {
+                document.getElementById('total-balance').textContent = `S/ ${balance.toFixed(2)}`;
+                document.getElementById('total-income').textContent = `S/ ${income.toFixed(2)}`;
+                document.getElementById('total-expense').textContent = `S/ ${expense.toFixed(2)}`;
+            } else {
+                document.getElementById('total-balance').textContent = `S/ *****`;
+                document.getElementById('total-income').textContent = `S/ *****`;
+                document.getElementById('total-expense').textContent = `S/ *****`;
+            }
+        };
+
+        window.saveTransaction = async (e) => {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('tx-amount').value);
+            const description = document.getElementById('tx-description').value.trim();
+            const txData = { description, amount, type: 'expense', date: new Date().toISOString() };
+            
+            const ref = await addDoc(collection(db, `users/${currentUser.uid}/transactions`), txData);
+            transactions.push({ id: ref.id, ...txData });
+            document.getElementById('transaction-form').reset();
+            renderUI();
+            switchTab('dashboard');
+        };
+
+        window.uploadTarjetaPdf = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                tarjetaPdfBase64 = event.target.result;
+                await saveMotoDocsCloud();
+                updateMotoDocsUI();
+                alert("¡PDF de tarjeta de propiedad subido!");
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.uploadVehiculoPhoto = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                vehiculoPhotoBase64 = event.target.result;
+                await saveMotoDocsCloud();
+                updateMotoDocsUI();
+                alert("¡Foto del vehículo subida!");
+            };
+            reader.readAsDataURL(file);
+        };
+
+        async function saveMotoDocsCloud() {
+            await setDoc(doc(db, `users_config/${currentUser.uid}`), {
+                motoDocs: { tarjetaPdf: tarjetaPdfBase64, vehiculoPhoto: vehiculoPhotoBase64 }
+            }, { merge: true });
+        }
+
+        function updateMotoDocsUI() {
+            const pdfStatus = document.getElementById('tarjeta-pdf-status');
+            if (tarjetaPdfBase64) pdfStatus.innerHTML = `<a href="${tarjetaPdfBase64}" target="_blank" class="text-emerald-400 font-bold underline">Ver PDF</a>`;
+            const photoStatus = document.getElementById('vehiculo-photo-status');
+            if (vehiculoPhotoBase64) photoStatus.innerHTML = `<span class="text-emerald-400 font-bold">Foto cargada</span>`;
+        }
+
+        function renderGallery() {
+            const grid = document.getElementById('gallery-grid');
+            grid.innerHTML = '';
+            if (tarjetaPdfBase64) {
+                grid.innerHTML += `<div class="p-2 bg-slate-900 rounded-xl text-center"><p class="text-xs text-white mb-1">Tarjeta Propiedad</p><a href="${tarjetaPdfBase64}" target="_blank" class="text-xs text-emerald-400 underline">Abrir PDF</a></div>`;
+            }
+            if (vehiculoPhotoBase64) {
+                grid.innerHTML += `<div class="p-2 bg-slate-900 rounded-xl text-center"><p class="text-xs text-white mb-1">Foto Vehículo</p><img src="${vehiculoPhotoBase64}" class="w-full h-20 object-cover rounded-lg"></div>`;
+            }
+            if (!tarjetaPdfBase64 && !vehiculoPhotoBase64) {
+                grid.innerHTML = `<p class="col-span-2 text-xs text-slate-400 text-center py-6">No hay archivos en la galería.</p>`;
+            }
+        }
+    </script>
 </body>
 </html>
