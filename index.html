@@ -1,0 +1,95 @@
+<!-- SECCIÓN: PANEL DE DELIVERY / INDRIVE Y PEDIDOSYA -->
+<main id="tab-delivery" class="hidden p-4 space-y-4">
+    <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-4 transition-colors duration-300">
+        <div class="flex justify-between items-center bg-slate-900 text-white py-3 px-4 rounded-2xl border-2 border-slate-700 shadow-inner">
+            <h3 class="text-sm font-black tracking-widest uppercase text-emerald-400"><i class="fa-solid fa-motorcycle mr-1.5"></i> Registro de Ruta y Servicios</h3>
+        </div>
+
+        <form id="delivery-form" onsubmit="saveDeliveryShift(event)" class="space-y-3">
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Plataforma</label>
+                <select id="del-platform" onchange="togglePlatformFields()" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 dark:text-white rounded-xl text-xs outline-none">
+                    <option value="PedidosYa">PedidosYa</option>
+                    <option value="inDrive">inDrive</option>
+                    <option value="Uber">Uber</option>
+                    <option value="Otro Servicio">Otro Servicio</option>
+                </select>
+            </div>
+
+            <!-- Campos específicos para PedidosYa -->
+            <div id="fields-pedidosya" class="space-y-3 border-l-2 border-rose-500 pl-3 my-2">
+                <p class="text-[10px] font-bold text-rose-500 uppercase tracking-wider">Estructura PedidosYa</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Pago por Pedidos (S/)</label>
+                        <input type="number" step="0.01" id="pya-pedidos-pay" placeholder="Ej. 28.90" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 dark:text-white rounded-xl text-xs outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Pago por Distancia (S/)</label>
+                        <input type="number" step="0.01" id="pya-dist-pay" placeholder="Ej. 48.11" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 dark:text-white rounded-xl text-xs outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Distancia Recorrida (km)</label>
+                        <input type="number" step="0.1" id="pya-km" placeholder="Ej. 60.1" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 dark:text-white rounded-xl text-xs outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Logros / Extra (S/)</label>
+                        <input type="number" step="0.01" id="pya-logros" placeholder="Ej. 5.00" value="0" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 dark:text-white rounded-xl text-xs outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Pedidos Comp.</label>
+                        <input type="number" id="pya-orders-count" placeholder="Ej. 20" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 dark:text-white rounded-xl text-xs outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Horas Conect.</label>
+                        <input type="number" id="pya-hours" placeholder="7" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 dark:text-white rounded-xl text-xs outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Minutos Conect.</label>
+                        <input type="number" id="pya-mins" placeholder="41" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 dark:text-white rounded-xl text-xs outline-none">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Campos genéricos / inDrive -->
+            <div id="fields-generic" class="space-y-3 hidden border-l-2 border-emerald-500 pl-3 my-2">
+                <p class="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Estructura inDrive / General</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Ingreso Neto (S/)</label>
+                        <input type="number" step="0.01" id="del-base" placeholder="Ej. 10.70" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 dark:text-white rounded-xl text-xs outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Kilometraje (km)</label>
+                        <input type="number" step="0.1" id="del-km" placeholder="Ej. 10.1" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 dark:text-white rounded-xl text-xs outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Propinas (S/)</label>
+                        <input type="number" step="0.01" id="del-tips" placeholder="0.00" value="0" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 dark:text-white rounded-xl text-xs outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Bonos / Extras (S/)</label>
+                        <input type="number" step="0.01" id="del-bonus" placeholder="0.00" value="0" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 dark:text-white rounded-xl text-xs outline-none">
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Fecha</label>
+                <input type="date" id="del-date" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 dark:text-white rounded-xl text-xs outline-none">
+            </div>
+            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl text-xs font-bold transition shadow">Guardar Registro de Turno</button>
+        </form>
+
+        <div class="space-y-2 pt-2 border-t dark:border-slate-700">
+            <h4 class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Historial de Turnos y Viajes</h4>
+            <div id="delivery-shifts-list" class="space-y-2"></div>
+        </div>
+    </div>
+</main>
