@@ -37,7 +37,6 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
-  // Ignorar peticiones de API de Firebase/Google para que Firestore maneje su propia caché
   if (event.request.url.includes('firestore.googleapis.com') || event.request.url.includes('identitytoolkit.googleapis.com')) {
     return;
   }
