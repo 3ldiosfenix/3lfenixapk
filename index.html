@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="es" id="html-root" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Mis Finanzas - 3ldiosfenix</title>
+
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135706.png">
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3135/3135706.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' };</script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: rgba(148, 163, 184, 0.1); border-radius: 8px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 8px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        .ui-card { background: #fff; padding: 1rem; border-radius: 1.5rem; box-shadow: 0 1px 2px rgba(0,0,0,.05); border: 1px solid rgba(226,232,240,.8); transition: background-color .3s, border-color .3s; }
+        .dark .ui-card { background: #1e293b; border-color: rgba(51,65,85,.8); }
+        .ui-dark-card { background: #0f172a; color: #fff; padding: 1rem; border-radius: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,.15); border: 1px solid #1e293b; }
+        .ui-input { width: 100%; padding: .5rem .75rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: .75rem; font-size: .75rem; outline: none; }
+        .dark .ui-input { background: #0f172a; border-color: #334155; color: #fff; }
+        .ui-input:focus { border-color: #10b981; }
+        .ui-label { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #94a3b8; margin-bottom: .25rem; }
+        .ui-modal-bg { position: fixed; inset: 0; background: rgba(2,6,23,.8); backdrop-filter: blur(4px); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+        .ui-modal-bg.hidden { display: none; }
+        .ui-modal-box { background: #0f172a; color: #fff; width: 100%; max-width: 24rem; padding: 1.25rem; border-radius: 1.5rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,.4); border: 1px solid #1e293b; }
+        .calc-key { background: #1e293b; padding: .625rem; border-radius: .75rem; font-size: .75rem; font-weight: 700; text-align: center; transition: background-color .15s; }
+        .calc-key:hover { background: #334155; }
+
+        @media all and (display-mode: standalone) {
+            #pwa-install-btn-auth { display: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col justify-between font-sans transition-colors duration-300">
+
+    <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 w-[92%] max-w-sm z-[70] flex flex-col gap-2 pointer-events-none"></div>
+
+    <div class="max-w-md w-full mx-auto bg-slate-50 dark:bg-slate-900 min-h-screen flex flex-col shadow-2xl relative pb-28 transition-colors duration-300">
+
+        <div id="offline-banner" class="hidden bg-amber-500 text-slate-950 text-[11px] font-bold text-center py-1 px-3 flex items-center justify-center gap-1.5 z-50">
+            <i class="fa-solid fa-wifi-slash"></i>
+            <span>Modo sin conexión activo • Los cambios se guardarán y sincronizarán al volver la red</span>
+        </div>
+
+        <!-- AUTENTICACIÓN -->
+        <div id="auth-screen" class="flex-1 flex flex-col justify-center p-6 bg-slate-900 text-white z-10 relative">
+            <div class="absolute top-4 right-4">
+                <button id="pwa-install-btn-auth" onclick="installPWA()" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-emerald-600/30 transition active:scale-95 cursor-pointer">
+                    <i class="fa-solid fa-mobile-screen-button"></i>
+                    <span>Instalar App</span>
+                </button>
+            </div>
+
+            <div class="text-center mb-6 mt-4">
+                <div class="w-20 h-20 rounded-3xl mx-auto mb-4 overflow-hidden border-2 border-emerald-500/50 shadow-lg shadow-emerald-500/20 bg-slate-800 flex items-center justify-center">
+                    <img id="admin-avatar" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Admin" class="w-full h-full object-cover">
+                </div>
+                <h1 id="auth-title" class="text-2xl font-bold">Iniciar Sesión</h1>
+                <p class="text-xs text-slate-400 mt-1">Gestiona tus finanzas personales de forma fácil</p>
+                <div class="inline-block mt-3 px-3 py-1 bg-slate-800 border border-slate-700 rounded-full shadow-inner">
+                    <span class="text-[10px] text-emerald-400 font-bold tracking-wider"><i class="fa-solid fa-code mr-1"></i> Desarrollado por 3ldiosfenix</span>
+                </div>
+            </div>
+
+            <div id="auth-error" class="hidden bg-red-500/20 text-red-300 p-3 rounded-xl text-xs mb-4 text-center border border-red-500/30"></div>
+            <div id="auth-success" class="hidden bg-emerald-500/20 text-emerald-300 p-3 rounded-xl text-xs mb-4 text-center border border-emerald-500/30"></div>
+
+            <form id="auth-form" action="javascript:void(0);" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                <div id="name-field" class="hidden">
+                    <label class="ui-label">Nombre Completo</label>
+                    <input type="text" id="auth-name" name="name" autocomplete="name" class="w-full px-4 py-3 bg-slate-800 border border-slate-700 text-white rounded-xl focus:border-emerald-500 outline-none text-sm">
+                </div>
+                <div>
+                    <label class="ui-label">Correo Electrónico</label>
+                    <input type="email" id="auth-email" name="username" autocomplete="username email" required class="w-full px-4 py-3 bg-slate-800 border border-slate-700 text-white rounded-xl focus:border-emerald-500 outline-none text-sm">
+                </div>
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="ui-label !mb-0">Contraseña</label>
+                        <button type="button" id="forgot-password-link" onclick="handleForgotPassword()" class="text-[11px] text-emerald-400 hover:underline">¿Olvidaste tu contraseña?</button>
+                    </div>
+                    <div class="relative">
+                        <input type="password" id="auth-password" name="password" autocomplete="current-password" required class="w-full px-4 py-3 pr-10 bg-slate-800 border border-slate-700 text-white rounded-xl focus:border-emerald-500 outline-none text-sm">
+                        <button type="button" onclick="togglePasswordVisibility('auth-password', 'auth-eye-icon')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-sm">
+                            <i id="auth-eye-icon" class="fa-solid fa-eye-slash"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" id="auth-btn" class="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/20 text-sm active:scale-95 cursor-pointer">Iniciar Sesión</button>
+            </form>
+
+            <div class="text-center mt-4">
+                <button type="button" id="auth-switch" onclick="toggleAuthMode(event)" class="text-xs text-emerald-400 hover:underline py-1 block mx-auto cursor-pointer">¿No tienes cuenta? Regístrate</button>
+            </div>
+        </div>
+
+        <!-- APP PRINCIPAL -->
+        <div id="app-screen" class="hidden flex-1 flex flex-col bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
+
+            <header id="main-header" class="bg-slate-900 text-white px-3 py-3 flex justify-between items-center rounded-b-2xl shadow-md relative">
+                <div class="flex items-center space-x-1.5 shrink-0">
+                    <div id="brand-badge" class="bg-emerald-500 text-white w-7 h-7 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-wallet text-[10px]"></i>
+                    </div>
+                    <div>
+                        <span id="app-brand-name" class="font-bold text-xs block leading-tight">Mis Finanzas</span>
+                        <span id="app-brand-sub" class="text-[8px] text-emerald-400 font-semibold tracking-wide">by 3ldiosfenix</span>
+                    </div>
+                </div>
+
+                <div class="relative flex items-center gap-1.5">
+                    <button onclick="toggleMenuDropdown()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-slate-700/80 transition shadow-inner">
+                        <i class="fa-solid fa-bars-staggered"></i>
+                        <span>Menú</span>
+                        <i id="menu-chevron" class="fa-solid fa-chevron-down text-[9px] transition-transform duration-300"></i>
+                    </button>
+
+                    <div id="header-dropdown-menu" class="hidden absolute right-0 top-11 bg-slate-900 border border-slate-800 p-2 rounded-2xl shadow-2xl z-50 flex flex-wrap gap-1.5 w-64 items-center justify-center">
+                        <div id="admin-menu-btn" class="hidden w-full mb-1">
+                            <button onclick="openAdminModal(); toggleMenuDropdown();" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 px-3 py-2 rounded-xl text-xs font-black flex items-center justify-center gap-2 shadow transition cursor-pointer">
+                                <i class="fa-solid fa-user-shield"></i><span>Panel Admin General</span>
+                            </button>
+                        </div>
+                        <div class="w-full mb-1">
+                            <button onclick="installPWA(); toggleMenuDropdown();" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow transition cursor-pointer">
+                                <i class="fa-solid fa-mobile-screen-button"></i><span>Instalar Aplicación (PWA)</span>
+                            </button>
+                        </div>
+                        <div class="flex items-center bg-slate-800/90 rounded-xl p-1 border border-slate-700/60 space-x-1">
+                            <button onclick="switchTab('delivery'); toggleMenuDropdown();" title="Panel Delivery" class="hover:text-emerald-400 text-xs px-2.5 py-1.5 rounded-lg hover:bg-slate-700 transition"><i class="fa-solid fa-motorcycle"></i></button>
+                            <button onclick="switchTab('moto'); toggleMenuDropdown();" title="Mantenimiento y Moto" class="hover:text-emerald-400 text-xs px-2.5 py-1.5 rounded-lg hover:bg-slate-700 transition"><i class="fa-solid fa-wrench"></i></button>
+                        </div>
+                        <div class="flex items-center bg-slate-800/90 rounded-xl p-1 border border-slate-700/60 space-x-1">
+                            <button onclick="switchTab('gallery'); toggleMenuDropdown();" title="Galería de Comprobantes" class="hover:text-emerald-400 text-xs px-2 py-1.5 rounded-lg hover:bg-slate-700 transition"><i class="fa-solid fa-images"></i></button>
+                            <button onclick="toggleDarkMode(); toggleMenuDropdown();" title="Cambiar Modo Claro / Oscuro" class="hover:text-amber-400 text-xs px-2 py-1.5 rounded-lg hover:bg-slate-700 transition"><i id="theme-toggle-icon" class="fa-solid fa-moon"></i></button>
+                            <button onclick="toggleCalcModal(); toggleMenuDropdown();" title="Calculadora" class="hover:text-emerald-400 text-xs px-2 py-1.5 rounded-lg hover:bg-slate-700 transition"><i class="fa-solid fa-calculator"></i></button>
+                        </div>
+                        <div class="flex items-center bg-slate-800/90 rounded-xl p-1 border border-slate-700/60 space-x-1">
+                            <button onclick="toggleSettingsModal(); toggleMenuDropdown();" title="Configuración" class="hover:text-emerald-400 text-xs px-2 py-1.5 rounded-lg hover:bg-slate-700 transition"><i class="fa-solid fa-gear"></i></button>
+                            <button onclick="exportCSV(); toggleMenuDropdown();" title="Exportar a Excel (CSV)" class="hover:text-emerald-400 text-xs px-2 py-1.5 rounded-lg hover:bg-slate-700 transition"><i class="fa-solid fa-file-excel"></i></button>
+                            <button onclick="exportJSON(); toggleMenuDropdown();" title="Exportar Respaldo JSON" class="hover:text-emerald-400 text-xs px-2 py-1.5 rounded-lg hover:bg-slate-700 transition"><i class="fa-solid fa-download"></i></button>
+                            <label title="Importar Respaldo" class="hover:text-emerald-400 cursor-pointer text-xs px-2 py-1.5 rounded-lg hover:bg-slate-700 transition" onclick="toggleMenuDropdown()">
+                                <i class="fa-solid fa-upload"></i>
+                                <input type="file" id="import-file" accept=".json" class="hidden" onchange="importJSON(event)">
+                            </label>
+                            <button onclick="logout()" title="Cerrar Sesión" class="text-rose-400 hover:text-rose-300 text-xs px-2 py-1.5 rounded-lg hover:bg-slate-700 transition"><i class="fa-solid fa-right-from-bracket"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- DASHBOARD -->
+            <main id="tab-dashboard" class="p-4 space-y-4">
+                <div class="flex justify-between items-center gap-2 px-1">
+                    <div class="shrink-0">
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400">Hola,</p>
+                        <h2 id="user-display-name" class="font-bold text-slate-800 dark:text-slate-100 text-sm">Usuario</h2>
+                    </div>
+                    <select id="time-filter" onchange="renderUI()" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs rounded-xl px-3 py-1.5 font-semibold outline-none shadow-sm focus:ring-1 focus:ring-emerald-500 max-w-[65%] truncate">
+                        <option value="week" selected>Esta Semana</option>
+                        <option value="week-prev-1">Semana Anterior</option>
+                        <option value="week-prev-2">Hace 2 Semanas</option>
+                        <option value="month">Este Mes</option>
+                        <option value="month-prev-1">Mes Anterior</option>
+                        <option value="month-2026-10">📅 Octubre 2026</option>
+                        <option value="month-2026-09">📅 Septiembre 2026</option>
+                        <option value="all">Todo el Historial</option>
+                    </select>
+                </div>
+
+                <div id="global-announcement-banner" class="hidden bg-amber-500/15 border border-amber-500/40 text-amber-300 px-3.5 py-2.5 rounded-2xl text-xs flex items-start gap-2 shadow-sm">
+                    <i class="fa-solid fa-bullhorn text-amber-400 mt-0.5 shrink-0"></i>
+                    <p id="global-announcement-text" class="font-medium leading-snug"></p>
+                </div>
+
+                <div class="relative select-none overflow-hidden rounded-3xl">
+                    <div id="balance-card" class="bg-emerald-600 text-white p-5 rounded-3xl shadow-lg relative overflow-hidden touch-pan-y cursor-grab active:cursor-grabbing will-change-transform">
+                        <div class="flex justify-between items-start gap-2">
+                            <div class="flex items-center gap-1.5 min-w-0">
+                                <button type="button" onclick="stepBalancePeriod(-1)" title="Período anterior" class="w-6 h-6 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center text-[10px] transition shrink-0 mt-0.5"><i class="fa-solid fa-chevron-left"></i></button>
+                                <div class="min-w-0">
+                                    <p id="balance-label" class="text-[10px] font-bold uppercase tracking-widest opacity-90 truncate">BALANCE DE ESTA SEMANA</p>
+                                    <p id="balance-date-range" class="text-[10px] font-semibold text-emerald-100/90 truncate mt-0.5">Cargando rango...</p>
+                                </div>
+                                <button type="button" onclick="stepBalancePeriod(1)" title="Período siguiente" class="w-6 h-6 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center text-[10px] transition shrink-0 mt-0.5"><i class="fa-solid fa-chevron-right"></i></button>
+                            </div>
+                            <button type="button" onclick="toggleBalanceVisibility()" class="text-white/80 hover:text-white text-sm shrink-0" title="Ocultar/Mostrar saldo"><i id="toggle-eye-icon" class="fa-solid fa-eye-slash"></i></button>
+                        </div>
+
+                        <h2 id="total-balance" class="text-3xl font-extrabold mt-2">S/ *****</h2>
+
+                        <div class="grid grid-cols-2 gap-4 mt-4 pt-3.5 border-t border-white/20">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-xs"><i class="fa-solid fa-arrow-down"></i></div>
+                                <div><p class="text-[10px] opacity-80">Ingresos</p><p id="total-income" class="text-xs font-bold">S/ *****</p></div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-xs"><i class="fa-solid fa-arrow-up"></i></div>
+                                <div><p class="text-[10px] opacity-80">Gastos</p><p id="total-expense" class="text-xs font-bold">S/ *****</p></div>
+                            </div>
+                        </div>
+
+                        <div id="balance-period-dots" class="flex justify-center items-center gap-1.5 mt-3.5"></div>
+                    </div>
+                </div>
+
+                <!-- Widget Notas / Pendientes -->
+                <div class="ui-card space-y-2.5">
+                    <div class="flex justify-between items-center gap-2 px-1">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 tracking-wider uppercase flex items-center truncate">
+                                <i class="fa-solid fa-note-sticky text-amber-400 mr-1.5 shrink-0"></i><span class="truncate">NOTAS / PENDIENTES</span>
+                            </h3>
+                            <span id="dashboard-notes-badge" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-500 dark:text-amber-400 border border-amber-500/30 shrink-0">0</span>
+                        </div>
+                        <div class="flex items-center gap-2.5 shrink-0">
+                            <button type="button" id="dashboard-clear-done-btn" onclick="deleteCompletedTasks()" class="hidden text-[11px] font-semibold text-rose-500 hover:underline">Limpiar hechas</button>
+                            <button type="button" onclick="switchTab('tasks')" class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">Ver todas</button>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <select id="quick-note-color" title="Color o prioridad" class="ui-input !w-auto px-2 font-bold shrink-0">
+                            <option value="#F59E0B">🟠</option>
+                            <option value="#EF4444">🔴</option>
+                            <option value="#3B82F6">🔵</option>
+                            <option value="#10B981">🟢</option>
+                        </select>
+                        <input type="text" id="quick-note-input" placeholder="Anotar pendiente o compra rápida..." onkeypress="if(event.key==='Enter'){ event.preventDefault(); addQuickNoteFromDashboard(); }" class="ui-input flex-1 min-w-0">
+                        <button type="button" onclick="addQuickNoteFromDashboard()" title="Agregar nota" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow shrink-0"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+
+                    <div id="dashboard-notes-list" class="space-y-1.5 max-h-44 overflow-y-auto custom-scroll pr-0.5"></div>
+                </div>
+
+                <!-- Rentabilidad Delivery -->
+                <div class="ui-dark-card space-y-2.5">
+                    <div class="flex justify-between items-start gap-2 px-1">
+                        <div class="min-w-0">
+                            <h3 class="text-xs font-bold text-emerald-400 tracking-wider uppercase flex items-center"><i class="fa-solid fa-gas-pump mr-1.5 shrink-0"></i><span class="truncate">RENTABILIDAD RUTA & REPARTO</span></h3>
+                            <p id="delivery-widget-date-range" class="text-[10px] font-semibold text-slate-400 truncate mt-0.5">Cargando rango...</p>
+                        </div>
+                        <button onclick="switchTab('delivery')" class="text-xs font-semibold text-emerald-400 hover:underline shrink-0">Registrar Turno</button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 pt-1 text-center">
+                        <div class="bg-slate-800 p-2 rounded-2xl border border-slate-700/80"><span class="text-[8px] text-slate-400 block font-semibold">Total Ingresos</span><span id="widget-delivery-total" class="text-[11px] font-bold text-emerald-400">S/ 0.00</span></div>
+                        <div class="bg-slate-800 p-2 rounded-2xl border border-slate-700/80"><span class="text-[8px] text-slate-400 block font-semibold">Combustible Moto</span><span id="widget-fuel-total" class="text-[11px] font-bold text-amber-400">S/ 0.00</span></div>
+                        <div class="bg-slate-800 p-2 rounded-2xl border border-slate-700/80"><span class="text-[8px] text-slate-400 block font-semibold">Neto Real</span><span id="widget-net-delivery" class="text-[11px] font-black text-cyan-400">S/ 0.00</span></div>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-950/70 px-3 py-2 rounded-2xl border border-slate-800 text-[10px]">
+                        <span class="text-slate-400 font-medium"><i class="fa-solid fa-route text-emerald-400 mr-1"></i>Km recorridos: <b id="widget-km-total" class="text-slate-200">0.0 km</b></span>
+                        <span class="text-slate-400 font-medium">Bruto/km: <b id="widget-gross-per-km" class="text-emerald-400">S/ 0.00</b> • Neto/km: <b id="widget-net-per-km" class="text-cyan-400">S/ 0.00</b></span>
+                    </div>
+                </div>
+
+                <!-- Agenda de Deudas -->
+                <div class="ui-dark-card space-y-2">
+                    <div class="flex justify-between items-center px-1">
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-xs font-bold text-amber-400 tracking-wider uppercase flex items-center"><i class="fa-solid fa-address-book mr-1.5"></i> AGENDA DE DEUDAS</h3>
+                            <button onclick="addQuickDebt()" title="Registrar nueva deuda" class="bg-amber-400 hover:bg-amber-500 text-slate-900 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black shadow transition active:scale-90"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span id="total-debt-amount" class="text-xs font-extrabold text-amber-400">S/ 0.00</span>
+                            <button onclick="toggleAllDebtsView()" id="toggle-debts-btn" class="text-xs font-semibold text-emerald-400 hover:underline">Ver todos</button>
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-slate-400 px-1">Dinero pendiente por devolver (No afecta tu Balance Total). Toca una deuda para ver su historial de abonos.</p>
+                    <div id="debtors-list" class="space-y-1.5 pt-1"></div>
+                </div>
+
+                <!-- Metas de Ahorro -->
+                <div class="ui-card space-y-3">
+                    <div class="flex justify-between items-center px-1">
+                        <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 tracking-wider uppercase flex items-center"><i class="fa-solid fa-piggy-bank text-emerald-500 mr-1.5"></i> METAS DE AHORRO</h3>
+                        <button type="button" onclick="addQuickGoal()" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline"><i class="fa-solid fa-plus mr-1"></i>Nueva Meta</button>
+                    </div>
+                    <div id="savings-goals-list" class="space-y-2.5"></div>
+                </div>
+
+                <!-- Asistente por Voz -->
+                <div class="bg-slate-900 text-white p-4 rounded-2xl flex items-center justify-between shadow-md">
+                    <div class="flex items-center space-x-3">
+                        <button type="button" onclick="startMasterVoiceAssistant()" class="bg-rose-500 hover:bg-rose-600 w-12 h-12 rounded-2xl flex items-center justify-center text-white text-lg shadow-lg shadow-rose-500/30 transition active:scale-95">
+                            <i id="voice-mic-icon" class="fa-solid fa-microphone"></i>
+                        </button>
+                        <div>
+                            <h3 class="text-xs font-bold">Asistente por Voz</h3>
+                            <p id="voice-subtext" class="text-[11px] text-slate-400">Toca el micro y habla</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="toggleVoiceHelp()" class="bg-slate-800 text-amber-400 border border-slate-700 text-[11px] font-semibold px-3 py-1.5 rounded-xl hover:bg-slate-700 flex items-center">
+                        <i class="fa-solid fa-circle-question mr-1"></i> Ejemplos
+                    </button>
+                </div>
+
+                <div id="voice-help-box" class="hidden bg-slate-800 text-slate-300 p-3.5 rounded-2xl text-xs space-y-1.5 border border-slate-700">
+                    <p class="font-bold text-emerald-400"><i class="fa-solid fa-lightbulb mr-1"></i> Comandos de voz:</p>
+                    <p>• <i>"Crear categoría Deudas"</i></p>
+                    <p>• <i>"Gasto de 50 soles en Deudas"</i></p>
+                </div>
+
+                <!-- Gráficos -->
+                <div class="ui-card space-y-3">
+                    <div class="flex justify-between items-center px-1">
+                        <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 tracking-wider uppercase"><i class="fa-solid fa-chart-line text-blue-500 mr-1.5"></i> TENDENCIA DE GASTOS DIARIOS</h3>
+                        <span id="trend-subtitle" class="text-[10px] text-slate-400 font-semibold">Filtro activo</span>
+                    </div>
+                    <div class="h-44 w-full relative"><canvas id="dailyTrendChart"></canvas></div>
+                </div>
+
+                <div class="ui-dark-card space-y-3">
+                    <div class="flex justify-between items-center px-1">
+                        <h3 class="text-xs font-bold text-slate-300 tracking-wider uppercase">RESUMEN FINANCIERO MENSUAL</h3>
+                        <span id="chart-year-label" class="text-[11px] text-emerald-400 font-bold">2026</span>
+                    </div>
+                    <div class="h-52 w-full relative bg-slate-900/50 rounded-2xl p-2"><canvas id="financialBarChart"></canvas></div>
+                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800 text-[10px] text-slate-300">
+                        <div class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span><span>ingresos</span></div>
+                        <div class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span><span>gastos</span></div>
+                        <div class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span><span>beneficio</span></div>
+                        <div class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-400 inline-block"></span><span>pérdida neta</span></div>
+                    </div>
+                </div>
+
+                <div class="ui-card space-y-3">
+                    <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 tracking-wider uppercase mb-1">GASTOS POR CATEGORÍA</h3>
+                    <div class="w-full h-52 relative flex items-center justify-center"><canvas id="categoryChart"></canvas></div>
+                    <div id="category-custom-legend" class="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-700/60 max-h-60 overflow-y-auto custom-scroll pr-1"></div>
+                </div>
+
+                <div class="ui-card space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 tracking-wider uppercase">MOVIMIENTOS RECIENTES</h3>
+                        <button onclick="switchTab('history')" class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">Ver todos</button>
+                    </div>
+                    <select id="category-filter" onchange="renderUI()" class="ui-input font-medium"><option value="all">🔍 Todas las Categorías</option></select>
+                    <div id="dashboard-recent-list" class="space-y-2 max-h-60 overflow-y-auto custom-scroll pr-1"></div>
+                </div>
+            </main>
+
+            <!-- DELIVERY -->
+            <main id="tab-delivery" class="hidden p-4 space-y-4">
+                <div class="ui-card !p-5 space-y-4">
+                    <div class="flex justify-between items-center bg-slate-900 text-white py-3 px-4 rounded-2xl border-2 border-slate-700 shadow-inner">
+                        <h3 id="delivery-form-title" class="text-sm font-black tracking-widest uppercase text-emerald-400"><i class="fa-solid fa-motorcycle mr-1.5"></i> Registro de Turnos & Pagos</h3>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" onclick="repeatLastDeliveryShift()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 py-2 px-3 rounded-xl text-[11px] font-bold transition flex items-center justify-center gap-1.5"><i class="fa-solid fa-rotate-left"></i><span>Repetir último turno</span></button>
+                        <button type="button" onclick="clearDeliveryTipsAndBonus()" class="bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 py-2 px-3 rounded-xl text-[11px] font-bold transition flex items-center justify-center gap-1.5"><i class="fa-solid fa-eraser"></i><span>Limpiar propinas/bonos</span></button>
+                    </div>
+
+                    <form id="delivery-form" onsubmit="saveDeliveryShift(event)" class="space-y-3">
+                        <input type="hidden" id="del-edit-id" value="">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Plataforma</label>
+                            <select id="del-platform" class="ui-input py-2.5"><option value="PedidosYa">PedidosYa</option><option value="inDrive">inDrive</option></select>
+                        </div>
+
+                        <div class="space-y-3 bg-slate-900/40 dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-700/80 my-2">
+                            <p class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-2 border-b border-slate-800 pb-1.5 flex items-center"><i class="fa-solid fa-route mr-1.5"></i> Datos del Turno y Ruta (Kilometraje)</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div><label class="ui-label">Base (S/)</label><input type="number" step="0.01" id="del-base" placeholder="Ej. 10.70" required class="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-xl text-xs outline-none"></div>
+                                <div><label class="ui-label">Kilometraje (km)</label><input type="number" step="0.1" id="del-km" placeholder="Ej. 13.4" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-xl text-xs outline-none"></div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div><label class="ui-label">Propinas (S/)</label><input type="number" step="0.01" id="del-tips" placeholder="0.00" value="0" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-xl text-xs outline-none"></div>
+                                <div><label class="ui-label">Bonos / Extras (S/)</label><input type="number" step="0.01" id="del-bonus" placeholder="0.00" value="0" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-white rounded-xl text-xs outline-none"></div>
+                            </div>
+                        </div>
+
+                        <div><label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Fecha</label><input type="date" id="del-date" required class="ui-input"></div>
+                        <div class="flex gap-2">
+                            <button type="submit" id="del-submit-btn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl text-xs font-bold transition shadow">Guardar Registro de Turno</button>
+                            <button type="button" onclick="cancelDeliveryEdit()" id="del-cancel-btn" class="hidden bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-200 px-4 py-3 rounded-xl font-bold hover:bg-slate-300 text-xs">Cancelar</button>
+                        </div>
+                    </form>
+
+                    <div class="space-y-3 pt-2 border-t dark:border-slate-700">
+                        <div class="flex justify-between items-center">
+                            <h4 class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Historial de Turnos y Pagos</h4>
+                            <div class="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-700 text-[10px] font-bold">
+                                <button type="button" onclick="setDeliveryGroup('daily')" id="del-group-daily" class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white transition">Diario</button>
+                                <button type="button" onclick="setDeliveryGroup('weekly')" id="del-group-weekly" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition">Semanal</button>
+                                <button type="button" onclick="setDeliveryGroup('monthly')" id="del-group-monthly" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition">Mensual</button>
+                            </div>
+                        </div>
+                        <div id="delivery-shifts-list" class="space-y-2"></div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- NUEVA TRANSACCIÓN -->
+            <main id="tab-add" class="hidden p-4 space-y-4">
+                <div class="ui-card !p-5 space-y-4">
+                    <h2 id="form-title" class="text-base font-bold text-slate-800 dark:text-slate-100">NUEVO REGISTRO</h2>
+                    <form id="transaction-form" class="space-y-4">
+                        <input type="hidden" id="tx-edit-id" value="">
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" id="btn-type-expense" onclick="setTxType('expense')" class="py-2.5 rounded-xl text-xs font-bold border border-red-500 text-red-500 bg-red-50 dark:bg-red-950/40 transition">Gasto</button>
+                            <button type="button" id="btn-type-income" onclick="setTxType('income')" class="py-2.5 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 text-slate-400 transition">Ingreso</button>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="ui-label !mb-0">Monto (S/)</label>
+                                <button type="button" onclick="toggleCalcModal()" class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold hover:underline flex items-center"><i class="fa-solid fa-calculator mr-1"></i> Abrir Calculadora</button>
+                            </div>
+                            <input type="number" step="0.01" id="tx-amount" placeholder="0.00" required class="ui-input py-2.5 text-sm">
+                        </div>
+                        <div><label class="ui-label">Categoría</label><select id="tx-category" class="ui-input py-2.5 text-sm"></select></div>
+                        <div><label class="ui-label">Fecha</label><input type="date" id="tx-date" required class="ui-input py-2.5 text-sm"></div>
+                        <div><label class="ui-label">Nota / Descripción (Ej. Compra del día)</label><input type="text" id="tx-description" placeholder="Ej. Compra del día" class="ui-input py-2.5 text-sm"></div>
+                        <div>
+                            <label class="ui-label">Foto / Comprobante (Opcional)</label>
+                            <div class="flex items-center gap-3">
+                                <label id="photo-upload-box" class="w-20 h-20 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl flex flex-col items-center justify-center cursor-pointer bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 transition overflow-hidden">
+                                    <i class="fa-solid fa-plus text-slate-400 text-lg"></i><span class="text-[9px] text-slate-400 mt-1 font-semibold">Añadir</span>
+                                    <input type="file" id="tx-photo-file" accept="image/*" class="hidden" onchange="previewTxPhoto(event)">
+                                </label>
+                                <div id="photo-preview-container" class="hidden relative w-20 h-20 rounded-2xl overflow-hidden border border-slate-300 dark:border-slate-700 shadow-sm">
+                                    <img id="photo-preview-img" alt="Comprobante" class="w-full h-full object-cover">
+                                    <button type="button" onclick="removeTxPhoto()" class="absolute top-1 right-1 bg-rose-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] shadow"><i class="fa-solid fa-xmark"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 pt-2">
+                            <button type="submit" id="form-submit-btn" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition shadow-md text-sm">Guardar Transacción</button>
+                            <button type="button" onclick="cancelEdit()" id="form-cancel-btn" class="hidden bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-200 px-4 py-3 rounded-xl font-bold hover:bg-slate-300 text-sm">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </main>
+
+            <!-- HISTORIAL -->
+            <main id="tab-history" class="hidden p-4 space-y-4">
+                <div class="ui-card space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 tracking-wider uppercase">HISTORIAL COMPLETO</h3>
+                        <span id="history-count" class="text-[10px] text-slate-400 font-semibold">0 registros</span>
+                    </div>
+                    <div class="relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input type="text" id="history-search-input" onkeyup="renderUI()" placeholder="Buscar por palabra clave..." class="ui-input !pl-9 !pr-8 font-medium">
+                        <button onclick="clearHistorySearch()" id="clear-search-btn" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"><i class="fa-solid fa-circle-xmark"></i></button>
+                    </div>
+                    <div id="full-history-list" class="space-y-2"></div>
+                </div>
+            </main>
+
+            <!-- TAREAS -->
+            <main id="tab-tasks" class="hidden p-4 space-y-4">
+                <div class="ui-card !p-5 space-y-4">
+                    <div class="flex justify-between items-center bg-slate-900 text-white py-3 px-4 rounded-2xl border-2 border-slate-700 shadow-inner">
+                        <h3 class="text-sm font-black tracking-widest uppercase text-emerald-400">LISTA DE TAREAS</h3>
+                        <div id="delete-completed-container"></div>
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="task-color-select" class="ui-input !w-auto px-2.5 font-bold">
+                            <option value="#EF4444">🔴 Rojo</option><option value="#F59E0B">🟠 Naranja</option><option value="#3B82F6">🔵 Azul</option>
+                            <option value="#8B5CF6">🟣 Morado</option><option value="#EC4899">🩷 Rosado</option><option value="#10B981">🟢 Verde</option>
+                        </select>
+                        <input type="text" id="new-task-input" placeholder="Escribe una nueva tarea..." onkeypress="if(event.key==='Enter') addNewTask()" class="ui-input flex-1">
+                        <button type="button" onclick="addNewTask()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                    <div id="tasks-list-container" class="space-y-2.5"></div>
+                </div>
+            </main>
+
+            <!-- MOTO -->
+            <main id="tab-moto" class="hidden p-4 space-y-4">
+                <div class="ui-card space-y-4">
+                    <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 tracking-wider uppercase"><i class="fa-solid fa-motorcycle text-emerald-500 mr-1.5"></i> Control y Mantenimiento de Moto</h3>
+
+                    <div class="bg-slate-900 text-white p-3.5 rounded-2xl border border-slate-800 shadow-md space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-sack-dollar"></i> Inversión Total en Moto</span>
+                            <span id="moto-combined-total" class="text-sm font-black text-cyan-400">S/ 0.00</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-center">
+                            <div class="bg-slate-950/80 p-2 rounded-xl border border-slate-800"><span class="text-[9px] text-slate-400 block font-semibold">Servicios</span><span id="moto-summary-services" class="text-xs font-bold text-emerald-400">S/ 0.00</span></div>
+                            <div class="bg-slate-950/80 p-2 rounded-xl border border-slate-800"><span class="text-[9px] text-slate-400 block font-semibold">Repuestos</span><span id="moto-summary-spares" class="text-xs font-bold text-amber-400">S/ 0.00</span></div>
+                        </div>
+                    </div>
+
+                    <div class="ui-dark-card space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider"><i class="fa-solid fa-camera mr-1"></i> Mi Motocicleta</h4>
+                            <div id="moto-main-photo-actions" class="hidden"><button onclick="removeMotoMainPhoto()" class="text-[10px] text-rose-400 hover:text-rose-300 font-bold"><i class="fa-solid fa-trash-can mr-1"></i> Eliminar Foto</button></div>
+                        </div>
+                        <div id="moto-main-photo-container" class="hidden w-full h-48 rounded-xl overflow-hidden bg-slate-950 border border-slate-700 relative cursor-pointer group" onclick="openImageModal(motoMainPhotoBase64)">
+                            <img id="moto-main-photo-img" alt="Mi Moto" class="w-full h-full object-cover group-hover:scale-105 transition">
+                            <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs font-bold"><i class="fa-solid fa-expand mr-1"></i> Ver en grande</div>
+                        </div>
+                        <div id="moto-main-photo-upload">
+                            <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 text-xs font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition shadow-inner">
+                                <i class="fa-solid fa-camera text-base"></i> Subir Foto de Mi Moto
+                                <input type="file" id="moto-main-photo-file" accept="image/*" class="hidden" onchange="uploadMotoMainPhoto(event)">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="ui-dark-card space-y-3">
+                        <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Estado de Documentos</h4>
+                        <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="text-[10px] text-slate-400 block font-semibold">SOAT Vencimiento</span>
+                                <label class="cursor-pointer text-emerald-400 hover:text-emerald-300 text-[10px] font-bold"><i class="fa-solid fa-camera mr-0.5"></i> Foto<input type="file" id="soat-file-input" accept="image/*" class="hidden" onchange="uploadSoatPhoto(event)"></label>
+                            </div>
+                            <input type="date" id="moto-soat-date" onchange="saveMotoDocs()" class="w-full bg-slate-900 border border-slate-700 text-white text-xs px-2 py-1 rounded-lg outline-none">
+                            <div class="flex justify-between items-center mt-1"><span id="soat-status-badge" class="text-[9px] font-bold px-2 py-0.5 rounded-full inline-block bg-slate-800 text-slate-400">Sin registrar</span><div id="soat-view-btn" class="hidden"></div></div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 pt-1">
+                            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-2 flex flex-col justify-between">
+                                <div>
+                                    <span class="text-[10px] text-slate-400 block font-semibold mb-1">Tarjeta Propiedad (PDF)</span>
+                                    <label class="cursor-pointer bg-slate-900 hover:bg-slate-950 text-emerald-400 border border-slate-700 text-[10px] font-bold px-2.5 py-1.5 rounded-lg flex items-center justify-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> Subir PDF<input type="file" id="tarjeta-pdf-input" accept="application/pdf" class="hidden" onchange="uploadTarjetaPdf(event)"></label>
+                                </div>
+                                <div id="tarjeta-pdf-status" class="text-[10px] text-slate-400 truncate">Sin archivo</div>
+                            </div>
+                            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-2 flex flex-col justify-between">
+                                <div>
+                                    <span class="text-[10px] text-slate-400 block font-semibold mb-1">Foto Datos Vehículo</span>
+                                    <label class="cursor-pointer bg-slate-900 hover:bg-slate-950 text-emerald-400 border border-slate-700 text-[10px] font-bold px-2.5 py-1.5 rounded-lg flex items-center justify-center gap-1 transition"><i class="fa-solid fa-camera"></i> Subir Foto<input type="file" id="vehiculo-photo-input" accept="image/*" class="hidden" onchange="uploadVehiculoPhoto(event)"></label>
+                                </div>
+                                <div id="vehiculo-photo-status" class="text-[10px] text-slate-400 truncate">Sin foto</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ui-dark-card space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider"><i class="fa-solid fa-gauge mr-1"></i> Control de Mantenimiento</h4>
+                            <span id="moto-km-status" class="text-[9px] font-bold px-2 py-0.5 rounded-full inline-block bg-slate-800 text-slate-300">Sin datos</span>
+                        </div>
+                        <p class="text-[10px] text-slate-400">Configura el kilometraje inicial independiente para cada mantenimiento y actualiza tu odómetro actual.</p>
+
+                        <div class="space-y-3 pt-1">
+                            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-1.5">
+                                <label class="block text-[10px] font-bold text-emerald-400 uppercase">Km Inicial - Cambio de Aceite (Cada 2,500 km)</label>
+                                <div class="flex gap-2"><input type="number" id="moto-km-aceite-input" placeholder="Ej. 5000" class="w-full bg-slate-900 border border-slate-700 text-white text-xs px-3 py-2 rounded-xl outline-none"><button type="button" onclick="saveMotoKmAceite()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-4 py-2 rounded-xl font-bold transition">Guardar</button></div>
+                            </div>
+                            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-1.5">
+                                <label class="block text-[10px] font-bold text-amber-400 uppercase">Km Inicial - Mantenimiento Integral (Cada 5,000 km)</label>
+                                <div class="flex gap-2"><input type="number" id="moto-km-afinamiento-input" placeholder="Ej. 5000" class="w-full bg-slate-900 border border-slate-700 text-white text-xs px-3 py-2 rounded-xl outline-none"><button type="button" onclick="saveMotoKmAfinamiento()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs px-4 py-2 rounded-xl font-bold transition">Guardar</button></div>
+                            </div>
+                            <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700 space-y-1.5">
+                                <label class="block text-[10px] font-bold text-slate-300 uppercase">Kilometraje Actual (Odómetro de la moto)</label>
+                                <div class="flex gap-2"><input type="number" id="moto-current-odometer-input" placeholder="Ej. 6200" class="w-full bg-slate-900 border border-slate-700 text-white text-xs px-3 py-2 rounded-xl outline-none"><button type="button" onclick="saveMotoOdometer()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2 rounded-xl font-bold transition">Actualizar</button></div>
+                            </div>
+                        </div>
+
+                        <div id="moto-proximos-mantenimientos" class="hidden mt-3 pt-3 border-t border-slate-800 space-y-3">
+                            <div class="flex items-center gap-1.5 text-amber-400 font-bold text-xs uppercase tracking-wider"><i class="fa-solid fa-calendar-days"></i> Resultados, Progreso y Metas</div>
+                            <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700/80 space-y-3 text-xs">
+                                <div class="space-y-1.5">
+                                    <div class="flex justify-between items-start gap-2"><span class="text-slate-300 font-medium shrink-0">• Cambio de aceite:</span><span id="prox-aceite" class="font-bold text-emerald-400 text-right">-- km</span></div>
+                                    <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-700/70"><div id="progress-bar-aceite" class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width:0%;"></div></div>
+                                    <div class="flex justify-between text-[10px] text-slate-400"><span id="progress-label-aceite">Sin odómetro</span><span id="progress-pct-aceite" class="font-bold text-emerald-400">0%</span></div>
+                                </div>
+                                <div class="space-y-1.5 pt-2 border-t border-slate-700/70">
+                                    <div class="flex justify-between items-start gap-2"><span class="text-slate-300 font-medium shrink-0">• Mantenimiento integral:</span><span id="prox-afinamiento" class="font-bold text-amber-400 text-right">-- km</span></div>
+                                    <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-700/70"><div id="progress-bar-afinamiento" class="bg-amber-400 h-full rounded-full transition-all duration-500" style="width:0%;"></div></div>
+                                    <div class="flex justify-between text-[10px] text-slate-400"><span id="progress-label-afinamiento">Sin odómetro</span><span id="progress-pct-afinamiento" class="font-bold text-amber-400">0%</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ui-dark-card space-y-3">
+                        <div class="flex justify-between items-center gap-2">
+                            <div class="flex items-center gap-1.5 min-w-0">
+                                <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider truncate"><i class="fa-solid fa-clipboard-check mr-1"></i> Servicios</h4>
+                                <span id="moto-services-total" class="text-[10px] font-extrabold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-full shrink-0">S/ 0.00</span>
+                            </div>
+                            <button type="button" onclick="openServiceLogModal()" class="text-xs font-bold text-emerald-400 hover:underline shrink-0"><i class="fa-solid fa-plus mr-1"></i>Registrar</button>
+                        </div>
+                        <div id="moto-services-list" class="space-y-2 max-h-52 overflow-y-auto custom-scroll pr-1"></div>
+                    </div>
+
+                    <div class="ui-dark-card space-y-3">
+                        <div class="flex justify-between items-center gap-2">
+                            <div class="flex items-center gap-1.5 min-w-0">
+                                <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider truncate"><i class="fa-solid fa-wrench mr-1"></i> Repuestos</h4>
+                                <span id="moto-spares-total" class="text-[10px] font-extrabold text-amber-400 bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 rounded-full shrink-0">S/ 0.00</span>
+                            </div>
+                            <button onclick="openMotoSpareModal()" class="text-xs font-bold text-emerald-400 hover:underline shrink-0"><i class="fa-solid fa-plus mr-1"></i>Registrar</button>
+                        </div>
+                        <div id="moto-spares-list" class="space-y-2 max-h-60 overflow-y-auto custom-scroll pr-1"></div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- GALERÍA -->
+            <main id="tab-gallery" class="hidden p-4 space-y-4">
+                <div class="ui-card space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 tracking-wider uppercase"><i class="fa-solid fa-images text-emerald-500 mr-1.5"></i> Galería de Comprobantes</h3>
+                        <span id="gallery-count" class="text-[10px] text-slate-400 font-semibold">0 fotos</span>
+                    </div>
+                    <div id="gallery-grid" class="grid grid-cols-2 gap-3 pt-1"></div>
+                </div>
+            </main>
+
+            <!-- MODALES -->
+            <div id="service-log-modal" onclick="if(event.target.id==='service-log-modal') closeServiceLogModal()" class="ui-modal-bg hidden">
+                <div class="ui-modal-box !max-w-sm space-y-4">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                        <h3 class="text-xs font-black text-emerald-400 uppercase tracking-wider"><i class="fa-solid fa-clipboard-check mr-1.5"></i> Registrar Servicio Realizado</h3>
+                        <button type="button" onclick="closeServiceLogModal()" class="text-slate-400 hover:text-white text-sm"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <form id="service-log-form" onsubmit="saveMaintenanceService(event)" class="space-y-3">
+                        <div><label class="ui-label">Tipo de Servicio</label><select id="service-type" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-700 text-white rounded-xl text-xs outline-none"><option value="oil">Cambio de Aceite (2,500 km)</option><option value="full">Mantenimiento Integral (5,000 km)</option><option value="both">Aceite + Mantenimiento Integral</option></select></div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div><label class="ui-label">Odómetro al Servicio (km)</label><input type="number" step="1" id="service-km" placeholder="Ej. 7500" required class="w-full px-3 py-2 bg-slate-950 border border-slate-700 text-white rounded-xl text-xs outline-none"></div>
+                            <div><label class="ui-label">Costo (S/)</label><input type="number" step="0.01" id="service-cost" placeholder="0.00" value="0" class="w-full px-3 py-2 bg-slate-950 border border-slate-700 text-white rounded-xl text-xs outline-none"></div>
+                        </div>
+                        <div><label class="ui-label">Fecha</label><input type="date" id="service-date" required class="w-full px-3 py-2 bg-slate-950 border border-slate-700 text-white rounded-xl text-xs outline-none"></div>
+                        <div><label class="ui-label">Nota (Opcional)</label><input type="text" id="service-note" placeholder="Ej. Aceite 20W50 + filtro de aire" class="w-full px-3 py-2 bg-slate-950 border border-slate-700 text-white rounded-xl text-xs outline-none"></div>
+                        <label class="flex items-center gap-2 text-[11px] text-slate-300 cursor-pointer pt-1"><input type="checkbox" id="service-reset-base" checked class="rounded accent-emerald-500"><span>Actualizar km inicial y odómetro con este servicio</span></label>
+                        <div class="flex gap-2 pt-1">
+                            <button type="button" onclick="closeServiceLogModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-2.5 rounded-xl text-xs font-bold transition">Cancelar</button>
+                            <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white py-2.5 rounded-xl text-xs font-black transition shadow">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="goal-create-modal" onclick="if(event.target.id==='goal-create-modal') closeGoalCreateModal()" class="ui-modal-bg hidden">
+                <div class="ui-modal-box !max-w-sm space-y-4">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                        <h3 class="text-xs font-black text-emerald-400 uppercase tracking-wider"><i class="fa-solid fa-piggy-bank mr-1.5"></i> Nueva Meta de Ahorro</h3>
+                        <button type="button" onclick="closeGoalCreateModal()" class="text-slate-400 hover:text-white text-sm"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div class="space-y-3">
+                        <div><label class="ui-label">Nombre de la Meta</label><input type="text" id="goal-create-title" placeholder="Ej. Fondo de Emergencia, Viaje..." class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 text-white rounded-xl text-xs outline-none focus:border-emerald-400"></div>
+                        <div><label class="ui-label">Monto Objetivo Total (S/)</label><input type="number" step="0.01" min="0.01" id="goal-create-target" placeholder="500.00" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 text-white rounded-xl text-xs outline-none focus:border-emerald-400"></div>
+                    </div>
+                    <div class="flex gap-2 pt-1">
+                        <button type="button" onclick="closeGoalCreateModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-2.5 rounded-xl text-xs font-bold transition">Cancelar</button>
+                        <button type="button" onclick="saveNewGoalModal()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white py-2.5 rounded-xl text-xs font-black transition shadow">Crear Meta</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="goal-contribution-modal" onclick="if(event.target.id==='goal-contribution-modal') closeGoalContributionModal()" class="ui-modal-bg hidden">
+                <div class="ui-modal-box !max-w-sm space-y-4">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                        <h3 id="goal-contrib-modal-title" class="text-xs font-black text-emerald-400 uppercase tracking-wider"><i class="fa-solid fa-coins mr-1.5"></i> Abonar a Meta</h3>
+                        <button type="button" onclick="closeGoalContributionModal()" class="text-slate-400 hover:text-white text-sm"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div class="space-y-3">
+                        <div><label class="ui-label">Monto del Abono (S/)</label><input type="number" step="0.01" min="0.01" id="goal-contrib-amount" placeholder="20.00" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 text-white rounded-xl text-xs outline-none focus:border-emerald-400"></div>
+                        <div><label class="ui-label">Fecha y Hora del Abono</label><input type="datetime-local" id="goal-contrib-datetime" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 text-white rounded-xl text-xs outline-none focus:border-emerald-400"></div>
+                    </div>
+                    <div class="flex gap-2 pt-1">
+                        <button type="button" onclick="closeGoalContributionModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-2.5 rounded-xl text-xs font-bold transition">Cancelar</button>
+                        <button type="button" onclick="saveGoalContributionModal()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white py-2.5 rounded-xl text-xs font-black transition shadow">Guardar Abono</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="admin-panel-modal" class="ui-modal-bg hidden">
+                <div class="ui-modal-box !max-w-md space-y-4 max-h-[88vh] flex flex-col">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-3 shrink-0">
+                        <h3 class="text-xs font-black text-amber-400 uppercase tracking-wider"><i class="fa-solid fa-user-shield mr-1.5"></i> Panel de Administrador General</h3>
+                        <button onclick="closeAdminModal()" class="text-slate-400 hover:text-white text-sm"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-center shrink-0">
+                        <div class="bg-slate-950 p-2.5 rounded-2xl border border-slate-800"><span class="text-[9px] text-slate-400 block font-semibold">Total</span><span id="admin-total-users" class="text-sm font-black text-white">0</span></div>
+                        <div class="bg-slate-950 p-2.5 rounded-2xl border border-slate-800"><span class="text-[9px] text-slate-400 block font-semibold">Activos</span><span id="admin-active-users" class="text-sm font-black text-emerald-400">0</span></div>
+                        <div class="bg-slate-950 p-2.5 rounded-2xl border border-slate-800"><span class="text-[9px] text-slate-400 block font-semibold">Suspendidos</span><span id="admin-suspended-users" class="text-sm font-black text-rose-400">0</span></div>
+                    </div>
+                    <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-2 shrink-0">
+                        <label class="block text-[10px] font-bold text-amber-400 uppercase tracking-wider">Aviso Global para Usuarios</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="admin-announcement-input" placeholder="Ej. Nueva versión disponible o mantenimiento..." class="flex-1 px-3 py-2 bg-slate-900 border border-slate-700 text-white rounded-xl text-xs outline-none focus:border-amber-400">
+                            <button type="button" onclick="saveGlobalAnnouncement()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3 py-2 rounded-xl text-xs font-black transition shrink-0">Guardar</button>
+                        </div>
+                    </div>
+                    <div class="space-y-2 overflow-y-auto custom-scroll pr-1 flex-1">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Usuarios Registrados</p>
+                        <div id="admin-users-list" class="space-y-2"></div>
+                    </div>
+                    <div class="space-y-2 pt-3 border-t border-slate-800 shrink-0 max-h-44 overflow-y-auto custom-scroll pr-1">
+                        <div class="flex justify-between items-center">
+                            <p class="text-[10px] font-bold text-rose-400 uppercase tracking-wider flex items-center gap-1"><i class="fa-solid fa-user-slash"></i> Cuentas Eliminadas (<span id="admin-deleted-count">0</span>)</p>
+                            <button type="button" onclick="clearDeletedAccountsLog()" class="text-[10px] text-slate-400 hover:text-rose-400 font-semibold transition">Limpiar historial</button>
+                        </div>
+                        <div id="admin-deleted-users-list" class="space-y-1.5"></div>
+                    </div>
+                    <button onclick="closeAdminModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-white py-2.5 rounded-xl text-xs font-bold transition shrink-0">Cerrar</button>
+                </div>
+            </div>
+
+            <div id="debt-history-modal" class="ui-modal-bg hidden">
+                <div class="ui-modal-box !max-w-sm space-y-4 max-h-[85vh] flex flex-col">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-3 shrink-0">
+                        <h3 id="debt-modal-title" class="text-xs font-bold text-amber-400 uppercase tracking-wider"><i class="fa-solid fa-clock-rotate-left mr-1.5"></i> Historial de Deuda</h3>
+                        <button onclick="closeDebtHistoryModal()" class="text-slate-400 hover:text-white text-sm"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div class="text-xs text-slate-300 flex justify-between bg-slate-950 p-3 rounded-xl border border-slate-800 shrink-0"><span>Deuda Actual:</span><span id="debt-modal-current" class="font-extrabold text-amber-400">S/ 0.00</span></div>
+                    <div id="debt-history-list" class="space-y-2 overflow-y-auto custom-scroll pr-1 flex-1 max-h-[50vh]"></div>
+                    <button onclick="closeDebtHistoryModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-white py-2.5 rounded-xl text-xs font-bold transition shrink-0">Cerrar</button>
+                </div>
+            </div>
+
+            <div id="moto-spare-modal" class="ui-modal-bg hidden">
+                <div class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 w-full max-w-sm p-5 rounded-3xl shadow-2xl space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-bold"><i class="fa-solid fa-wrench text-emerald-600 mr-2"></i> Registrar Repuesto</h3>
+                        <button onclick="closeMotoSpareModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                    </div>
+                    <form id="moto-spare-form" onsubmit="saveMotoSpare(event)" class="space-y-3">
+                        <div><label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Nombre</label><input type="text" id="spare-name" required class="ui-input py-2 text-sm"></div>
+                        <div><label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Costo (S/)</label><input type="number" step="0.01" id="spare-cost" required class="ui-input py-2 text-sm"></div>
+                        <div><label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Fecha</label><input type="date" id="spare-date" required class="ui-input py-2 text-sm"></div>
+                        <button type="submit" class="w-full bg-emerald-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-emerald-700 transition">Guardar</button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="calc-modal" class="ui-modal-bg hidden">
+                <div class="ui-modal-box !max-w-xs space-y-4">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                        <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider"><i class="fa-solid fa-calculator mr-1.5"></i> Calculadora</h3>
+                        <button onclick="toggleCalcModal()" class="text-slate-400 hover:text-white text-sm"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 text-right space-y-1">
+                        <div id="calc-history" class="text-[10px] text-slate-500 h-4 truncate">0</div>
+                        <div id="calc-display" class="text-2xl font-black text-emerald-400 truncate">0</div>
+                    </div>
+                    <div id="calc-keypad" class="grid grid-cols-4 gap-2"></div>
+                    <button type="button" onclick="sendCalcToForm()" class="w-full bg-emerald-500 text-white py-3 rounded-xl text-xs font-bold">Enviar resultado al gasto</button>
+                </div>
+            </div>
+
+            <div id="image-modal" class="ui-modal-bg hidden">
+                <div class="bg-white dark:bg-slate-900 w-full max-w-sm p-4 rounded-3xl relative flex flex-col items-center">
+                    <button onclick="closeImageModal()" class="absolute top-3 right-3 text-slate-500 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                    <div class="w-full max-h-[70vh] overflow-auto rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-2"><img id="modal-image-view" alt="Imagen" class="w-full h-auto object-contain"></div>
+                </div>
+            </div>
+
+            <div id="settings-modal" class="ui-modal-bg hidden">
+                <div class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 w-full max-w-sm p-5 rounded-3xl space-y-4 max-h-[90vh] overflow-y-auto custom-scroll">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-bold"><i class="fa-solid fa-gears text-emerald-600 mr-2"></i> Configuración</h3>
+                        <button onclick="toggleSettingsModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                    </div>
+                    <div class="space-y-4">
+                        <div><label class="block text-xs font-semibold text-slate-500 mb-1">Nombre App</label><input type="text" id="setting-app-name" placeholder="Mis Finanzas" class="ui-input py-2 text-sm"></div>
+
+                        <div class="pt-3 border-t dark:border-slate-800 space-y-3">
+                            <h4 class="text-xs font-bold text-emerald-500 uppercase tracking-wider"><i class="fa-solid fa-lock mr-1.5"></i> Seguridad / Contraseña</h4>
+                            <form id="change-password-form" onsubmit="handleChangePassword(event)" class="space-y-2.5">
+                                <div><label class="block text-[10px] font-semibold text-slate-500 mb-1">Contraseña Actual</label><div class="relative"><input type="password" id="current-password" placeholder="••••••••" required class="ui-input !pr-9"><button type="button" onclick="togglePasswordVisibility('current-password', 'eye-curr')" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 text-xs"><i id="eye-curr" class="fa-solid fa-eye-slash"></i></button></div></div>
+                                <div><label class="block text-[10px] font-semibold text-slate-500 mb-1">Nueva Contraseña</label><div class="relative"><input type="password" id="new-password" placeholder="Mínimo 6 caracteres" required minlength="6" class="ui-input !pr-9"><button type="button" onclick="togglePasswordVisibility('new-password', 'eye-new')" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 text-xs"><i id="eye-new" class="fa-solid fa-eye-slash"></i></button></div></div>
+                                <div><label class="block text-[10px] font-semibold text-slate-500 mb-1">Confirmar Nueva Contraseña</label><div class="relative"><input type="password" id="confirm-password" placeholder="Repite la nueva contraseña" required minlength="6" class="ui-input !pr-9"><button type="button" onclick="togglePasswordVisibility('confirm-password', 'eye-conf')" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 text-xs"><i id="eye-conf" class="fa-solid fa-eye-slash"></i></button></div></div>
+                                <button type="submit" class="w-full bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 py-2 rounded-xl text-xs font-bold transition shadow-inner">Actualizar Contraseña</button>
+                            </form>
+                        </div>
+
+                        <div class="pt-2 border-t dark:border-slate-800"><label class="block text-xs font-semibold text-slate-500 mb-1">Plataformas de Trabajo (Solo PedidosYa e inDrive)</label><div id="platforms-management-list" class="space-y-1.5 max-h-40 overflow-y-auto custom-scroll border p-2 rounded-xl bg-slate-50 dark:bg-slate-950"></div></div>
+                        <div class="pt-2 border-t dark:border-slate-800">
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Nueva Categoría</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="new-category-name" placeholder="Ej. Ahorros" class="ui-input flex-1 py-2 text-sm">
+                                <input type="color" id="new-category-color" value="#8B5CF6" class="w-9 h-9 p-0.5 border rounded-xl cursor-pointer">
+                                <button type="button" onclick="addCategory()" class="bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs font-bold">Crear</button>
+                            </div>
+                        </div>
+                        <div id="categories-management-list" class="space-y-2 max-h-56 overflow-y-auto custom-scroll border p-2 rounded-xl bg-slate-50 dark:bg-slate-950"></div>
+                        <button type="button" onclick="saveSettings()" class="w-full bg-emerald-600 text-white py-2.5 rounded-xl text-xs font-bold">Guardar</button>
+
+                        <div id="delete-account-section" class="pt-3 border-t border-rose-500/20 space-y-2">
+                            <h4 class="text-xs font-bold text-rose-400 uppercase tracking-wider"><i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Eliminar Cuenta</h4>
+                            <p class="text-[11px] text-slate-400 leading-snug">Borra permanentemente tu cuenta, tus transacciones, metas, turnos, tareas y configuraciones guardadas. Esta acción no se puede deshacer.</p>
+                            <button type="button" id="delete-account-btn" onclick="handleDeleteAccount()" class="w-full bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/40 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"><i class="fa-solid fa-user-xmark"></i><span>Eliminar mi cuenta</span></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BARRA INFERIOR -->
+            <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-6 py-2 flex justify-around items-center z-40 transition-colors duration-300">
+                <button onclick="switchTab('dashboard')" id="nav-btn-dashboard" class="flex flex-col items-center text-emerald-600 dark:text-emerald-400 text-[11px] font-bold"><i class="fa-solid fa-chart-pie text-lg mb-0.5"></i><span>Resumen</span></button>
+                <button onclick="switchTab('add')" id="nav-btn-add" class="flex flex-col items-center"><div id="add-fab-btn" class="w-12 h-12 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center text-xl shadow-lg shadow-emerald-500/40 -mt-6 border-4 border-slate-50 dark:border-slate-900 transition active:scale-95"><i class="fa-solid fa-plus"></i></div><span class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-0.5">Agregar</span></button>
+                <button onclick="switchTab('history')" id="nav-btn-history" class="flex flex-col items-center text-slate-400 text-[11px] font-semibold hover:text-emerald-600 dark:hover:text-emerald-400"><i class="fa-solid fa-list-check text-lg mb-0.5"></i><span>Historial</span></button>
+            </nav>
+        </div>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+</body>
+</html>
