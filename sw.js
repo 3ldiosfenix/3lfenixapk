@@ -2,6 +2,7 @@ const CACHE_NAME = 'misfinanzas-3ldiosfenix-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
+  './app.js',
   './manifest.json',
   'https://cdn.tailwindcss.com',
   'https://cdn.jsdelivr.net/npm/chart.js',
