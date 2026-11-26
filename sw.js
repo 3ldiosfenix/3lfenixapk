@@ -1,4 +1,4 @@
-const CACHE_NAME = 'misfinanzas-3ldiosfenix-v5';
+const CACHE_NAME = 'misfinanzas-3ldiosfenix-v6';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
