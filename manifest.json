@@ -1,7 +1,9 @@
 {
+  "id": "./",
   "name": "Mis Finanzas - 3ldiosfenix",
   "short_name": "Mis Finanzas",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
@@ -17,7 +19,7 @@
       "src": "https://cdn-icons-png.flaticon.com/512/3135/3135706.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
   ]
 }
