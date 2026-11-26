@@ -1,4 +1,4 @@
-const CACHE_NAME = 'misfinanzas-3ldiosfenix-v1';
+const CACHE_NAME = 'misfinanzas-3ldiosfenix-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -37,7 +37,11 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
-  if (event.request.url.includes('firestore.googleapis.com') || event.request.url.includes('identitytoolkit.googleapis.com')) {
+  if (
+    event.request.url.includes('firestore.googleapis.com') ||
+    event.request.url.includes('identitytoolkit.googleapis.com') ||
+    event.request.url.includes('gstatic.com/firebasejs')
+  ) {
     return;
   }
 
